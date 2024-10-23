@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
     <PackageReference Include="VirtoCommerce.MarketplaceVendorModule.Core" Version="3.825.0-alpha.819" />
-    <PackageReference Include="VirtoCommerce.CommunicationModule.Core" Version="3.800.0-alpha.3" />
+    <PackageReference Include="VirtoCommerce.CommunicationModule.Core" Version="3.800.0-alpha.5" />
     <PackageReference Include="VirtoCommerce.Platform.Core" Version="3.825.0" />
   </ItemGroup>
 </Project>

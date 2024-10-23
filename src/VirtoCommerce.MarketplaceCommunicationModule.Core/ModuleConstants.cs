@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.MarketplaceCommunicationModule.Core;
@@ -22,6 +24,65 @@ public static class ModuleConstants
                 Delete
             };
         }
+
+        public static class Roles
+        {
+            public static readonly Role Operator = new()
+            {
+                Id = "vcmp-operator-role",
+                Permissions = new[]
+                {
+                    Permissions.Read,
+                    Permissions.Send,
+                    Permissions.Edit,
+                    Permissions.Delete
+                }
+                .Select(x => new Permission { GroupName = "Marketplace", Name = x })
+                .ToList()
+            };
+
+            public static readonly Role VendorOwner = new()
+            {
+                Id = "vcmp-owner-role",
+                Permissions = new[]
+                {
+                    Permissions.Read,
+                    Permissions.Send,
+                    Permissions.Edit,
+                    Permissions.Delete
+                }
+                .Select(x => new Permission { GroupName = "Marketplace", Name = x })
+                .ToList()
+            };
+
+            public static readonly Role VendorAdmin = new()
+            {
+                Id = "vcmp-admin-role",
+                Permissions = new[]
+                {
+                    Permissions.Read,
+                    Permissions.Send
+                }
+                .Select(x => new Permission { GroupName = "Marketplace", Name = x })
+                .ToList()
+            };
+
+            public static readonly Role VendorAgent = new()
+            {
+                Id = "vcmp-agent-role",
+                Permissions = new[]
+                {
+                    Permissions.Read,
+                    Permissions.Send
+                }
+                .Select(x => new Permission { GroupName = "Marketplace", Name = x })
+                .ToList()
+            };
+
+            public static Role[] AllRoles = { Operator, VendorOwner, VendorAdmin, VendorAgent };
+
+        }
+
     }
 
     public static class Settings
