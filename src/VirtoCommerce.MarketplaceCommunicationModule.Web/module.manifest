@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <module>
-  <id>VirtoCommerce.MarketplaceCommunicationModule</id>
+  <id>VirtoCommerce.MarketplaceCommunication</id>
   <version>3.800.0</version>
   <version-tag></version-tag>
 
   <platformVersion>3.825.0</platformVersion>
   <dependencies>
     <dependency id="VirtoCommerce.Core" version="3.825.0" />
-    <dependency id="VirtoCommerce.CommunicationModule" version="3.800.0" />
+    <dependency id="VirtoCommerce.Communication" version="3.800.0" />
     <dependency id="VirtoCommerce.MarketplaceVendor" version="3.821.0" />
   </dependencies>
 
