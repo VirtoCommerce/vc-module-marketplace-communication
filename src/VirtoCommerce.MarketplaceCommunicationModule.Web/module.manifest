@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<module>
+  <id>VirtoCommerce.MarketplaceCommunicationModule</id>
+  <version>3.800.0</version>
+  <version-tag></version-tag>
+
+  <platformVersion>3.825.0</platformVersion>
+  <dependencies>
+    <dependency id="VirtoCommerce.Core" version="3.825.0" />
+    <dependency id="VirtoCommerce.CommunicationModule" version="3.800.0" />
+    <dependency id="VirtoCommerce.MarketplaceVendor" version="3.821.0" />
+  </dependencies>
+
+  <title>VirtoCommerce MarketplaceCommunication extension module</title>
+  <description>VirtoCommerce MarketplaceCommunication extension module</description>
+
+  <authors>
+    <author>Vladimir Buravlev</author>
+  </authors>
+  <owners>
+    <owner>VirtoCommerce</owner>
+  </owners>
+
+  <projectUrl>https://github.com/VirtoCommerce/vc-module-marketplace-communication</projectUrl>
+  <iconUrl>Modules/$(VirtoCommerce.MarketplaceCommunication)/Content/logo.png</iconUrl>
+  <requireLicenseAcceptance>false</requireLicenseAcceptance>
+
+  <assemblyFile>VirtoCommerce.MarketplaceCommunicationModule.Web.dll</assemblyFile>
+  <moduleType>VirtoCommerce.MarketplaceCommunicationModule.Web.Module, VirtoCommerce.MarketplaceCommunicationModule.Web</moduleType>
+
+  <releaseNotes>First version.</releaseNotes>
+  <copyright>Copyright © 2024 VirtoCommerce. All rights reserved</copyright>
+  <tags>Marketplace Communication module</tags>
+  <useFullTypeNameInSwagger>false</useFullTypeNameInSwagger>
+</module>

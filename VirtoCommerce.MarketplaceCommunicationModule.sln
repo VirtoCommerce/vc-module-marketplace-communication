@@ -1,0 +1,64 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{C177E1D8-E765-4688-B575-CCFB3C59CB9E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.MarketplaceCommunicationModule.Web", "src\VirtoCommerce.MarketplaceCommunicationModule.Web\VirtoCommerce.MarketplaceCommunicationModule.Web.csproj", "{C8CBF4CA-8429-41A5-BA0B-2942DFF03A29}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.MarketplaceCommunicationModule.Data", "src\VirtoCommerce.MarketplaceCommunicationModule.Data\VirtoCommerce.MarketplaceCommunicationModule.Data.csproj", "{358432E8-7E11-4879-B8B5-14157888F9DC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.MarketplaceCommunicationModule.Core", "src\VirtoCommerce.MarketplaceCommunicationModule.Core\VirtoCommerce.MarketplaceCommunicationModule.Core.csproj", "{6A2CFDE3-E088-41A8-A655-483455E4432B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D376894E-1D81-47BC-BF7E-F675018735A2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.MarketplaceCommunicationModule.Tests", "tests\VirtoCommerce.MarketplaceCommunicationModule.Tests\VirtoCommerce.MarketplaceCommunicationModule.Tests.csproj", "{7CB4DCAA-ADA8-46EA-B856-2E1C76BB2CE1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{391742AB-EDD9-4E71-8DEA-CF8B37FD906E}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		Directory.Build.props = Directory.Build.props
+		LICENSE = LICENSE
+		module.ignore = module.ignore
+		README.md = README.md
+		VirtoCommerce.MarketplaceCommunicationModule.sln.DotSettings = VirtoCommerce.MarketplaceCommunicationModule.sln.DotSettings
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C8CBF4CA-8429-41A5-BA0B-2942DFF03A29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8CBF4CA-8429-41A5-BA0B-2942DFF03A29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8CBF4CA-8429-41A5-BA0B-2942DFF03A29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8CBF4CA-8429-41A5-BA0B-2942DFF03A29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{358432E8-7E11-4879-B8B5-14157888F9DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{358432E8-7E11-4879-B8B5-14157888F9DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{358432E8-7E11-4879-B8B5-14157888F9DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{358432E8-7E11-4879-B8B5-14157888F9DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A2CFDE3-E088-41A8-A655-483455E4432B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A2CFDE3-E088-41A8-A655-483455E4432B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A2CFDE3-E088-41A8-A655-483455E4432B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A2CFDE3-E088-41A8-A655-483455E4432B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CB4DCAA-ADA8-46EA-B856-2E1C76BB2CE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CB4DCAA-ADA8-46EA-B856-2E1C76BB2CE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CB4DCAA-ADA8-46EA-B856-2E1C76BB2CE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CB4DCAA-ADA8-46EA-B856-2E1C76BB2CE1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C8CBF4CA-8429-41A5-BA0B-2942DFF03A29} = {C177E1D8-E765-4688-B575-CCFB3C59CB9E}
+		{358432E8-7E11-4879-B8B5-14157888F9DC} = {C177E1D8-E765-4688-B575-CCFB3C59CB9E}
+		{6A2CFDE3-E088-41A8-A655-483455E4432B} = {C177E1D8-E765-4688-B575-CCFB3C59CB9E}
+		{7CB4DCAA-ADA8-46EA-B856-2E1C76BB2CE1} = {D376894E-1D81-47BC-BF7E-F675018735A2}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3B417219-B0C7-4799-937E-2ACAB8988C06}
+	EndGlobalSection
+EndGlobal

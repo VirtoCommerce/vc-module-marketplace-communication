@@ -1,0 +1,28 @@
+{
+  "MarketplaceCommunicationModule": {
+    "blades": {
+      "hello-world": {
+        "title": "Hello world blade"
+      }
+    }
+  },
+  "permissions": {
+    "MarketplaceCommunicationModule:access": "Open MarketplaceCommunicationModule menu",
+    "MarketplaceCommunicationModule:create": "Create MarketplaceCommunicationModule related data",
+    "MarketplaceCommunicationModule:read": "View MarketplaceCommunicationModule related data",
+    "MarketplaceCommunicationModule:update": "Update MarketplaceCommunicationModule related data",
+    "MarketplaceCommunicationModule:delete": "Delete MarketplaceCommunicationModule related data"
+  },
+  "settings": {
+    "MarketplaceCommunicationModule": {
+      "MarketplaceCommunicationModuleEnabled": {
+        "title": "MarketplaceCommunicationModule Enabled",
+        "description": "MarketplaceCommunicationModule Enabled setting"
+      },
+      "MarketplaceCommunicationModulePassword": {
+        "title": "MarketplaceCommunicationModule Password",
+        "description": "MarketplaceCommunicationModule Password setting"
+      }
+    }
+  }
+}
