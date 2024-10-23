@@ -13,12 +13,15 @@ namespace VirtoCommerce.MarketplaceCommunicationModule.Data.Commands;
 public class SendMessageCommandHandler : ICommandHandler<SendMessageCommand>
 {
     private readonly IMessageService _messageService;
+    private readonly ICommunicationUserService _communicationUserService;
 
     public SendMessageCommandHandler(
-        IMessageService messageService
+        IMessageService messageService,
+        ICommunicationUserService communicationUserService
         )
     {
         _messageService = messageService;
+        _communicationUserService = communicationUserService;
     }
 
     public virtual async Task<Unit> Handle(SendMessageCommand request, CancellationToken cancellationToken)
@@ -34,7 +37,7 @@ public class SendMessageCommandHandler : ICommandHandler<SendMessageCommand>
         }
 
         var message = AbstractTypeFactory<Message>.TryCreateInstance();
-        message.SenderId = request.Message.SenderId ?? request.SellerId;
+        message.SenderId = request.Message.SenderId ?? (await GetOrCreateCommunicationUserForSeller(request.SellerId)).Id;
         message.Content = request.Message.Content;
         message.EntityId = request.Message.ProductId;
         message.ThreadId = request.Message.ReplyTo;
@@ -47,5 +50,16 @@ public class SendMessageCommandHandler : ICommandHandler<SendMessageCommand>
 
         await _messageService.SendMessage(message);
         return Unit.Value;
+    }
+
+    protected virtual async Task<CommunicationUser> GetOrCreateCommunicationUserForSeller(string sellerId)
+    {
+        var communicationUser = await _communicationUserService.GetCommunicationUserByUserId(sellerId, CoreModuleConstants.CommunicationUserType.Organization);
+        if (communicationUser == null)
+        {
+            communicationUser = await _communicationUserService.CreateCommunicationUser(sellerId, CoreModuleConstants.CommunicationUserType.Organization);
+        }
+
+        return communicationUser;
     }
 }
