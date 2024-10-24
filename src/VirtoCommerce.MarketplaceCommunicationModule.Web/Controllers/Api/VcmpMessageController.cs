@@ -32,7 +32,7 @@ public class VcmpMessageController : ControllerBase
         var authorizationResult = await _authorizationService.AuthorizeAsync(User, query, new SellerAuthorizationRequirement(Core.ModuleConstants.Security.Permissions.Read));
         if (!authorizationResult.Succeeded)
         {
-            return Unauthorized();
+            return Forbid();
         }
         var result = await _mediator.Send(query);
 
@@ -46,7 +46,7 @@ public class VcmpMessageController : ControllerBase
         var authorizationResult = await _authorizationService.AuthorizeAsync(User, command, new SellerAuthorizationRequirement(Core.ModuleConstants.Security.Permissions.Send));
         if (!authorizationResult.Succeeded)
         {
-            return Unauthorized();
+            return Forbid();
         }
         var result = await _mediator.Send(command);
 
@@ -60,7 +60,7 @@ public class VcmpMessageController : ControllerBase
         var authorizationResult = await _authorizationService.AuthorizeAsync(User, command, new SellerAuthorizationRequirement(Core.ModuleConstants.Security.Permissions.Edit));
         if (!authorizationResult.Succeeded)
         {
-            return Unauthorized();
+            return Forbid();
         }
         var result = await _mediator.Send(command);
 
@@ -74,7 +74,7 @@ public class VcmpMessageController : ControllerBase
         var authorizationResult = await _authorizationService.AuthorizeAsync(User, command, new SellerAuthorizationRequirement(Core.ModuleConstants.Security.Permissions.Delete));
         if (!authorizationResult.Succeeded)
         {
-            return Unauthorized();
+            return Forbid();
         }
         var result = await _mediator.Send(command);
 
@@ -88,7 +88,7 @@ public class VcmpMessageController : ControllerBase
         var authorizationResult = await _authorizationService.AuthorizeAsync(User, command, new SellerAuthorizationRequirement(Core.ModuleConstants.Security.Permissions.Read));
         if (!authorizationResult.Succeeded)
         {
-            return Unauthorized();
+            return Forbid();
         }
         var result = await _mediator.Send(command);
 
@@ -102,7 +102,7 @@ public class VcmpMessageController : ControllerBase
         var authorizationResult = await _authorizationService.AuthorizeAsync(User, command, new SellerAuthorizationRequirement(Core.ModuleConstants.Security.Permissions.Read));
         if (!authorizationResult.Succeeded)
         {
-            return Unauthorized();
+            return Forbid();
         }
         var result = await _mediator.Send(command);
 
