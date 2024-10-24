@@ -1,0 +1,31 @@
+<div class="blade-content __medium-wide">
+  <div class="blade-inner">
+    <form class="form" name="formScope" ng-controller="virtoCommerce.marketplaceCommunicationModule.productCommunicationListController">
+      <div class="form-group" ng-init="setGridOptions('productmessageslist-grid', {
+                    useExternalSorting: false,
+                    data: 'blade.messages',
+                    rowTemplate: 'list.row.html',
+                    rowHeight: 44,
+                    columnDefs: [
+                                { name: 'senderId', displayName: 'marketplaceCommunication.blades.product-communication.labels.sender' },
+                                { name: 'createdDate', displayName: 'marketplaceCommunication.blades.product-communication.labels.date', cellTemplate: 'date.cell.html' },
+                                { name: 'content', displayName: 'marketplaceCommunication.blades.product-communication.labels.message' },
+                                ]})">
+        <div class="note" ng-if="!blade.messages.length">{{ 'marketplaceCommunication.blades.product-communication.labels.no-messages' | translate }}</div>
+        <div ng-if="blade.messages.length">
+          <div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-resize-columns ui-grid-pinning ui-grid-height ui-grid-edit ui-grid-validate></div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script type="text/ng-template" id="list.row.html">
+  <div ng-click="grid.appScope.selectNode(row.entity)" ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" ui-grid-one-bind-id-grid="rowRenderIndex + '-' + col.uid + '-cell'" class="ui-grid-cell" ng-class="{'ui-grid-row-header-cell': col.isRowHeader, '__hovered': grid.appScope.contextMenuEntity === row.entity, '__selected': row.entity.id===grid.appScope.selectedNodeId }" role="{{col.isRowHeader ? 'rowheader' : 'gridcell' }}" ui-grid-cell></div>
+</script>
+
+<script type="text/ng-template" id="date.cell.html">
+  <div class="ui-grid-cell-contents">
+    {{ COL_FIELD | date: "yyyy-MM-dd" }}
+  </div>
+</script>

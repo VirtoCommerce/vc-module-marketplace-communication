@@ -1,0 +1,32 @@
+{
+  "marketplaceCommunication": {
+    "blades": {
+      "product-communication": {
+        "title": "Messages",
+        "labels": {
+          "date": "Date",
+          "message": "Message",
+          "no-messages": "No messages",
+          "sender": "Sender"
+        }
+      }
+    },
+    "widgets": {
+      "product-communication": {
+        "title": "Communicaton"
+      }
+    }
+  },
+  "settings": {
+    "MarketplaceCommunicationModule": {
+      "MarketplaceCommunicationModuleEnabled": {
+        "title": "MarketplaceCommunicationModule Enabled",
+        "description": "MarketplaceCommunicationModule Enabled setting"
+      },
+      "MarketplaceCommunicationModulePassword": {
+        "title": "MarketplaceCommunicationModule Password",
+        "description": "MarketplaceCommunicationModule Password setting"
+      }
+    }
+  }
+}
