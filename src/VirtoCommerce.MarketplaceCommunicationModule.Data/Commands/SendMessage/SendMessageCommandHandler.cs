@@ -40,7 +40,7 @@ public class SendMessageCommandHandler : ICommandHandler<SendMessageCommand>
         message.SenderId = request.Message.SenderId ?? (await GetOrCreateCommunicationUserForSeller(request.SellerId)).Id;
         message.Content = request.Message.Content;
         message.EntityId = request.Message.EntityId;
-        message.EntityId = request.Message.EntityType;
+        message.EntityType = request.Message.EntityType;
         message.ThreadId = request.Message.ReplyTo;
 
         var messageRecipient = AbstractTypeFactory<MessageRecipient>.TryCreateInstance();
