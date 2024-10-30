@@ -51,7 +51,7 @@ public class VcmpCommunicationUserController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet]
+    [HttpPost]
     [Route("seller")]
     [Authorize(Core.ModuleConstants.Security.Permissions.Read)]
     public async Task<ActionResult<CommunicationUser>> GetSeller([FromBody] GetSellerCommunicationUserQuery query)
