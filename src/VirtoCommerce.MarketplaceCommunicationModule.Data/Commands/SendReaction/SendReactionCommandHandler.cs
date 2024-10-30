@@ -33,13 +33,19 @@ public class SendReactionCommandHandler : ICommandHandler<SendReactionCommand, M
             throw new ArgumentNullException(nameof(request.MessageId));
         }
 
-        var reactor = await _communicationUserService.GetCommunicationUserByUserId(request.SellerId, CoreModuleConstants.CommunicationUserType.Organization);
-        if (reactor == null)
+        var reactorId = request.ReactorId;
+
+        if (string.IsNullOrEmpty(reactorId))
         {
-            throw new InvalidOperationException($"Communication user for Seller with id {request.SellerId} not found");
+            var reactor = await _communicationUserService.GetCommunicationUserByUserId(request.SellerId, CoreModuleConstants.CommunicationUserType.Organization);
+            if (reactor == null)
+            {
+                throw new InvalidOperationException($"Communication user for Seller with id {request.SellerId} not found");
+            }
+            reactorId = reactor.Id;
         }
 
-        var message = await _messageService.SetMessageReaction(request.MessageId, reactor.Id, request.Reaction);
+        var message = await _messageService.SetMessageReaction(request.MessageId, reactorId, request.Reaction);
 
         return message;
     }

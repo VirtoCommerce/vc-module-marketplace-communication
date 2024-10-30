@@ -11,6 +11,6 @@ public class MarkMessageAsReadCommand : ICommand<Message>, IHasSellerId
 
     [Required]
     public string MessageId { get; set; }
-
+    public string RecipientId { get; set; }
     public bool NotRead { get; set; }
 }

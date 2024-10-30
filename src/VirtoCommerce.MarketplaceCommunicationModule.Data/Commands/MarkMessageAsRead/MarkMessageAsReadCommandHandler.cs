@@ -32,13 +32,19 @@ public class MarkMessageAsReadCommandHandler : ICommandHandler<MarkMessageAsRead
             throw new ArgumentNullException(nameof(request.MessageId));
         }
 
-        var recipient = await _communicationUserService.GetCommunicationUserByUserId(request.SellerId, CoreModuleConstants.CommunicationUserType.Organization);
-        if (recipient == null)
+        var recipientId = request.RecipientId;
+
+        if (string.IsNullOrEmpty(recipientId))
         {
-            throw new InvalidOperationException($"Communication user for Seller with id {request.SellerId} not found");
+            var recipient = await _communicationUserService.GetCommunicationUserByUserId(request.SellerId, CoreModuleConstants.CommunicationUserType.Organization);
+            if (recipient == null)
+            {
+                throw new InvalidOperationException($"Communication user for Seller with id {request.SellerId} not found");
+            }
+            recipientId = recipient.Id;
         }
 
-        var message = await _messageService.SetMessageReadStatus(request.MessageId, recipient.Id, request.NotRead);
+        var message = await _messageService.SetMessageReadStatus(request.MessageId, recipientId, request.NotRead);
 
         return message;
     }

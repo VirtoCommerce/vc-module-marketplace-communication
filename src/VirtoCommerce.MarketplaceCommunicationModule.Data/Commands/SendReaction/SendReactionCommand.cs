@@ -11,6 +11,6 @@ public class SendReactionCommand : ICommand<Message>, IHasSellerId
 
     [Required]
     public string MessageId { get; set; }
-
+    public string ReactorId { get; set; }
     public string Reaction { get; set; }
 }
