@@ -10,6 +10,4 @@ public class DeleteMessageCommand : ICommand, IHasSellerId
 
     [Required]
     public string[] MessageIds { get; set; }
-
-    public bool WithReplies { get; set; }
 }

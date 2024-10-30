@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -9,15 +8,12 @@ using VirtoCommerce.MarketplaceVendorModule.Core.Common;
 namespace VirtoCommerce.MarketplaceCommunicationModule.Data.Commands;
 public class DeleteMessageCommandHandler : ICommandHandler<DeleteMessageCommand>
 {
-    private readonly IMessageCrudService _messageCrudService;
     private readonly IMessageService _messageService;
 
     public DeleteMessageCommandHandler(
-        IMessageCrudService messageCrudService,
         IMessageService messageService
         )
     {
-        _messageCrudService = messageCrudService;
         _messageService = messageService;
     }
 
@@ -33,24 +29,8 @@ public class DeleteMessageCommandHandler : ICommandHandler<DeleteMessageCommand>
             throw new ArgumentException(nameof(request.MessageIds));
         }
 
-        var idsToDelete = new List<string>();
-        if (request.WithReplies)
-        {
-            idsToDelete = GetChildMessageIdsRecursively(request.MessageIds);
-        }
-        else
-        {
-            idsToDelete.AddRange(request.MessageIds);
-        }
-
-        await _messageCrudService.DeleteAsync(idsToDelete);
+        await _messageService.DeleteMessage(request.MessageIds, false);
 
         return Unit.Value;
-    }
-
-    protected virtual List<string> GetChildMessageIdsRecursively(string[] parendMessageId)
-    {
-        return new List<string>(parendMessageId);
-        //throw new NotImplementedException();
     }
 }
