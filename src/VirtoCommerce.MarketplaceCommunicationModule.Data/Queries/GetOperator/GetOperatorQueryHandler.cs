@@ -26,11 +26,7 @@ public class GetOperatorQueryHandler : IQueryHandler<GetOperatorQuery, Communica
     {
         var operatorGroupId = _options.OperatorGroupId;
 
-        var operatorCommunicationUser = await _communicationUserService.GetCommunicationUserByUserId(operatorGroupId, CoreModuleConstants.CommunicationUserType.Organization);
-        if (operatorCommunicationUser == null)
-        {
-            operatorCommunicationUser = await _communicationUserService.CreateCommunicationUser(operatorGroupId, CoreModuleConstants.CommunicationUserType.Organization);
-        }
+        var operatorCommunicationUser = await _communicationUserService.GetOrCreateCommunicationUser(operatorGroupId, CoreModuleConstants.CommunicationUserType.Organization);
 
         return operatorCommunicationUser;
     }

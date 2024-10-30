@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.CommunicationModule.Core.Models;
 using VirtoCommerce.MarketplaceCommunicationModule.Data.Queries;
 using VirtoCommerce.MarketplaceCommunicationModule.Data.Queries.GetOperator;
+using VirtoCommerce.MarketplaceCommunicationModule.Data.Queries.GetSellerCommunicationUser;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketplaceCommunicationModule.Web.Controllers.Api;
@@ -45,6 +46,16 @@ public class VcmpCommunicationUserController : ControllerBase
     {
         var query = AbstractTypeFactory<GetOperatorQuery>.TryCreateInstance();
 
+        var result = await _mediator.Send(query);
+
+        return Ok(result);
+    }
+
+    [HttpGet]
+    [Route("seller")]
+    [Authorize(Core.ModuleConstants.Security.Permissions.Read)]
+    public async Task<ActionResult<CommunicationUser>> GetSeller([FromBody] GetSellerCommunicationUserQuery query)
+    {
         var result = await _mediator.Send(query);
 
         return Ok(result);

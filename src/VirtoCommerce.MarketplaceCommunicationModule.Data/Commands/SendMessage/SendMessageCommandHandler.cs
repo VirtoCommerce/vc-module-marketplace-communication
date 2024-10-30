@@ -37,7 +37,8 @@ public class SendMessageCommandHandler : ICommandHandler<SendMessageCommand>
         }
 
         var message = AbstractTypeFactory<Message>.TryCreateInstance();
-        message.SenderId = request.Message.SenderId ?? (await GetOrCreateCommunicationUserForSeller(request.SellerId)).Id;
+        message.SenderId = request.Message.SenderId
+            ?? (await _communicationUserService.GetOrCreateCommunicationUser(request.SellerId, CoreModuleConstants.CommunicationUserType.Organization)).Id;
         message.Content = request.Message.Content;
         message.EntityId = request.Message.EntityId;
         message.EntityType = request.Message.EntityType;
@@ -50,16 +51,5 @@ public class SendMessageCommandHandler : ICommandHandler<SendMessageCommand>
 
         await _messageService.SendMessage(message);
         return Unit.Value;
-    }
-
-    protected virtual async Task<CommunicationUser> GetOrCreateCommunicationUserForSeller(string sellerId)
-    {
-        var communicationUser = await _communicationUserService.GetCommunicationUserByUserId(sellerId, CoreModuleConstants.CommunicationUserType.Organization);
-        if (communicationUser == null)
-        {
-            communicationUser = await _communicationUserService.CreateCommunicationUser(sellerId, CoreModuleConstants.CommunicationUserType.Organization);
-        }
-
-        return communicationUser;
     }
 }
