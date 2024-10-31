@@ -1,31 +1,135 @@
 <div class="blade-content __medium-wide">
-  <div class="blade-inner">
-    <form class="form" name="formScope" ng-controller="virtoCommerce.marketplaceCommunicationModule.productCommunicationListController">
-      <div class="form-group" ng-init="setGridOptions('productmessageslist-grid', {
-                    useExternalSorting: false,
-                    data: 'blade.messages',
-                    rowTemplate: 'list.row.html',
-                    rowHeight: 44,
-                    columnDefs: [
-                                { name: 'senderId', displayName: 'marketplaceCommunication.blades.product-communication.labels.sender' },
-                                { name: 'createdDate', displayName: 'marketplaceCommunication.blades.product-communication.labels.date', cellTemplate: 'date.cell.html' },
-                                { name: 'content', displayName: 'marketplaceCommunication.blades.product-communication.labels.message' },
-                                ]})">
-        <div class="note" ng-if="!blade.messages.length">{{ 'marketplaceCommunication.blades.product-communication.labels.no-messages' | translate }}</div>
-        <div ng-if="blade.messages.length">
-          <div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-resize-columns ui-grid-pinning ui-grid-height ui-grid-edit ui-grid-validate></div>
+    <style>
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .loading-skeleton {
+            position: relative;
+            overflow: hidden;
+        }
+    </style>
+
+    <div class="blade-inner">
+        <div class="inner-block" style="display: flex; flex-direction: column; height: 100%; width: 100%;">
+            <!-- Messages container with scroll -->
+            <div style="flex-grow: 1; overflow-y: auto; padding: 20px;">
+                <!-- Previous messages skeleton loader -->
+                <div ng-if="isLoadingPrevious" 
+                     style="padding: 20px;">
+                    <div class="loading-skeleton" style="height: 80px; margin-bottom: 15px; background: #f0f0f0; border-radius: 4px; animation: pulse 1.5s infinite;">
+                        <div style="display: flex; gap: 10px; padding: 15px;">
+                            <div style="width: 50px; height: 50px; border-radius: 50%; background: #e0e0e0;"></div>
+                            <div style="flex-grow: 1;">
+                                <div style="width: 70%; height: 14px; background: #e0e0e0; margin-bottom: 10px;"></div>
+                                <div style="width: 50%; height: 14px; background: #e0e0e0;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="loading-skeleton" style="height: 80px; background: #f0f0f0; border-radius: 4px; animation: pulse 1.5s infinite;">
+                        <div style="display: flex; gap: 10px; padding: 15px;">
+                            <div style="width: 50px; height: 50px; border-radius: 50%; background: #e0e0e0;"></div>
+                            <div style="flex-grow: 1;">
+                                <div style="width: 60%; height: 14px; background: #e0e0e0; margin-bottom: 10px;"></div>
+                                <div style="width: 40%; height: 14px; background: #e0e0e0;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Previous messages loader -->
+                <div ng-if="!isLoadingPrevious && blade.hasPrevious" 
+                     on-visible="loadPreviousMessages()"
+                     is-scrolling="blade.isScrollingToMessage"
+                     style="text-align: center; padding: 20px;">
+                    
+                </div>
+
+                <div ng-repeat="message in blade.messages">
+                    <message-tree
+                        message="message"
+                        current-user="currentUser"
+                        parent-controller="this"
+                        loading-states="threadLoadingStates"
+                        on-delete="deleteMessage(message)"
+                        on-edit="editMessage(message)"
+                        on-mark-read="markAsRead(message)"
+                        on-toggle-replies="toggleReplies(message)"
+                        get-message-replies="getMessageReplies(message)"
+                        has-replies="hasReplies(message)"
+                        has-more-replies="hasMoreReplies(message)"
+                        load-more-replies="loadMoreReplies(message)"
+                        has-previous-replies="hasPreviousReplies(message)"
+                        load-previous-replies="loadPreviousReplies(message)"
+                        search-messages-loading="searchMessagesLoading">
+                    </message-tree>
+                </div>
+                
+                <!-- Next messages skeleton loader -->
+                <div ng-if="isLoadingMore" 
+                     style="padding: 20px;">
+                    <div class="loading-skeleton" style="height: 80px; margin-bottom: 15px; background: #f0f0f0; border-radius: 4px; animation: pulse 1.5s infinite;">
+                        <div style="display: flex; gap: 10px; padding: 15px;">
+                            <div style="width: 50px; height: 50px; border-radius: 50%; background: #e0e0e0;"></div>
+                            <div style="flex-grow: 1;">
+                                <div style="width: 65%; height: 14px; background: #e0e0e0; margin-bottom: 10px;"></div>
+                                <div style="width: 45%; height: 14px; background: #e0e0e0;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="loading-skeleton" style="height: 80px; background: #f0f0f0; border-radius: 4px; animation: pulse 1.5s infinite;">
+                        <div style="display: flex; gap: 10px; padding: 15px;">
+                            <div style="width: 50px; height: 50px; border-radius: 50%; background: #e0e0e0;"></div>
+                            <div style="flex-grow: 1;">
+                                <div style="width: 55%; height: 14px; background: #e0e0e0; margin-bottom: 10px;"></div>
+                                <div style="width: 35%; height: 14px; background: #e0e0e0;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Next messages loader -->
+                <div ng-if="!isLoadingMore && blade.hasMore && blade.messages.length < blade.totalCount" 
+                     on-visible="loadMore()"
+                     is-scrolling="blade.isScrollingToMessage"
+                     style="text-align: center; padding: 20px;">
+                  
+                </div>
+            </div>
+
+            <!-- Root message form -->
+            <div style="flex-shrink: 0; border-top: 1px solid #dee9f0; padding: 15px; background: white;">
+                <!-- Collapsed input -->
+                <div ng-if="!isFormExpanded"
+                     ng-click="expandForm()"
+                     style="padding: 8px; border: 1px solid #dee9f0; border-radius: 4px; font: inherit; cursor: text; color: #666; font: inherit;">
+                     Start new conversation...
+                </div>
+                
+                <!-- Expanded form -->
+                <div ng-if="isFormExpanded" style="display: flex; flex-direction: column; gap: 10px;">
+                    <textarea 
+                        ng-model="mainForm.text" 
+                        style="min-height: 60px; padding: 8px; border: 1px solid #dee9f0; border-radius: 4px; font: inherit;" 
+                        placeholder="Start new conversation..."
+                        autofocus></textarea>
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button class="btn __cancel" 
+                                ng-click="cancelMessage()"
+                                style="align-self: flex-end;">
+                            Cancel
+                        </button>
+                        <button class="btn" 
+                                ng-click="sendRootMessage()" 
+                                ng-disabled="!mainForm.text || blade.isLoading"
+                                style="align-self: flex-end;">
+                            <span class="fa fa-paper-plane"></span>
+                            {{blade.isLoading ? 'Sending...' : 'Send'}}
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </form>
-  </div>
+    </div>
 </div>
-
-<script type="text/ng-template" id="list.row.html">
-  <div ng-click="grid.appScope.selectNode(row.entity)" ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" ui-grid-one-bind-id-grid="rowRenderIndex + '-' + col.uid + '-cell'" class="ui-grid-cell" ng-class="{'ui-grid-row-header-cell': col.isRowHeader, '__hovered': grid.appScope.contextMenuEntity === row.entity, '__selected': row.entity.id===grid.appScope.selectedNodeId }" role="{{col.isRowHeader ? 'rowheader' : 'gridcell' }}" ui-grid-cell></div>
-</script>
-
-<script type="text/ng-template" id="date.cell.html">
-  <div class="ui-grid-cell-contents">
-    {{ COL_FIELD | date: "yyyy-MM-dd" }}
-  </div>
-</script>

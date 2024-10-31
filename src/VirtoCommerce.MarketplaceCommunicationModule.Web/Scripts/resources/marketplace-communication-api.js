@@ -11,6 +11,6 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             // communication users
             getUserInfos: { method: 'GET', url: 'api/vcmp/communicationuser/info', isArray: true },
             getOperator: { method: 'GET', url: 'api/vcmp/communicationuser/operator' },
-
+            getSellerUser: { method: 'POST', url: 'api/vcmp/communicationuser/seller' },
         });
     }]);
