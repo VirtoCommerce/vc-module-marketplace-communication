@@ -5,7 +5,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             searchMessages: { method: 'POST', url: 'api/vcmp/message/search' },
             sendMessage: { method: 'POST', url: 'api/vcmp/message/new' },
             updateMessage: { method: 'POST', url: 'api/vcmp/message/update' },
-            deleteMessage: { method: 'DELETE', url: 'api/vcmp/message' },
+            deleteMessage: { method: 'DELETE', url: 'api/vcmp/message', isArray: true },
             markRead: { method: 'POST', url: 'api/vcmp/message/markread' },
             sendReaction: { method: 'POST', url: 'api/vcmp/message/sendreaction' },
             // communication users
