@@ -7,13 +7,47 @@
           "date": "Date",
           "message": "Message",
           "no-messages": "No messages",
-          "sender": "Sender"
+          "sender": "Sender",
+          "edit-message": "Edit your message...",
+          "write-reply": "Write your reply...",
+          "start-conversation": "Start new conversation...",
+          "sending": "Sending...",
+          "send": "Send",
+          "show-replies": "Show replies ({{count}})",
+          "hide-replies": "Hide replies",
+          "loading-previous": "Loading previous messages...",
+          "loading-more": "Loading more messages...",
+          "user-avatar": "User avatar",
+          "previous-messages": "Previous messages",
+          "next-messages": "Next messages",
+          "no-more-messages": "No more messages to load"
+        },
+        "buttons": {
+          "reply": "Reply",
+          "edit": "Edit",
+          "delete": "Delete",
+          "save": "Save",
+          "cancel": "Cancel",
+          "load-more": "Load more",
+          "load-previous": "Load previous",
+          "send": "Send"
+        },
+        "dialogs": {
+          "delete": {
+            "title": "Delete Message",
+            "message": "Are you sure you want to delete this message?"
+          }
+        },
+        "errors": {
+          "update-failed": "Failed to update message",
+          "delete-failed": "Failed to delete message",
+          "send-failed": "Failed to send message"
         }
       }
     },
     "widgets": {
       "product-communication": {
-        "title": "Communicaton"
+        "title": "Communication"
       }
     }
   },

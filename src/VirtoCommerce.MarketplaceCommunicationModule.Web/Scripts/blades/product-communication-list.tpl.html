@@ -17,7 +17,7 @@
             <div style="flex-grow: 1; overflow-y: auto; padding: 20px;">
                 <!-- Previous messages skeleton loader -->
                 <div ng-if="isLoadingPrevious" 
-                     style="padding: 20px;">
+                     style="padding-bottom: 10px;">
                     <div class="loading-skeleton" style="height: 80px; margin-bottom: 15px; background: #f0f0f0; border-radius: 4px; animation: pulse 1.5s infinite;">
                         <div style="display: flex; gap: 10px; padding: 15px;">
                             <div style="width: 50px; height: 50px; border-radius: 50%; background: #e0e0e0;"></div>
@@ -43,7 +43,7 @@
                      on-visible="loadPreviousMessages()"
                      is-scrolling="blade.isScrollingToMessage"
                      style="text-align: center; padding: 20px;">
-                    
+                    {{ 'marketplaceCommunication.blades.product-communication.labels.loading-previous' | translate }}
                 </div>
 
                 <div ng-repeat="message in blade.messages">
@@ -62,13 +62,14 @@
                         load-more-replies="loadMoreReplies(message)"
                         has-previous-replies="hasPreviousReplies(message)"
                         load-previous-replies="loadPreviousReplies(message)"
-                        search-messages-loading="searchMessagesLoading">
+                        search-messages-loading="searchMessagesLoading"
+                        should-show-unread-dot="shouldShowUnreadDot(message)">
                     </message-tree>
                 </div>
                 
                 <!-- Next messages skeleton loader -->
                 <div ng-if="isLoadingMore" 
-                     style="padding: 20px;">
+                     style="padding-top: 10px;">
                     <div class="loading-skeleton" style="height: 80px; margin-bottom: 15px; background: #f0f0f0; border-radius: 4px; animation: pulse 1.5s infinite;">
                         <div style="display: flex; gap: 10px; padding: 15px;">
                             <div style="width: 50px; height: 50px; border-radius: 50%; background: #e0e0e0;"></div>
@@ -104,7 +105,7 @@
                 <div ng-if="!isFormExpanded"
                      ng-click="expandForm()"
                      style="padding: 8px; border: 1px solid #dee9f0; border-radius: 4px; font: inherit; cursor: text; color: #666; font: inherit;">
-                     Start new conversation...
+                     {{ 'marketplaceCommunication.blades.product-communication.labels.start-conversation' | translate }}
                 </div>
                 
                 <!-- Expanded form -->
@@ -112,20 +113,21 @@
                     <textarea 
                         ng-model="mainForm.text" 
                         style="min-height: 60px; padding: 8px; border: 1px solid #dee9f0; border-radius: 4px; font: inherit;" 
-                        placeholder="Start new conversation..."
+                        placeholder="{{ 'marketplaceCommunication.blades.product-communication.labels.start-conversation' | translate }}"
                         autofocus></textarea>
                     <div style="display: flex; gap: 10px; justify-content: flex-end;">
                         <button class="btn __cancel" 
                                 ng-click="cancelMessage()"
                                 style="align-self: flex-end;">
-                            Cancel
+                                <span class="fa fa-times" style="margin-right: 5px;"></span>
+                                {{ 'marketplaceCommunication.blades.product-communication.buttons.cancel' | translate }}
                         </button>
                         <button class="btn" 
                                 ng-click="sendRootMessage()" 
                                 ng-disabled="!mainForm.text || blade.isLoading"
                                 style="align-self: flex-end;">
-                            <span class="fa fa-paper-plane"></span>
-                            {{blade.isLoading ? 'Sending...' : 'Send'}}
+                            <span class="fa fa-paper-plane" style="margin-right: 5px;"></span>
+                            {{blade.isLoading ? ('marketplaceCommunication.blades.product-communication.labels.sending' | translate) : ('marketplaceCommunication.blades.product-communication.labels.send' | translate)}}
                         </button>
                     </div>
                 </div>

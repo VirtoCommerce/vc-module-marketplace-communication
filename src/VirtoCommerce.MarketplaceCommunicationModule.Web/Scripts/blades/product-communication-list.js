@@ -26,7 +26,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         }
     };
 }])
-.directive('messageTree', ['$compile', function($compile) {
+.directive('messageTree', ['$compile', '$timeout', 'messageFormsService', function($compile, $timeout, messageFormsService) {
     return {
         restrict: 'E',
         scope: {
@@ -44,13 +44,13 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             loadMoreReplies: '&',
             hasPreviousReplies: '=',
             loadPreviousReplies: '&',
-            loadingStates: '='
+            loadingStates: '=',
+            shouldShowUnreadDot: '&'
         },
         template: `
             <div class="message-item" 
                  style="padding: 10px; margin-bottom: 5px; border: 1px solid #dee9f0; border-radius: 4px;"
                  data-message-id="{{message.id}}"
-                 on-visible="onMarkRead({message: message})"
                  is-scrolling="parentController.blade.isScrollingToMessage"
                  ng-style="{'background-color': message.id === selectedMessageId ? '#ecf7fc' : 'transparent'}">
                 <div>
@@ -61,7 +61,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                                 style="width: 32px; height: 32px; border-radius: 50%; margin-right: 10px;">
                                 <img ng-src="{{message.senderInfo.avatarUrl}}" 
                                     style="width: 100%; height: 100%; border-radius: 50%;"
-                                    alt="User avatar">
+                                    alt="{{ 'marketplaceCommunication.blades.product-communication.labels.user-avatar' | translate }}">
                             </div>
                             <div ng-if="!message.senderInfo.avatarUrl" 
                                 style="width: 32px; height: 32px; border-radius: 50%; margin-right: 10px; background: #e0e0e0; display: flex; align-items: center; justify-content: center;">
@@ -75,40 +75,62 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                             </div>
                         </div>
                         <div ng-if="shouldShowUnreadDot(message)" 
+                             on-visible="delayedMarkRead(message)"
                              style="width: 8px; height: 8px; border-radius: 50%; background-color: #e53935;">
                         </div>
                     </div>
 
                     <!-- Message content -->
-                    <div style="margin: 10px 0;">{{message.content}}</div>
+                    <div ng-if="!editMode.isActive" style="margin: 10px 0;">{{message.content}}</div>
+                    
+                    <!-- Edit form -->
+                    <div ng-if="editMode.isActive" style="margin: 10px 0;">
+                        <textarea 
+                            ng-model="editMode.text" 
+                            style="width: -webkit-fill-available; min-height: 80px; margin-bottom: 10px; padding: 8px; font: inherit;" 
+                            placeholder="{{ 'marketplaceCommunication.blades.product-communication.labels.edit-message' | translate }}"></textarea>
+                        <div>
+                            <button class="btn" ng-click="submitEdit()" ng-disabled="!editMode.text">
+                                <span class="fa fa-paper-plane" style="margin-right: 5px;"></span>
+                                {{ 'marketplaceCommunication.blades.product-communication.buttons.save' | translate }}
+                            </button>
+                            <button class="btn __cancel" ng-click="cancelEdit()">
+                                <span class="fa fa-times" style="margin-right: 5px;"></span>
+                                {{ 'marketplaceCommunication.blades.product-communication.buttons.cancel' | translate }}
+                            </button>
+                        </div>
+                    </div>
 
                     <!-- Actions -->
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                         <div class="form-group">
-                            <button class="btn" ng-click="showReplyForm()">
+                            <button class="btn" ng-click="showReplyForm()" 
+                                    ng-if="!editMode.isActive && !replyForm.isVisible">
                                 <span class="fa fa-reply" style="margin-right: 5px;"></span>
-                                Reply
+                                {{ 'marketplaceCommunication.blades.product-communication.buttons.reply' | translate }}
                             </button>
-                            <button class="btn" ng-click="onEdit({message: message})" 
-                                    ng-if="message.senderId === currentUser.id">
+                            <button class="btn" ng-click="startEdit()" 
+                                    ng-if="message.senderId === currentUser.id && !editMode.isActive && !replyForm.isVisible">
                                 <span class="fa fa-pencil" style="margin-right: 5px;"></span>
-                                Edit
+                                {{ 'marketplaceCommunication.blades.product-communication.buttons.edit' | translate }}
                             </button>
                             <button class="btn __cancel" ng-click="onDelete({message: message})" 
-                                    ng-if="message.senderId === currentUser.id"
-                                    style="margin-left: 5px;">
+                                    ng-if="message.senderId === currentUser.id && !editMode.isActive && !replyForm.isVisible">
                                 <span class="fa fa-trash-o" style="margin-right: 5px;"></span>
-                                Delete
+                                {{ 'marketplaceCommunication.blades.product-communication.buttons.delete' | translate }}
                             </button>
                         </div>
                         <div class="form-group">
                             <button class="btn" 
                                     style="font-size: 12px;"
-                                ng-if="hasReplies({message: message})"
-                                ng-click="onToggleReplies({message: message})">
+                                    ng-if="hasReplies({message: message}) && !editMode.isActive && !replyForm.isVisible"
+                                    ng-click="onToggleReplies({message: message})">
                             <span ng-if="message.isExpanded" class="fa fa-chevron-up" style="margin-right: 5px;"></span>
                             <span ng-if="!message.isExpanded" class="fa fa-chevron-down" style="margin-right: 5px;"></span>
-                            {{ message.isExpanded ? 'Hide replies' : 'Show replies (' + message.answersCount + ')' }}
+                            <span ng-if="message.isExpanded" translate="marketplaceCommunication.blades.product-communication.labels.hide-replies"></span>
+                            <span ng-if="!message.isExpanded" 
+                                  translate="marketplaceCommunication.blades.product-communication.labels.show-replies"
+                                  translate-values="{ count: message.answersCount }"></span>
                             </button>
                         </div>
                     </div>
@@ -117,16 +139,17 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     <div ng-if="replyForm.isVisible" style="margin-top: 10px; padding: 10px; border: 1px solid #dee9f0; border-radius: 4px;">
                         <textarea 
                             ng-model="replyForm.text" 
-                            style="min-height: 80px; margin-bottom: 10px; padding: 8px; font: inherit;" 
-                            placeholder="Write your reply..."></textarea>
+                            style="width: -webkit-fill-available; min-height: 80px; margin-bottom: 10px; padding: 8px; font: inherit;" 
+                            placeholder="{{ 'marketplaceCommunication.blades.product-communication.labels.write-reply' | translate }}"
+                            autofocus></textarea>
                         <div>
                             <button class="btn" ng-click="submitReply()" ng-disabled="!replyForm.text">
                                 <span class="fa fa-paper-plane" style="margin-right: 5px;"></span>
-                                Send
+                                {{ 'marketplaceCommunication.blades.product-communication.buttons.send' | translate }}
                             </button>
                             <button class="btn __cancel" ng-click="hideReplyForm()">
                                 <span class="fa fa-times" style="margin-right: 5px;"></span>
-                                Cancel
+                                {{ 'marketplaceCommunication.blades.product-communication.buttons.cancel' | translate }}
                             </button>
                         </div>
                     </div>
@@ -137,7 +160,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             <div ng-if="hasReplies({message: message}) && message.isExpanded" style="position: relative; margin-left: 24px;">
                 <!-- Previous replies skeleton -->
                 <div ng-if="loadingStates.previous[message.id]" 
-                     style="padding: 10px;">
+                     style="padding-bottom: 10px;">
                     <div class="loading-skeleton" style="height: 60px; margin-bottom: 10px; background: #f0f0f0; border-radius: 4px; animation: pulse 1.5s infinite;">
                         <div style="display: flex; gap: 10px; padding: 10px;">
                             <div style="width: 40px; height: 40px; border-radius: 50%; background: #e0e0e0;"></div>
@@ -198,7 +221,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
                 <!-- Next replies skeleton -->
                 <div ng-if="loadingStates.more[message.id] && hasMoreReplies({message: message})" 
-                     style="padding: 10px;">
+                     style="padding-top: 10px;">
                     <div class="loading-skeleton" style="height: 60px; margin-bottom: 10px; background: #f0f0f0; border-radius: 4px; animation: pulse 1.5s infinite;">
                         <div style="display: flex; gap: 10px; padding: 10px;">
                             <div style="width: 40px; height: 40px; border-radius: 50%; background: #e0e0e0;"></div>
@@ -233,20 +256,35 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 isVisible: false
             };
 
+            scope.editMode = {
+                isActive: false,
+                text: ''
+            };
+
+            scope.startEdit = function() {
+                messageFormsService.closeAllForms();
+                scope.editMode.isActive = true;
+                scope.editMode.text = scope.message.content;
+            };
+
+            scope.cancelEdit = function() {
+                scope.editMode.isActive = false;
+                scope.editMode.text = '';
+            };
+
             scope.showReplyForm = function() {
-                console.log('Show reply form');
+                messageFormsService.openForm('reply-' + scope.message.id);
                 scope.replyForm.isVisible = true;
                 scope.replyForm.text = '';
             };
 
             scope.hideReplyForm = function() {
-                console.log('Hide reply form');
+                messageFormsService.closeAllForms();
                 scope.replyForm.isVisible = false;
                 scope.replyForm.text = '';
             };
 
             scope.submitReply = function() {
-                console.log('Submit reply', scope.replyForm.text);
                 if (!scope.replyForm.text || !scope.replyForm.text.trim()) return;
                 
                 // Call controller method directly
@@ -254,16 +292,65 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 scope.hideReplyForm();
             };
 
+            scope.submitEdit = function() {
+                if (!scope.editMode.text || !scope.editMode.text.trim()) return;
+                
+                scope.parentController.updateMessage({
+                    message: scope.message, 
+                    newContent: scope.editMode.text
+                });
+                
+                scope.editMode.isActive = false;
+                scope.editMode.text = '';
+            };
+
+            scope.$watch(function() {
+                return messageFormsService.activeForm;
+            }, function(newFormId) {
+                if (newFormId !== 'edit-' + scope.message.id && scope.editMode.isActive) {
+                    scope.editMode.isActive = false;
+                    scope.editMode.text = '';
+                }
+                if (newFormId !== 'reply-' + scope.message.id && scope.replyForm.isVisible) {
+                    scope.replyForm.isVisible = false;
+                    scope.replyForm.text = '';
+                }
+            });
+
+            scope.delayedMarkRead = function(message) {
+                $timeout(function() {
+                    scope.onMarkRead({message: message});
+                }, 2000);
+            };
+
             $compile(element.contents())(scope);
         }
     };
 }])
+.factory('messageFormsService', function() {
+    var service = {
+        activeForm: null,  // 'root', 'edit-{messageId}', 'reply-{messageId}'
+        
+        closeAllForms: function() {
+            this.activeForm = null;
+        },
+        
+        openForm: function(formId) {
+            this.activeForm = formId;
+        },
+        
+        isFormActive: function(formId) {
+            return this.activeForm === formId;
+        }
+    };
+    return service;
+})
 .controller('virtoCommerce.marketplaceCommunicationModule.productCommunicationListController', 
-    ['$scope', '$timeout', 'virtoCommerce.marketplaceCommunicationModule.webApi', 'platformWebApp.dialogService',
-    function ($scope, $timeout, api, dialogService) {
+    ['$scope', '$timeout', 'virtoCommerce.marketplaceCommunicationModule.webApi', 'platformWebApp.dialogService', 'messageFormsService',
+    function ($scope, $timeout, api, dialogService, messageFormsService) {
         var blade = $scope.blade;
         blade.headIcon = 'fas fa-comment';
-        blade.title = 'marketplaceCommunication.blades.product-communication-list.title';
+        blade.title = 'Communication';
         
         blade.messages = [];
         blade.threadsMap = {};
@@ -318,17 +405,17 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         $scope.mainForm = $scope.mainForm || {};
 
         $scope.expandForm = function() {
+            messageFormsService.openForm('root');
             $scope.isFormExpanded = true;
-            // Ensure the change is detected
             if (!$scope.$$phase) {
                 $scope.$apply();
             }
         };
 
         $scope.cancelMessage = function() {
+            messageFormsService.closeAllForms();
             $scope.mainForm.text = '';
             $scope.isFormExpanded = false;
-            // Ensure the change is detected
             if (!$scope.$$phase) {
                 $scope.$apply();
             }
@@ -846,11 +933,110 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             return recipientRecord && recipientRecord.readStatus === 'New';
         };
 
+        $scope.deleteMessage = function(message) {
+            // Get all child messages if this is a root message
+            var messageIds = [message.id];
+            if (!message.threadId) {
+                // If this is a root message, include all replies
+                var replies = blade.threadsMap[message.id] || [];
+                messageIds = messageIds.concat(replies.map(reply => reply.id));
+            }
+
+            var dialog = {
+                id: "confirmDeleteMessage",
+                title: "marketplaceCommunication.blades.product-communication.dialogs.delete.title" | translate,
+                message: "marketplaceCommunication.blades.product-communication.dialogs.delete.message" | translate,
+                callback: function(confirm) {
+                    if (confirm) {
+                        blade.isLoading = true;
+                        
+                        // Create object with data
+                        var data = {
+                            messageIds: messageIds
+                        };
+                        
+                        // Pass data as a parameter
+                        api.deleteMessage(data).$promise.then(function() {
+                            // If it's a reply, remove it from the thread
+                            if (message.threadId) {
+                                var threadMessages = blade.threadsMap[message.threadId] || [];
+                                var index = threadMessages.findIndex(m => m.id === message.id);
+                                if (index !== -1) {
+                                    threadMessages.splice(index, 1);
+                                    
+                                    // Update the answers count of the parent message
+                                    var parentMessage = blade.messages.find(m => m.id === message.threadId);
+                                    if (parentMessage) {
+                                        parentMessage.answersCount = (parentMessage.answersCount || 1) - 1;
+                                    }
+                                }
+                            } 
+                            // If it's a root message, remove it and its thread
+                            else {
+                                var index = blade.messages.findIndex(m => m.id === message.id);
+                                if (index !== -1) {
+                                    blade.messages.splice(index, 1);
+                                    delete blade.threadsMap[message.id];
+                                }
+                            }
+                        }).finally(function() {
+                            blade.isLoading = false;
+                        });
+                    }
+                }
+            };
+            
+            dialogService.showConfirmationDialog(dialog);
+        };
+
+        $scope.updateMessage = function(args) {
+            console.log('Controller updateMessage called', {
+                message: args.message,
+                newContent: args.newContent
+            });
+
+            if (!args.newContent || !args.newContent.trim()) return;
+
+            blade.isLoading = true;
+
+            var command = {
+                messageId: args.message.id,
+                content: args.newContent.trim()
+            };
+
+            api.updateMessage(command, function(response) {
+                // Update message content
+                args.message.content = args.newContent.trim();
+                
+                // If this is a root message
+                if (!args.message.threadId) {
+                    var index = blade.messages.findIndex(m => m.id === args.message.id);
+                    if (index !== -1) {
+                        blade.messages[index].content = args.newContent.trim();
+                    }
+                } 
+                // If this is a reply
+                else {
+                    var threadMessages = blade.threadsMap[args.message.threadId] || [];
+                    var replyIndex = threadMessages.findIndex(m => m.id === args.message.id);
+                    if (replyIndex !== -1) {
+                        threadMessages[replyIndex].content = args.newContent.trim();
+                    }
+                }
+            }).$promise.finally(function() {
+                blade.isLoading = false;
+            });
+        };
+
         initialize();
         blade.refresh();
 
-        // Add watcher for replyForm text changes
-        $scope.$watch('replyForm.text', function(newVal) {
-            console.log('Reply text changed to:', newVal);
+        $scope.$watch(function() {
+            return messageFormsService.activeForm;
+        }, function(newFormId) {
+            if (newFormId !== 'root' && $scope.isFormExpanded) {
+                $scope.mainForm.text = '';
+                $scope.isFormExpanded = false;
+            }
         });
     }]);
