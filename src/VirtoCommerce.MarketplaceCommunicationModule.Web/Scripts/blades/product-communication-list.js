@@ -45,7 +45,8 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             hasPreviousReplies: '=',
             loadPreviousReplies: '&',
             loadingStates: '=',
-            shouldShowUnreadDot: '&'
+            shouldShowUnreadDot: '&',
+            maxLines: '=?'
         },
         template: `
             <div class="message-item" 
@@ -81,7 +82,29 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     </div>
 
                     <!-- Message content -->
-                    <div ng-if="!editMode.isActive" style="margin: 10px 0;">{{message.content}}</div>
+                    <div ng-if="!editMode.isActive" style="margin: 10px 0;">
+                        <div class="message-content"
+                             ng-class="{'expanded': isExpanded}"
+                             ng-style="!isExpanded && {'max-height': maxLines * 20 + 'px'}"
+                             style="position: relative; line-height: 20px; overflow: hidden; transition: max-height 0.3s ease-out;">
+                            <div>{{message.content}}</div>
+                            <!-- Gradient overlay -->
+                            <div ng-if="!isExpanded && needsExpansion" 
+                                 style="position: absolute; bottom: 0; left: 0; right: 0; height: 20px; background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%); pointer-events: none;"></div>
+                        </div>
+                        <div ng-if="needsExpansion"
+                             ng-click="toggleContent()"
+                             style="color: #1c84c6; cursor: pointer; padding-top: 5px; user-select: none;">
+                            <span ng-if="!isExpanded">
+                                <i class="fa fa-chevron-down" style="margin-right: 5px;"></i>
+                                {{ 'marketplaceCommunication.blades.product-communication.labels.show-more' | translate }}
+                            </span>
+                            <span ng-if="isExpanded">
+                                <i class="fa fa-chevron-up" style="margin-right: 5px;"></i>
+                                {{ 'marketplaceCommunication.blades.product-communication.labels.show-less' | translate }}
+                            </span>
+                        </div>
+                    </div>
                     
                     <!-- Edit form -->
                     <div ng-if="editMode.isActive" style="margin: 10px 0;">
@@ -90,13 +113,13 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                             style="width: -webkit-fill-available; min-height: 80px; margin-bottom: 10px; padding: 8px; font: inherit;" 
                             placeholder="{{ 'marketplaceCommunication.blades.product-communication.labels.edit-message' | translate }}"></textarea>
                         <div>
-                            <button class="btn" ng-click="submitEdit()" ng-disabled="!editMode.text">
-                                <span class="fa fa-paper-plane" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.product-communication.buttons.save' | translate }}
-                            </button>
                             <button class="btn __cancel" ng-click="cancelEdit()">
                                 <span class="fa fa-times" style="margin-right: 5px;"></span>
                                 {{ 'marketplaceCommunication.blades.product-communication.buttons.cancel' | translate }}
+                            </button>
+                            <button class="btn" ng-click="submitEdit()" ng-disabled="!editMode.text">
+                                <span class="fa fa-paper-plane" style="margin-right: 5px;"></span>
+                                {{ 'marketplaceCommunication.blades.product-communication.buttons.save' | translate }}
                             </button>
                         </div>
                     </div>
@@ -143,13 +166,13 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                             placeholder="{{ 'marketplaceCommunication.blades.product-communication.labels.write-reply' | translate }}"
                             autofocus></textarea>
                         <div>
-                            <button class="btn" ng-click="submitReply()" ng-disabled="!replyForm.text">
-                                <span class="fa fa-paper-plane" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.product-communication.buttons.send' | translate }}
-                            </button>
                             <button class="btn __cancel" ng-click="hideReplyForm()">
                                 <span class="fa fa-times" style="margin-right: 5px;"></span>
                                 {{ 'marketplaceCommunication.blades.product-communication.buttons.cancel' | translate }}
+                            </button>
+                            <button class="btn" ng-click="submitReply()" ng-disabled="!replyForm.text">
+                                <span class="fa fa-paper-plane" style="margin-right: 5px;"></span>
+                                {{ 'marketplaceCommunication.blades.product-communication.buttons.send' | translate }}
                             </button>
                         </div>
                     </div>
@@ -262,9 +285,9 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             };
 
             scope.startEdit = function() {
-                messageFormsService.closeAllForms();
-                scope.editMode.isActive = true;
                 scope.editMode.text = scope.message.content;
+                scope.editMode.isActive = true;
+                messageFormsService.openForm('edit-' + scope.message.id);
             };
 
             scope.cancelEdit = function() {
@@ -273,13 +296,14 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             };
 
             scope.showReplyForm = function() {
-                messageFormsService.openForm('reply-' + scope.message.id);
                 scope.replyForm.isVisible = true;
-                scope.replyForm.text = '';
+                messageFormsService.openForm('reply-' + scope.message.id);
             };
 
             scope.hideReplyForm = function() {
-                messageFormsService.closeAllForms();
+                if (messageFormsService.isFormActive('reply-' + scope.message.id)) {
+                    messageFormsService.closeAllForms();
+                }
                 scope.replyForm.isVisible = false;
                 scope.replyForm.text = '';
             };
@@ -306,14 +330,20 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
             scope.$watch(function() {
                 return messageFormsService.activeForm;
-            }, function(newFormId) {
-                if (newFormId !== 'edit-' + scope.message.id && scope.editMode.isActive) {
-                    scope.editMode.isActive = false;
-                    scope.editMode.text = '';
-                }
-                if (newFormId !== 'reply-' + scope.message.id && scope.replyForm.isVisible) {
-                    scope.replyForm.isVisible = false;
-                    scope.replyForm.text = '';
+            }, function(newFormId, oldFormId) {
+                // Only close forms if a different form is being opened
+                if (newFormId && newFormId !== oldFormId) {
+                    // Handle edit form
+                    if (scope.editMode.isActive && newFormId !== 'edit-' + scope.message.id) {
+                        scope.editMode.isActive = false;
+                        scope.editMode.text = '';
+                    }
+                    
+                    // Handle reply form
+                    if (scope.replyForm.isVisible && newFormId !== 'reply-' + scope.message.id) {
+                        scope.replyForm.isVisible = false;
+                        scope.replyForm.text = '';
+                    }
                 }
             });
 
@@ -321,6 +351,26 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 $timeout(function() {
                     scope.onMarkRead({message: message});
                 }, 2000);
+            };
+
+            // Set default max lines
+            scope.maxLines = scope.maxLines || 4;
+            scope.isExpanded = false;
+            scope.needsExpansion = false;
+
+            // Check content height after content is rendered
+            $timeout(function() {
+                var contentElement = element[0].querySelector('.message-content');
+                if (contentElement) {
+                    var contentHeight = contentElement.scrollHeight;
+                    var lineHeight = 20; // matches the CSS line-height
+                    var maxHeight = scope.maxLines * lineHeight;
+                    scope.needsExpansion = contentHeight > maxHeight;
+                }
+            });
+
+            scope.toggleContent = function() {
+                scope.isExpanded = !scope.isExpanded;
             };
 
             $compile(element.contents())(scope);
@@ -944,8 +994,8 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
             var dialog = {
                 id: "confirmDeleteMessage",
-                title: "marketplaceCommunication.blades.product-communication.dialogs.delete.title" | translate,
-                message: "marketplaceCommunication.blades.product-communication.dialogs.delete.message" | translate,
+                title: "marketplaceCommunication.blades.product-communication.dialogs.delete.title",
+                message: "marketplaceCommunication.blades.product-communication.dialogs.delete.message",
                 callback: function(confirm) {
                     if (confirm) {
                         blade.isLoading = true;

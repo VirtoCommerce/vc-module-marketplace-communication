@@ -20,7 +20,9 @@
           "user-avatar": "User avatar",
           "previous-messages": "Previous messages",
           "next-messages": "Next messages",
-          "no-more-messages": "No more messages to load"
+          "no-more-messages": "No more messages to load",
+          "show-more": "Show more",
+          "show-less": "Show less"
         },
         "buttons": {
           "reply": "Reply",
