@@ -1,10 +1,14 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.CommunicationModule.Core.Models;
 using VirtoCommerce.CommunicationModule.Core.Models.Search;
 using VirtoCommerce.MarketplaceCommunicationModule.Data.Commands;
 using VirtoCommerce.MarketplaceCommunicationModule.Data.Queries;
+using VirtoCommerce.MarketplaceCommunicationModule.Data.Queries.GetThread;
+using VirtoCommerce.MarketplaceCommunicationModule.Data.Queries.GetUnreadCount;
 using VirtoCommerce.MarketplaceVendorModule.Data.Authorization;
 
 namespace VirtoCommerce.MarketplaceCommunicationModule.Web.Controllers.Api;
@@ -28,6 +32,20 @@ public class VcmpMessageController : ControllerBase
     [HttpPost]
     [Route("search")]
     public async Task<ActionResult<SearchMessageResult>> Search([FromBody] SearchMessagesQuery query)
+    {
+        var authorizationResult = await _authorizationService.AuthorizeAsync(User, query, new SellerAuthorizationRequirement(Core.ModuleConstants.Security.Permissions.Read));
+        if (!authorizationResult.Succeeded)
+        {
+            return Forbid();
+        }
+        var result = await _mediator.Send(query);
+
+        return Ok(result);
+    }
+
+    [HttpPost]
+    [Route("thread")]
+    public async Task<ActionResult<IList<Message>>> GetThread([FromBody] GetThreadQuery query)
     {
         var authorizationResult = await _authorizationService.AuthorizeAsync(User, query, new SellerAuthorizationRequirement(Core.ModuleConstants.Security.Permissions.Read));
         if (!authorizationResult.Succeeded)
@@ -107,5 +125,19 @@ public class VcmpMessageController : ControllerBase
         var result = await _mediator.Send(command);
 
         return Ok();
+    }
+
+    [HttpPost]
+    [Route("unreadcount")]
+    public async Task<ActionResult<int>> GetUnreadMessageCount([FromBody] GetUnreadCountQuery query)
+    {
+        var authorizationResult = await _authorizationService.AuthorizeAsync(User, query, new SellerAuthorizationRequirement(Core.ModuleConstants.Security.Permissions.Read));
+        if (!authorizationResult.Succeeded)
+        {
+            return Forbid();
+        }
+        var result = await _mediator.Send(query);
+
+        return Ok(result);
     }
 }
