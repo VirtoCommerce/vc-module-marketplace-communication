@@ -25,6 +25,11 @@ public class GetThreadQueryHandler : IQueryHandler<GetThreadQuery, IList<Message
             throw new ArgumentNullException(nameof(request));
         }
 
+        if (string.IsNullOrEmpty(request.ThreadId))
+        {
+            throw new ArgumentNullException(nameof(request.ThreadId));
+        }
+
         var result = await _messageService.GetThread(request.ThreadId);
 
         return result;

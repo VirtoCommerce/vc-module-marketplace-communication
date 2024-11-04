@@ -10,6 +10,7 @@ using VirtoCommerce.MarketplaceCommunicationModule.Data.Queries;
 using VirtoCommerce.MarketplaceCommunicationModule.Data.Queries.GetThread;
 using VirtoCommerce.MarketplaceCommunicationModule.Data.Queries.GetUnreadCount;
 using VirtoCommerce.MarketplaceVendorModule.Data.Authorization;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketplaceCommunicationModule.Web.Controllers.Api;
 
@@ -43,10 +44,13 @@ public class VcmpMessageController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost]
+    [HttpGet]
     [Route("thread")]
-    public async Task<ActionResult<IList<Message>>> GetThread([FromBody] GetThreadQuery query)
+    public async Task<ActionResult<IList<Message>>> GetThread([FromQuery] string threadId)
     {
+        var query = AbstractTypeFactory<GetThreadQuery>.TryCreateInstance();
+        query.ThreadId = threadId;
+
         var authorizationResult = await _authorizationService.AuthorizeAsync(User, query, new SellerAuthorizationRequirement(Core.ModuleConstants.Security.Permissions.Read));
         if (!authorizationResult.Succeeded)
         {
