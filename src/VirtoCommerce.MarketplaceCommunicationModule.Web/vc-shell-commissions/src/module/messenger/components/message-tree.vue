@@ -198,8 +198,6 @@ const handleToggleExpand = async () => {
 };
 
 async function searchNestedMessages(threadId: string) {
-  console.log("searchNestedMessages", threadId);
-
   await searchMessages({
     // ...searchQuery.value,
     threadId,
@@ -305,8 +303,6 @@ const markAsRead = (args: { messageId: string; recipientId: string }) => {
         })
       : m,
   );
-
-  console.log("messages", messages.value);
 
   emit("mark-read", { messageId: args.messageId, recipientId: args.recipientId });
 };

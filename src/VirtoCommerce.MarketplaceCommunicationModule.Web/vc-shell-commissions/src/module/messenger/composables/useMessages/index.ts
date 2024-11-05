@@ -94,7 +94,6 @@ export const useMessages = (): IUseMessages => {
 
   const { action: searchMessages, loading: searchMessagesLoading } = useAsync<ISearchMessagesQuery>(async (query) => {
     const client = await getMessagingClient();
-    console.log("searchQuery.value", searchQuery.value, query);
     searchQuery.value = {
       ...searchQuery.value,
       ...query,

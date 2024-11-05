@@ -311,8 +311,6 @@ const isUnread = computed(() => {
 
   const recipient = props.message.recipients.find((recipient) => recipient.recipientId === seller.value?.id);
 
-  console.log("recipient", recipient, props.message.id);
-
   return recipient && recipient.readStatus === "New";
 });
 
@@ -360,7 +358,6 @@ const isVisible = useElementVisibility(messageItemRef);
 watch(
   [isVisible, isUnread],
   ([newValue, unread]) => {
-    console.log("isVisible", newValue, unread);
     if (newValue && unread) {
       delayedMarkRead();
     }
