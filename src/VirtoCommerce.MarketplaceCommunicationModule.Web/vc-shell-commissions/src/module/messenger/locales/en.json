@@ -1,0 +1,71 @@
+{
+  "MESSENGER": {
+    "TITLE": "Communication",
+    "REPLY": "Reply",
+    "ADD_COMMENT": "Add Comment",
+    "SAVE_CHANGES": "Save changes",
+    "RECIPIENTS": "Recipients",
+    "ENTER_MESSAGE": "Enter your message",
+    "SEND": "Send",
+    "LOADING": "Loading messages...",
+    "NO_MESSAGES": "No messages yet",
+    "ERROR_LOADING": "Error loading messages",
+    "ERROR_SENDING": "Error sending message",
+    "MESSAGE_SENT": "Message sent successfully",
+    "DELETE_CONFIRM": "Are you sure you want to delete this message?",
+    "DELETE_SUCCESS": "Message deleted successfully",
+    "DELETE_ERROR": "Error deleting message",
+    "EDIT": "Edit",
+    "CANCEL": "Cancel",
+    "SAVE": "Save",
+    "EDIT_SUCCESS": "Message edited successfully",
+    "EDIT_ERROR": "Error editing message",
+    "ATTACHMENT": "Attachment",
+    "ATTACH_FILE": "Attach file",
+    "FILE_TOO_LARGE": "File is too large",
+    "UNSUPPORTED_FILE_TYPE": "Unsupported file type",
+    "THREAD": {
+      "TITLE": "Message Thread",
+      "NEW": "New Thread",
+      "SUBJECT": "Subject",
+      "PARTICIPANTS": "Participants",
+      "ADD_PARTICIPANT": "Add Participant",
+      "REMOVE_PARTICIPANT": "Remove Participant",
+      "LEAVE": "Leave Thread",
+      "LEAVE_CONFIRM": "Are you sure you want to leave this thread?",
+      "LEAVE_SUCCESS": "You have left the thread",
+      "LEAVE_ERROR": "Error leaving thread"
+    },
+    "SEARCH": {
+      "PLACEHOLDER": "Search messages",
+      "NO_RESULTS": "No messages found",
+      "RESULTS": "Search results"
+    },
+    "SORT": {
+      "LABEL": "Sort by",
+      "DATE_ASC": "Date (Oldest first)",
+      "DATE_DESC": "Date (Newest first)",
+      "AUTHOR": "Author"
+    },
+    "FILTER": {
+      "LABEL": "Filter",
+      "ALL": "All messages",
+      "UNREAD": "Unread",
+      "WITH_ATTACHMENTS": "With attachments"
+    },
+    "NOTIFICATION": {
+      "NEW_MESSAGE": "You have a new message",
+      "THREAD_UPDATED": "Thread updated"
+    },
+    "WIDGET": {
+      "TITLE": "Communication"
+    },
+    "SHOW_REPLIES": "Show replies ({count})",
+    "HIDE_REPLIES": "Hide replies",
+    "DELETE_MESSAGE": "Delete",
+    "DELETE_CONFIRMATION": "Are you sure you want to delete this message?",
+    "SHOW_MORE": "Show more",
+    "SHOW_LESS": "Show less",
+    "UNREAD_MESSAGES": "Unread messages"
+  }
+}

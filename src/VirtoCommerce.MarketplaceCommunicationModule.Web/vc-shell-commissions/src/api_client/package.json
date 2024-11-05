@@ -1,0 +1,13 @@
+{
+  "name": "@vcmp-marketplace-communication/api",
+  "version": "1.0.0",
+  "files": [
+    "package.json"
+  ],
+  "exports": {
+    "./virtocommerce.marketplacecommunication": {
+      "import": "./virtocommerce.marketplacecommunication.js",
+      "types": "./types/virtocommerce.marketplacecommunication.d.ts"
+    }
+  }
+}

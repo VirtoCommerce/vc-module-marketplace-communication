@@ -11,4 +11,7 @@
     <ProjectReference Include="..\VirtoCommerce.MarketplaceCommunicationModule.Core\VirtoCommerce.MarketplaceCommunicationModule.Core.csproj" />
     <ProjectReference Include="..\VirtoCommerce.MarketplaceCommunicationModule.Data\VirtoCommerce.MarketplaceCommunicationModule.Data.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <CommunicationApp Include="vcmp-communication\dist\**" />
+  </ItemGroup>
 </Project>

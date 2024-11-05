@@ -1,0 +1,15 @@
+{
+  "extends": "@vc-shell/ts-config/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "declarationDir": "types",
+    "outDir": "./",
+    "rootDir": "./"
+  },
+  "files": [
+    "virtocommerce.marketplacecommunication.ts"
+  ],
+  "include": [
+    "*.ts"
+  ]
+}

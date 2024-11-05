@@ -1,0 +1,32 @@
+{
+  "name": "vcmp-marketplace-commissions",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./dist/index.mjs",
+  "types": "./dist/types/index.d.ts",
+  "scripts": {
+    "build": "vite build",
+    "generate-api-client": "cross-env api-client-generator --APP_PLATFORM_MODULES='[VirtoCommerce.MarketplaceCommunication]' --APP_API_CLIENT_DIRECTORY=./src/api_client/ --APP_OUT_DIR=dist --APP_PACKAGE_NAME=@vcmp-marketplace-communication/api --APP_PLATFORM_URL=https://localhost:5001/ --APP_PACKAGE_VERSION=$npm_package_version"
+  },
+  "workspaces": [
+    "src/api_client"
+  ],
+  "devDependencies": {
+    "@types/lodash-es": "^4.17.6",
+    "@vc-shell/api-client-generator": "^1.0.296",
+    "@vc-shell/ts-config": "^1.0.296",
+    "@vitejs/plugin-vue": "5.0.3",
+    "cross-env": "^7.0.3",
+    "lodash-es": "^4.17.21",
+    "sass": "^1.80.6",
+    "vite": "5.3.6"
+  },
+  "dependencies": {
+    "@vc-shell/framework": "^1.0.296",
+    "@vcmp-marketplace-communication/api": "^1.0.0",
+    "vue": "^3.4.19",
+    "vue-router": "^4.2.5"
+  },
+  "packageManager": "yarn@4.5.0"
+}

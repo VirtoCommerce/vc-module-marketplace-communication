@@ -1,0 +1,17 @@
+# v2.0.0
+name: Build Communication Module
+
+runs:
+  using: composite
+
+  steps:
+
+    - name: Install dependencies for Communication Module
+      shell: bash
+      working-directory: src/VirtoCommerce.MarketplaceCommunicationModule.Web/vcmp-communication
+      run: yarn
+
+    - name: Build Communication Module
+      shell: bash
+      working-directory:  src/VirtoCommerce.MarketplaceCommunicationModule.Web/vcmp-communication
+      run: yarn build

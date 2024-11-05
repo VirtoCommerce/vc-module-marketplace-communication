@@ -940,7 +940,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     entityType: 'Product',
                     rootsOnly: true,
                     responseGroup: 'Full',
-                    take: 5,
+                    take: 20,
                     sort: 'createdDate:desc'
                 };
 
