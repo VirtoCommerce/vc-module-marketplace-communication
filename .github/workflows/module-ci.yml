@@ -90,7 +90,7 @@ jobs:
         if: ${{ github.ref != 'refs/heads/master' }}
         uses: VirtoCommerce/vc-github-actions/add-version-suffix@master
         with:
-          versionSuffix: ${{ env.VERSION_SUFFIX }}\
+          versionSuffix: ${{ env.VERSION_SUFFIX }}
 
       - name: Build Communication Module
         uses: ./.github/actions/build-communication-module
