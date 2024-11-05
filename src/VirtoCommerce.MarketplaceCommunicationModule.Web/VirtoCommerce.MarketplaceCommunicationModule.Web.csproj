@@ -8,10 +8,19 @@
     <SonarQubeTestProject>false</SonarQubeTestProject>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="vcmp-communication\**" />
+    <Content Remove="vcmp-communication\**" />
+    <EmbeddedResource Remove="vcmp-communication\**" />
+    <None Remove="vcmp-communication\**" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\VirtoCommerce.MarketplaceCommunicationModule.Core\VirtoCommerce.MarketplaceCommunicationModule.Core.csproj" />
     <ProjectReference Include="..\VirtoCommerce.MarketplaceCommunicationModule.Data\VirtoCommerce.MarketplaceCommunicationModule.Data.csproj" />
   </ItemGroup>
   <ItemGroup>
     <CommunicationApp Include="vcmp-communication\dist\**" />
   </ItemGroup>
+  <Target Name="CopyCustomContentOnPublish" AfterTargets="Publish">
+    <Copy SourceFiles="@(CommunicationApp)" DestinationFiles="$(PublishDir)\..\%(Identity)" />
+  </Target>
 </Project>
