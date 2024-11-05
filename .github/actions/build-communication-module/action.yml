@@ -14,4 +14,4 @@ runs:
     - name: Build Communication Module
       shell: bash
       working-directory:  src/VirtoCommerce.MarketplaceCommunicationModule.Web/vcmp-communication
-      run: yarn build
+      run: yarn build:modules-bundle

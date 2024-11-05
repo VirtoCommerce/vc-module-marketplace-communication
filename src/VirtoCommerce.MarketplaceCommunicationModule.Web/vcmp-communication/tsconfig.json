@@ -4,7 +4,13 @@
     "baseUrl": ".",
     "outDir": "dist",
     "rootDir": "src",
-    "types": ["vite/client"]
+    "types": [
+      "vite/client",
+      ]
   },
-  "include": ["src/module/**/*.ts", "src/module/**/*.vue", "src/module/**/*.json"]
+  "include": [
+    "./src/**/*.ts",
+    "./src/**/*.vue",
+    "./src/**/*.json"
+  ]
 }
