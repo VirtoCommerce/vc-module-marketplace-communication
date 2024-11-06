@@ -27,7 +27,6 @@ export function useInfiniteScroll({
   const previousLoading = ref(false);
   const nextLoading = ref(false);
 
-  // Получаем реальный DOM элемент контейнера
   const getContainerElement = (): MaybeComputedElementRef<MaybeElement> => {
     if (!containerRef.value) return null;
     return "$el" in containerRef.value ? (containerRef.value.$el as HTMLElement) : containerRef.value;
