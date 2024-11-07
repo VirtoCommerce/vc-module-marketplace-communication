@@ -35,9 +35,6 @@ export interface IUseMessages {
     rootsOnly?: boolean;
     threadId?: string;
   }) => Promise<Message | undefined>;
-  getMessagesByEntity: (entityId: string) => Message[];
-  getUsersInfo: (ids: string[] | undefined) => Promise<void>;
-  users: Ref<CommunicationUser[]>;
   unreadCount: ComputedRef<number>;
   searchMessages: (query: ISearchMessagesQuery) => Promise<void>;
   searchMessagesLoading: Ref<boolean>;
@@ -78,15 +75,11 @@ export const useMessages = (): IUseMessages => {
   );
   const loadedThread = ref<Message[] | undefined>([]);
 
-  const users = shallowRef<CommunicationUser[]>([]);
   const seller = ref<CommunicationUser>();
-  const getMessagesByEntity = (entityId: string) => {
-    return messages.value?.filter((msg) => msg.entityId === entityId) || [];
-  };
 
-  const { action: getUsersInfo } = useAsync<string[] | undefined>(async (ids) => {
+  const { action: getUsersInfo } = useAsync<string[] | undefined, CommunicationUser[]>(async (ids) => {
     const client = await getCommunicationUserClient();
-    users.value = await client.getCommunicationUsers(ids);
+    return await client.getCommunicationUsers(ids);
   });
 
   const hasOlderMessages = ref(false);
@@ -105,10 +98,7 @@ export const useMessages = (): IUseMessages => {
     hasNewerMessages.value = (searchResult.value?.totalCount || 0) > (messages.value?.length || 0);
 
     if (searchResult.value.results && searchResult.value.results.length > 0) {
-      const usersIds = Array.from(new Set(searchResult.value.results.map((msg) => msg.senderId))).filter(
-        (id) => id,
-      ) as string[];
-      await getUsersInfo(usersIds);
+      await loadUserInfoForMessages(searchResult.value.results);
     }
   });
 
@@ -156,7 +146,12 @@ export const useMessages = (): IUseMessages => {
 
     const result = await client.search(latestMessagesQuery);
     searchResult.value = result;
+
+    await loadUserInfoForMessages(result.results);
+
     messages.value = result.results?.reverse() || [];
+
+
 
     hasOlderMessages.value = (result.totalCount || 0) > (messages.value?.length || 0);
     hasNewerMessages.value = false;
@@ -227,6 +222,8 @@ export const useMessages = (): IUseMessages => {
 
       const result = await client.search(new SearchMessagesQuery(newQuery));
 
+      await loadUserInfoForMessages(result.results);
+
       if (messages.value?.length) {
         hasNewerMessages.value = (result.totalCount || 0) > (messages.value?.length || 0) + (newQuery.take || 0);
       }
@@ -260,6 +257,8 @@ export const useMessages = (): IUseMessages => {
       });
 
       const result = await client.search(previousQuery);
+
+      await loadUserInfoForMessages(result.results);
 
       if (messages.value?.length) {
         hasOlderMessages.value = (result.totalCount || 0) > (messages.value?.length || 0) + (previousQuery.take || 0);
@@ -301,12 +300,22 @@ export const useMessages = (): IUseMessages => {
     loadedThread.value = result;
   });
 
+  async function loadUserInfoForMessages(messages: Message[] | undefined) {
+    const userIds = Array.from(new Set(messages?.map((m) => m.senderId))).filter((id) => id) as string[];
+    if (userIds?.length) {
+      const users = await getUsersInfo(userIds);
+      messages?.forEach((message) => {
+        const user = users.find((u) => u.id === message.senderId);
+        if (user) {
+          message.senderInfo = user;
+        }
+      });
+    }
+  }
+
   return {
     messages,
     sendMessage,
-    getMessagesByEntity,
-    getUsersInfo,
-    users,
     unreadCount,
     searchMessages,
     searchMessagesLoading,
@@ -334,6 +343,6 @@ export const useMessages = (): IUseMessages => {
     getThread,
     getUnreadCount,
     seller,
-    loadedThread
+    loadedThread,
   };
 };

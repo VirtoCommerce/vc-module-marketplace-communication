@@ -13,8 +13,8 @@
       <div class="message-item__header">
         <div class="message-item__author-info">
           <VcImage
-            v-if="userInfo?.avatarUrl"
-            :src="userInfo?.avatarUrl"
+            v-if="message.senderInfo?.avatarUrl"
+            :src="message.senderInfo?.avatarUrl"
             rounded
             size="s"
             class="message-item__avatar"
@@ -26,7 +26,7 @@
           />
           <div class="message-item__author-info-wrapper">
             <div class="message-item__author-row">
-              <span class="message-item__author">{{ userInfo?.userName || message.senderId }}</span>
+              <span class="message-item__author">{{ message.senderInfo?.userName || message.senderId }}</span>
               <span
                 v-if="isUnread"
                 class="message-item__unread-indicator"
@@ -142,7 +142,6 @@ import { useElementVisibility, useIntersectionObserver } from "@vueuse/core";
 
 export interface Props {
   message: Message;
-  userInfo?: CommunicationUser;
   isTarget: boolean;
   loading: boolean;
 }
@@ -294,7 +293,7 @@ onUnmounted(() => {
 });
 
 const canManageMessage = computed(() => {
-  return currentSeller.value.id === props.userInfo?.userId;
+  return currentSeller.value.id === props.message?.senderInfo?.userId && props.message?.answersCount === 0;
 });
 
 const isRepliesExpanded = ref(false);
@@ -303,6 +302,13 @@ const toggleReplies = () => {
   isRepliesExpanded.value = !isRepliesExpanded.value;
   emit("toggle-replies", isRepliesExpanded.value);
 };
+
+watch(
+  () => props.message.answersCount,
+  () => {
+    isRepliesExpanded.value = true;
+  },
+);
 
 const isUnread = computed(() => {
   if (!props.message.recipients || props.message.senderId === seller.value?.id) {
@@ -335,7 +341,7 @@ const markAsRead = (message: Message) => {
   });
 };
 
-let timer: unknown | null = null;
+let timer: number | null = null;
 
 const delayedMarkRead = () => {
   if (isProgrammaticScroll.value) return;

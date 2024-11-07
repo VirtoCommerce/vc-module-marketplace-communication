@@ -6,11 +6,10 @@
         "labels": {
           "date": "Date",
           "message": "Message",
-          "no-messages": "No messages",
+          "no-messages": "Start conversation with vendor",
           "sender": "Sender",
           "edit-message": "Edit your message...",
           "write-reply": "Write your reply...",
-          "start-conversation": "Start new conversation...",
           "sending": "Sending...",
           "send": "Send",
           "show-replies": "Show replies ({{count}})",
@@ -22,7 +21,9 @@
           "next-messages": "Next messages",
           "no-more-messages": "No more messages to load",
           "show-more": "Show more",
-          "show-less": "Show less"
+          "show-less": "Show less",
+          "enter-message": "Enter your message...",
+          "start-conversation": "Start new conversation..."
         },
         "buttons": {
           "reply": "Reply",
@@ -32,7 +33,8 @@
           "cancel": "Cancel",
           "load-more": "Load more",
           "load-previous": "Load previous",
-          "send": "Send"
+          "send": "Send",
+          "start-conversation": "Start new conversation..."
         },
         "dialogs": {
           "delete": {

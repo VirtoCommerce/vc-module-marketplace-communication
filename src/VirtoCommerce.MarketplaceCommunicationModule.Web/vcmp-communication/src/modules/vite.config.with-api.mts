@@ -25,6 +25,7 @@ export default defineConfig({
           vue: "Vue",
           "vue-router": "VueRouter",
           "vue-i18n": "VueI18n",
+          "vee-validate": "VeeValidate",
           moment: "moment",
           "lodash-es": "_",
           "@vueuse/core": "VueUse",

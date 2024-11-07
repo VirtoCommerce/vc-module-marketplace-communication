@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useMessages } from "../../composables";
-import { loading as vLoading, useBladeNavigation } from "@vc-shell/framework";
+import { loading as vLoading, useBladeNavigation, VcWidget } from "@vc-shell/framework";
 
 export interface Props {
   modelValue: {
@@ -68,25 +68,3 @@ defineExpose({
   updateActiveWidgetCount: populateCounter,
 });
 </script>
-
-<style scoped>
-.message-widget {
-  position: relative;
-  cursor: pointer;
-}
-
-.message-count {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background-color: #ccc;
-  border-radius: 50%;
-  padding: 2px 6px;
-  font-size: 12px;
-}
-
-.new-messages {
-  background-color: red;
-  color: white;
-}
-</style>

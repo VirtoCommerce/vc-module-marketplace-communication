@@ -38,7 +38,6 @@
             v-for="message in loadedThread"
             :key="message.id"
             :message="message"
-            :users-info="users"
             :target-message-id="targetMessageId"
             @update-parent-message="updateParentMessage"
             @remove-parent-message="removeParentMessage"
@@ -61,13 +60,26 @@
               v-for="message in rootMessages"
               :key="message.id"
               :message="message"
-              :users-info="users"
               :target-message-id="targetMessageId"
               @update-parent-message="updateParentMessage"
               @remove-parent-message="removeParentMessage"
               @mark-read="markMessageAsRead"
             />
           </template>
+
+
+            <div class="tw-w-full tw-h-full tw-box-border tw-flex tw-flex-col tw-items-center tw-justify-center"  v-if="!rootMessages.length">
+              <VcIcon
+                icon="fas fa-comment"
+                class="tw-text-[color:var(--empty-communication)]"
+                size="xxxl"
+              />
+              <div class="tw-m-4 tw-text-xl tw-font-medium">
+                {{ $t("MESSENGER.NO_MESSAGES") }}
+              </div>
+              <VcButton @click="setActiveForm('main', null)">{{ $t("MESSENGER.NEW_MESSAGE") }}</VcButton>
+            </div>
+
         </template>
 
         <div
@@ -103,11 +115,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, provide, onMounted, nextTick, watch, inject, Ref, defineComponent, h } from "vue";
+import { computed, ref, provide, onMounted, nextTick, inject, Ref } from "vue";
 import { useMessages } from "../composables";
 import NewMessageForm from "../components/new-message-form.vue";
-import { IParentCallArgs, notification } from "@vc-shell/framework";
-import { Message, MessageRecipient } from "@vcmp-communication/api/marketplacecommunication";
+import { IParentCallArgs } from "@vc-shell/framework";
+import { Message, MessageRecipient, ISearchMessagesQuery } from "@vcmp-communication/api/marketplacecommunication";
 import * as _ from "lodash-es";
 import MessageSkeleton from "../components/message-skeleton.vue";
 import MessageTree from "../components/message-tree.vue";
@@ -147,7 +159,6 @@ const {
   getOperator,
   getRootMessages,
   loadMoreMessages,
-  users,
   searchMessagesLoading,
   updateMessage,
   removeMessage,
@@ -226,7 +237,12 @@ async function update(args: { content: string; messageId: string }) {
 // Add new ref for tracking programmatic scroll
 const isProgrammaticScroll = ref(false);
 
-async function sendRootMessage(args: { content: string; replyTo: string; entityId: string; entityType: string }) {
+async function sendRootMessage(args: {
+  content: string;
+  replyTo: string | undefined;
+  entityId: string;
+  entityType: string;
+}) {
   if (props.options?.entityId) {
     const newMessage = await sendMessage({
       ...args,
@@ -253,9 +269,9 @@ async function sendRootMessage(args: { content: string; replyTo: string; entityI
   }
 }
 
-async function search() {
+async function search(query?: ISearchMessagesQuery) {
   await searchMessages({
-    // ...searchQuery.value,
+    ...(query ?? {}),
     entityId: props.options?.entityId,
     entityType: props.options?.entityType,
     rootsOnly: true,

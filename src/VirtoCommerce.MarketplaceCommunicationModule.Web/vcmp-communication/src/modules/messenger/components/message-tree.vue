@@ -6,7 +6,6 @@
   >
     <MessageItem
       :message="message"
-      :user-info="userInfo"
       :is-target="message.id === targetMessageId"
       :loading="onChangeLoading"
       @mounted="checkIfTarget"
@@ -121,13 +120,10 @@ import { useInfiniteScroll } from "../composables";
 
 export interface Props {
   message: Message;
-  usersInfo: CommunicationUser[];
   targetMessageId: string | null;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  usersInfo: () => [],
-});
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
   (e: "message-found", el: HTMLElement): void;
@@ -141,7 +137,6 @@ const {
   searchMessages,
   sendMessage,
   messages,
-  users,
   loadMoreMessages,
   searchMessagesLoading,
   searchQuery,
@@ -164,7 +159,7 @@ const setActiveForm = inject("setActiveForm") as (
   formType: "main" | "reply" | "edit" | null,
   formId: string | null,
 ) => void;
-const seller = inject("seller") as { id: string; name: string };
+
 const onChangeLoading = useLoading(sendMessageLoading, updateMessageLoading);
 const childMessages = computed(() => messages.value?.filter((m) => m.threadId === props.message.id) || []);
 const isExpanded = ref(false);
@@ -174,8 +169,6 @@ const repliesContainer = ref<HTMLElement | null>(null);
 const page = ref(1);
 
 const isProgrammaticScroll = ref(false);
-
-const userInfo = computed(() => props.usersInfo.find((user) => user.id === props.message.senderId));
 
 const hasMoreReplies = ref(true);
 
@@ -212,7 +205,15 @@ async function updateParentMessage(message: Message) {
 }
 
 async function removeParentMessage(message: Message) {
+  console.log('removeParentMessage', message, props.message)
   messages.value = messages.value?.filter((m) => m.id !== message.id);
+
+  const parentMessage = {
+    ...props.message,
+    answersCount: props.message.answersCount ? props.message.answersCount - 1 : 1,
+  };
+
+  emit("update-parent-message", parentMessage as Message);
 }
 
 const sendReplyMessage = async (content: {
@@ -280,8 +281,6 @@ const remove = async (args: { messageIds: string[]; withReplies: boolean }) => {
   await removeMessage(args);
 
   emit("remove-parent-message", props.message);
-
-  // emit("search");
 };
 
 const mark = async (args: { messageId: string; recipientId: string }) => {
@@ -378,6 +377,10 @@ const { previousLoading, nextLoading, cleanup } = useInfiniteScroll({
 </script>
 
 <style lang="scss">
+:root {
+  --empty-communication: var(--empty-grid-icon-color, var(--secondary-500));
+}
+
 .message-tree {
   @apply tw-relative;
 

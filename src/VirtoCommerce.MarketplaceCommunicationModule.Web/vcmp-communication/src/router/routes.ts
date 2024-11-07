@@ -17,7 +17,7 @@ export const routes: RouteRecordRaw[] = [
     children: [],
     redirect: (to) => {
       if (to.name === "App") {
-        return { path: "/reviews", params: to.params };
+        return { path: "/details", params: to.params };
       }
       return to.path;
     },
@@ -29,7 +29,7 @@ export const routes: RouteRecordRaw[] = [
     props: () => ({
       logo: whiteLogoImage,
       background: bgImage,
-      title: "Reviews App",
+      title: "Communication App",
     }),
   },
   {

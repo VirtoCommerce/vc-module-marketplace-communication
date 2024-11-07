@@ -6,7 +6,7 @@
     <VcInput
       v-if="!isExpanded && !message?.content"
       type="text"
-      :placeholder="$t('MESSENGER.ADD_COMMENT')"
+      :placeholder="$t('MESSENGER.ADD_PLACEHOLDER')"
       class="new-message-form__input"
       @focus="expandForm"
     />
@@ -33,6 +33,7 @@
         </VcButton>
         <VcButton
           type="submit"
+          icon="fas fa-paper-plane"
           :disabled="!content.trim()"
           small
 

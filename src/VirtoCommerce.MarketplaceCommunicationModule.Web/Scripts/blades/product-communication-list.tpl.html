@@ -13,10 +13,24 @@
 
     <div class="blade-inner">
         <div class="inner-block" style="display: flex; flex-direction: column; height: 100%; width: 100%;">
-            <!-- Messages container with scroll -->
-            <div style="flex-grow: 1; overflow-y: auto; padding: 20px;">
+            <!-- Empty state -->
+            <div ng-if="isInitialLoadComplete && !blade.messages.length && !blade.isLoading"
+                 style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; padding: 20px; text-align: center;">
+                <i class="fas fa-comment" style="font-size: 48px; color: #dee9f0; margin-bottom: 20px;"></i>
+                <div style="font-size: 16px; color: #999; margin-bottom: 20px;">
+                    {{ 'marketplaceCommunication.blades.product-communication.labels.no-messages' | translate }}
+                </div>
+                <button class="btn" ng-click="startConversation()">
+                    <span class="fa fa-plus" style="margin-right: 5px;"></span>
+                    {{ 'marketplaceCommunication.blades.product-communication.buttons.start-conversation' | translate }}
+                </button>
+            </div>
+
+            <!-- Messages container (show only if there are messages or loading) -->
+            <div ng-if="blade.messages.length || blade.isLoading"
+                 style="flex-grow: 1; overflow-y: auto; padding: 20px;">
                 <!-- Previous messages skeleton loader -->
-                <div ng-if="isLoadingPrevious" 
+                <div ng-if="isLoadingPrevious"
                      style="padding-bottom: 10px;">
                     <div class="loading-skeleton" style="height: 80px; margin-bottom: 15px; background: #f0f0f0; border-radius: 4px; animation: pulse 1.5s infinite;">
                         <div style="display: flex; gap: 10px; padding: 15px;">
@@ -39,7 +53,7 @@
                 </div>
 
                 <!-- Previous messages loader -->
-                <div ng-if="!isLoadingPrevious && blade.hasPrevious" 
+                <div ng-if="!isLoadingPrevious && blade.hasPrevious"
                      on-visible="loadPreviousMessages()"
                      is-scrolling="blade.isScrollingToMessage"
                      style="text-align: center; padding: 20px;">
@@ -66,9 +80,9 @@
                         should-show-unread-dot="shouldShowUnreadDot(message)">
                     </message-tree>
                 </div>
-                
+
                 <!-- Next messages skeleton loader -->
-                <div ng-if="isLoadingMore" 
+                <div ng-if="isLoadingMore"
                      style="padding-top: 10px;">
                     <div class="loading-skeleton" style="height: 80px; margin-bottom: 15px; background: #f0f0f0; border-radius: 4px; animation: pulse 1.5s infinite;">
                         <div style="display: flex; gap: 10px; padding: 15px;">
@@ -91,11 +105,11 @@
                 </div>
 
                 <!-- Next messages loader -->
-                <div ng-if="!isLoadingMore && blade.hasMore && blade.messages.length < blade.totalCount" 
+                <div ng-if="!isLoadingMore && blade.hasMore && blade.messages.length < blade.totalCount"
                      on-visible="loadMore()"
                      is-scrolling="blade.isScrollingToMessage"
                      style="text-align: center; padding: 20px;">
-                  
+
                 </div>
             </div>
 
@@ -107,23 +121,23 @@
                      style="padding: 8px; border: 1px solid #dee9f0; border-radius: 4px; font: inherit; cursor: text; color: #666; font: inherit;">
                      {{ 'marketplaceCommunication.blades.product-communication.labels.start-conversation' | translate }}
                 </div>
-                
+
                 <!-- Expanded form -->
                 <div ng-if="isFormExpanded" style="display: flex; flex-direction: column; gap: 10px;">
-                    <textarea 
-                        ng-model="mainForm.text" 
-                        style="min-height: 60px; padding: 8px; border: 1px solid #dee9f0; border-radius: 4px; font: inherit;" 
-                        placeholder="{{ 'marketplaceCommunication.blades.product-communication.labels.start-conversation' | translate }}"
-                        autofocus></textarea>
+                    <textarea
+                        ng-model="mainForm.text"
+                        style="min-height: 60px; padding: 8px; border: 1px solid #dee9f0; border-radius: 4px; font: inherit;"
+                        placeholder="{{ 'marketplaceCommunication.blades.product-communication.labels.enter-message' | translate }}"
+                        vc-focus="isFormExpanded"></textarea>
                     <div class="form-group">
-                        <button class="btn __cancel" 
+                        <button class="btn __cancel"
                                 ng-click="cancelMessage()"
                                 style="align-self: flex-end;">
                                 <span class="fa fa-times" style="margin-right: 5px;"></span>
                                 {{ 'marketplaceCommunication.blades.product-communication.buttons.cancel' | translate }}
                         </button>
-                        <button class="btn" 
-                                ng-click="sendRootMessage()" 
+                        <button class="btn"
+                                ng-click="sendRootMessage()"
                                 ng-disabled="!mainForm.text || blade.isLoading"
                                 style="align-self: flex-end;">
                             <span class="fa fa-paper-plane" style="margin-right: 5px;"></span>

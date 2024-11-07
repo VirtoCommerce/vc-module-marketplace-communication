@@ -26,6 +26,20 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         }
     };
 }])
+.directive('vcFocus', ['$timeout', function ($timeout) {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attrs) {
+            scope.$watch(attrs.vcFocus, function (value) {
+                if (value === true) {
+                    $timeout(function () {
+                        element[0].focus();
+                    });
+                }
+            });
+        }
+    };
+}])
 .directive('messageTree', ['$compile', '$timeout', 'messageFormsService', function($compile, $timeout, messageFormsService) {
     return {
         restrict: 'E',
@@ -49,7 +63,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             maxLines: '=?'
         },
         template: `
-            <div class="message-item" 
+            <div class="message-item"
                  style="padding: 10px; margin-bottom: 5px; border: 1px solid #dee9f0; border-radius: 4px;"
                  data-message-id="{{message.id}}"
                  is-scrolling="parentController.blade.isScrollingToMessage"
@@ -58,13 +72,13 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     <!-- Header with avatar and user info -->
                     <div style="margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between;">
                         <div style="display: flex; align-items: center;">
-                            <div ng-if="message.senderInfo.avatarUrl" 
+                            <div ng-if="message.senderInfo.avatarUrl"
                                 style="width: 32px; height: 32px; border-radius: 50%; margin-right: 10px;">
-                                <img ng-src="{{message.senderInfo.avatarUrl}}" 
+                                <img ng-src="{{message.senderInfo.avatarUrl}}"
                                     style="width: 100%; height: 100%; border-radius: 50%;"
                                     alt="{{ 'marketplaceCommunication.blades.product-communication.labels.user-avatar' | translate }}">
                             </div>
-                            <div ng-if="!message.senderInfo.avatarUrl" 
+                            <div ng-if="!message.senderInfo.avatarUrl"
                                 style="width: 32px; height: 32px; border-radius: 50%; margin-right: 10px; background: #e0e0e0; display: flex; align-items: center; justify-content: center;">
                                 <i class="fas fa-user" style="color: #666;"></i>
                             </div>
@@ -75,7 +89,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                                 <span style="color: #999; font-size: 12px;" am-time-ago="message.createdDate"></span>
                             </div>
                         </div>
-                        <div ng-if="shouldShowUnreadDot(message)" 
+                        <div ng-if="shouldShowUnreadDot(message)"
                              on-visible="delayedMarkRead(message)"
                              style="width: 8px; height: 8px; border-radius: 50%; background-color: #e53935;">
                         </div>
@@ -89,7 +103,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                              style="position: relative; line-height: 20px; overflow: hidden; transition: max-height 0.3s ease-out;">
                             <div>{{message.content}}</div>
                             <!-- Gradient overlay -->
-                            <div ng-if="!isExpanded && needsExpansion" 
+                            <div ng-if="!isExpanded && needsExpansion"
                                  style="position: absolute; bottom: 0; left: 0; right: 0; height: 20px; background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%); pointer-events: none;"></div>
                         </div>
                         <div ng-if="needsExpansion"
@@ -105,13 +119,14 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                             </span>
                         </div>
                     </div>
-                    
+
                     <!-- Edit form -->
                     <div ng-if="editMode.isActive" style="margin: 10px 0;">
-                        <textarea 
-                            ng-model="editMode.text" 
-                            style="width: -webkit-fill-available; min-height: 80px; margin-bottom: 10px; padding: 8px; font: inherit;" 
-                            placeholder="{{ 'marketplaceCommunication.blades.product-communication.labels.edit-message' | translate }}"></textarea>
+                        <textarea
+                            ng-model="editMode.text"
+                            style="width: -webkit-fill-available; min-height: 80px; margin-bottom: 10px; padding: 8px; font: inherit;"
+                            placeholder="{{ 'marketplaceCommunication.blades.product-communication.labels.edit-message' | translate }}"
+                            vc-focus="editMode.isActive"></textarea>
                         <div>
                             <button class="btn __cancel" ng-click="cancelEdit()">
                                 <span class="fa fa-times" style="margin-right: 5px;"></span>
@@ -127,31 +142,31 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     <!-- Actions -->
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                         <div class="form-group">
-                            <button class="btn" ng-click="showReplyForm()" 
+                            <button class="btn" ng-click="showReplyForm()"
                                     ng-if="!editMode.isActive && !replyForm.isVisible">
                                 <span class="fa fa-reply" style="margin-right: 5px;"></span>
                                 {{ 'marketplaceCommunication.blades.product-communication.buttons.reply' | translate }}
                             </button>
-                            <button class="btn" ng-click="startEdit()" 
-                                    ng-if="message.senderId === currentUser.id && !editMode.isActive && !replyForm.isVisible">
+                            <button class="btn" ng-click="startEdit()"
+                                    ng-if="message.senderId === currentUser.id && message.answersCount === 0 && !editMode.isActive && !replyForm.isVisible">
                                 <span class="fa fa-pencil" style="margin-right: 5px;"></span>
                                 {{ 'marketplaceCommunication.blades.product-communication.buttons.edit' | translate }}
                             </button>
-                            <button class="btn __cancel" ng-click="onDelete({message: message})" 
-                                    ng-if="message.senderId === currentUser.id && !editMode.isActive && !replyForm.isVisible">
+                            <button class="btn __cancel" ng-click="onDelete({message: message})"
+                                    ng-if="message.senderId === currentUser.id && message.answersCount === 0 && !editMode.isActive && !replyForm.isVisible">
                                 <span class="fa fa-trash-o" style="margin-right: 5px;"></span>
                                 {{ 'marketplaceCommunication.blades.product-communication.buttons.delete' | translate }}
                             </button>
                         </div>
                         <div class="form-group">
-                            <button class="btn" 
+                            <button class="btn"
                                     style="font-size: 12px;"
                                     ng-if="hasReplies({message: message}) && !editMode.isActive && !replyForm.isVisible"
                                     ng-click="onToggleReplies({message: message})">
                             <span ng-if="message.isExpanded" class="fa fa-chevron-up" style="margin-right: 5px;"></span>
                             <span ng-if="!message.isExpanded" class="fa fa-chevron-down" style="margin-right: 5px;"></span>
                             <span ng-if="message.isExpanded" translate="marketplaceCommunication.blades.product-communication.labels.hide-replies"></span>
-                            <span ng-if="!message.isExpanded" 
+                            <span ng-if="!message.isExpanded"
                                   translate="marketplaceCommunication.blades.product-communication.labels.show-replies"
                                   translate-values="{ count: message.answersCount }"></span>
                             </button>
@@ -160,11 +175,11 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
                     <!-- Reply form -->
                     <div ng-if="replyForm.isVisible" style="margin-top: 10px; padding: 10px; border: 1px solid #dee9f0; border-radius: 4px;">
-                        <textarea 
-                            ng-model="replyForm.text" 
-                            style="width: -webkit-fill-available; min-height: 80px; margin-bottom: 10px; padding: 8px; font: inherit;" 
+                        <textarea
+                            ng-model="replyForm.text"
+                            style="width: -webkit-fill-available; min-height: 80px; margin-bottom: 10px; padding: 8px; font: inherit;"
                             placeholder="{{ 'marketplaceCommunication.blades.product-communication.labels.write-reply' | translate }}"
-                            autofocus></textarea>
+                            vc-focus="replyForm.isVisible"></textarea>
                         <div>
                             <button class="btn __cancel" ng-click="hideReplyForm()">
                                 <span class="fa fa-times" style="margin-right: 5px;"></span>
@@ -182,7 +197,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             <!-- Replies container -->
             <div ng-if="hasReplies({message: message}) && message.isExpanded" style="position: relative; margin-left: 24px;">
                 <!-- Previous replies skeleton -->
-                <div ng-if="loadingStates.previous[message.id]" 
+                <div ng-if="loadingStates.previous[message.id]"
                      style="padding-bottom: 10px;">
                     <div class="loading-skeleton" style="height: 60px; margin-bottom: 10px; background: #f0f0f0; border-radius: 4px; animation: pulse 1.5s infinite;">
                         <div style="display: flex; gap: 10px; padding: 10px;">
@@ -205,7 +220,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 </div>
 
                 <!-- Previous replies loader -->
-                <div ng-if="!loadingStates.previous[message.id] && hasPreviousReplies" 
+                <div ng-if="!loadingStates.previous[message.id] && hasPreviousReplies"
                      on-visible="loadPreviousReplies({message: message})"
                      is-scrolling="parentController.blade.isScrollingToMessage"
                      style="text-align: center; padding: 10px;">
@@ -216,7 +231,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     <!-- Branch lines -->
                     <div style="position: absolute; left: -24px; top: 0; bottom: 0;">
                         <!-- Vertical line for non-last items -->
-                        <div ng-if="!$last" 
+                        <div ng-if="!$last"
                              style="position: absolute; left: 0; top: 18px; bottom: 0; width: 1px; background-color: #dee9f0;"></div>
                         <!-- Branch corner -->
                         <div style="position: absolute; left: 0; top: -5px; width: 1px; height: 33px; background-color: #dee9f0;"></div>
@@ -243,7 +258,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 </div>
 
                 <!-- Next replies skeleton -->
-                <div ng-if="loadingStates.more[message.id] && hasMoreReplies({message: message})" 
+                <div ng-if="loadingStates.more[message.id] && hasMoreReplies({message: message})"
                      style="padding-top: 10px;">
                     <div class="loading-skeleton" style="height: 60px; margin-bottom: 10px; background: #f0f0f0; border-radius: 4px; animation: pulse 1.5s infinite;">
                         <div style="display: flex; gap: 10px; padding: 10px;">
@@ -266,7 +281,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 </div>
 
                 <!-- Next replies loader -->
-                <div ng-if="!loadingStates.more[message.id] && hasMoreReplies({message: message})" 
+                <div ng-if="!loadingStates.more[message.id] && hasMoreReplies({message: message})"
                      on-visible="loadMoreReplies({message: message})"
                      is-scrolling="parentController.blade.isScrollingToMessage"
                      style="text-align: center; padding: 10px;">
@@ -310,7 +325,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
             scope.submitReply = function() {
                 if (!scope.replyForm.text || !scope.replyForm.text.trim()) return;
-                
+
                 // Call controller method directly
                 scope.parentController.sendReply(scope.message, scope.replyForm.text);
                 scope.hideReplyForm();
@@ -318,12 +333,12 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
             scope.submitEdit = function() {
                 if (!scope.editMode.text || !scope.editMode.text.trim()) return;
-                
+
                 scope.parentController.updateMessage({
-                    message: scope.message, 
+                    message: scope.message,
                     newContent: scope.editMode.text
                 });
-                
+
                 scope.editMode.isActive = false;
                 scope.editMode.text = '';
             };
@@ -338,7 +353,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                         scope.editMode.isActive = false;
                         scope.editMode.text = '';
                     }
-                    
+
                     // Handle reply form
                     if (scope.replyForm.isVisible && newFormId !== 'reply-' + scope.message.id) {
                         scope.replyForm.isVisible = false;
@@ -380,28 +395,28 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 .factory('messageFormsService', function() {
     var service = {
         activeForm: null,  // 'root', 'edit-{messageId}', 'reply-{messageId}'
-        
+
         closeAllForms: function() {
             this.activeForm = null;
         },
-        
+
         openForm: function(formId) {
             this.activeForm = formId;
         },
-        
+
         isFormActive: function(formId) {
             return this.activeForm === formId;
         }
     };
     return service;
 })
-.controller('virtoCommerce.marketplaceCommunicationModule.productCommunicationListController', 
+.controller('virtoCommerce.marketplaceCommunicationModule.productCommunicationListController',
     ['$scope', '$timeout', 'virtoCommerce.marketplaceCommunicationModule.webApi', 'platformWebApp.dialogService', 'messageFormsService',
     function ($scope, $timeout, api, dialogService, messageFormsService) {
         var blade = $scope.blade;
         blade.headIcon = 'fas fa-comment';
         blade.title = 'Communication';
-        
+
         blade.messages = [];
         blade.threadsMap = {};
         $scope.selectedMessageId = null;
@@ -416,7 +431,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             text: '',
             replyingTo: null
         };
-        
+
         // Form for root message
         $scope.mainForm = {
             text: ''
@@ -475,13 +490,13 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             blade.threadHasMore = {};
             blade.threadHasPrevious = {};
             blade.threadPagesMap = {};
-            
+
             // Ensure threadHasPrevious is initialized for all messages
             blade.messages?.forEach(message => {
                 var threadId = message.threadId || message.id;
                 blade.threadHasPrevious[threadId] = false;
             });
-            
+
             api.getOperator({}, function(operator) {
                 $scope.currentUser = operator;
             });
@@ -495,13 +510,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         }
 
         $scope.sendReply = function(parentMessage, replyText) {
-            console.log('Controller sendReply called', {
-                parentMessage: parentMessage,
-                replyText: replyText
-            });
-
             if (!replyText || !replyText.trim()) {
-                console.log('Cannot send: empty text');
                 return;
             }
 
@@ -519,15 +528,13 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 }
             };
 
-            console.log('Sending command:', command);
-
             api.sendMessage(command, function() {
                 var searchCriteria = {
                     entityId: blade.entityId,
                     entityType: 'Product',
                     threadId: parentMessage.id,
                     responseGroup: 'Full',
-                    take: 5,
+                    take: 10,
                     sort: 'createdDate:desc'
                 };
 
@@ -537,10 +544,10 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                         blade.threadsMap[threadId] = response.results.reverse();
                         blade.threadTotalCounts[threadId] = response.totalCount;
                         blade.threadHasMore[threadId] = false;
-                        
+
                         // Set flag for previous messages
                         blade.threadHasPrevious[threadId] = response.totalCount > response.results.length;
-                        
+
                         // Update answers count on parent message
                         parentMessage.answersCount = response.totalCount;
 
@@ -569,11 +576,10 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         };
 
         $scope.toggleReplies = function(message) {
-            console.log('Toggle replies for message', message);
             message.isExpanded = !message.isExpanded;
 
             if (message.isExpanded) {
-    
+
                 var threadId = message.id;
                 if (!blade.threadsMap[threadId] || blade.threadsMap[threadId].length === 0) {
                     loadThreadMessages(threadId);
@@ -605,10 +611,10 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     } else {
                         blade.threadsMap[threadId] = blade.threadsMap[threadId].concat(response.results);
                     }
-                    
+
                     // Store total count for this thread
                     blade.threadTotalCounts[threadId] = response.totalCount;
-                    
+
                     // Load user info for messages
                     loadUserInfoForMessages(response.results);
                 }
@@ -628,11 +634,11 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     } else {
                         blade.messages = blade.messages.concat(response.results);
                     }
-                    
+
                     // Store total count
                     blade.totalCount = response.totalCount;
                     blade.hasMore = blade.messages.length < response.totalCount;
-                    
+
                     loadUserInfoForMessages(response.results);
                 }
             }).$promise.finally(function() {
@@ -669,8 +675,8 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             }
 
             // Check if there's a recipient record for current user with 'New' status
-            const recipientRecord = message.recipients?.find(r => 
-                r.recipientId === $scope.currentUser.id && 
+            const recipientRecord = message.recipients?.find(r =>
+                r.recipientId === $scope.currentUser.id &&
                 r.readStatus === 'New'
             );
 
@@ -690,9 +696,9 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 if (!message.threadId) {
                     var replies = blade.threadsMap[message.id] || [];
                     replies.forEach(function(reply) {
-                        const replyRecipient = reply.recipients?.find(r => 
-                            r.recipientId === $scope.currentUser.id && 
-                            r.readStatus === 'New' && 
+                        const replyRecipient = reply.recipients?.find(r =>
+                            r.recipientId === $scope.currentUser.id &&
+                            r.readStatus === 'New' &&
                             reply.senderId !== $scope.currentUser.id
                         );
 
@@ -708,9 +714,9 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 else {
                     var rootMessage = blade.messages.find(m => m.id === message.threadId);
                     if (rootMessage) {
-                        const rootRecipient = rootMessage.recipients?.find(r => 
-                            r.recipientId === $scope.currentUser.id && 
-                            r.readStatus === 'New' && 
+                        const rootRecipient = rootMessage.recipients?.find(r =>
+                            r.recipientId === $scope.currentUser.id &&
+                            r.readStatus === 'New' &&
                             rootMessage.senderId !== $scope.currentUser.id
                         );
 
@@ -730,7 +736,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             blade.isLoading = true;
             blade.currentPage = 1;
             blade.hasMore = true;
-            
+
             var criteria = {
                 entityId: blade.entityId,
                 entityType: 'Product',
@@ -741,16 +747,17 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             };
 
             loadMessages(criteria, true);
+            $scope.isInitialLoadComplete = true;
         };
 
         // Add loadMore function for root messages
         $scope.loadMore = function() {
             if ($scope.isLoadingMore || blade.isScrollingToMessage) return;
-            
+
             // Calculate if we've loaded all items
             var currentPage = Math.ceil(blade.messages.length / blade.pageSize);
             var totalPages = Math.ceil(blade.totalCount / blade.pageSize);
-            
+
             if (currentPage >= totalPages) {
                 blade.hasMore = false;
                 return;
@@ -766,14 +773,14 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             };
 
             $scope.isLoadingMore = true;
-            
+
             api.searchMessages(criteria, function(response) {
                 if (response && response.results) {
                     if (response.results.length) {
                         blade.messages = blade.messages.concat(response.results);
                         blade.totalCount = response.totalCount;
                         blade.hasMore = blade.messages.length < response.totalCount;
-                        
+
                         loadUserInfoForMessages(response.results);
                     }
                 }
@@ -786,12 +793,12 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             var threadId = message.id;
             var currentReplies = blade.threadsMap[threadId] || [];
             var totalCount = blade.threadTotalCounts[threadId] || 0;
-            
+
             // Check threadHasMore flag
             if (blade.threadHasMore && blade.threadHasMore[threadId] === false) {
                 return false;
             }
-            
+
             return currentReplies.length < totalCount;
         };
 
@@ -799,7 +806,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             var threadId = message.threadId || message.id;
             var currentReplies = blade.threadsMap[threadId] || [];
             if ($scope.threadLoadingStates.more[threadId] || blade.isScrollingToMessage) return;
-            
+
             var criteria = {
                 threadId: threadId,
                 entityId: blade.entityId,
@@ -811,18 +818,18 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             };
 
             $scope.threadLoadingStates.more[threadId] = true;
-            
+
             api.searchMessages(criteria, function(response) {
                 if (response && response.results) {
                     blade.threadsMap[threadId] = (blade.threadsMap[threadId] || []).concat(response.results);
                     blade.threadTotalCounts[threadId] = response.totalCount;
-                    
+
                     // Check if all messages are loaded
                     if (blade.threadsMap[threadId].length >= response.totalCount) {
                         blade.threadHasMore = blade.threadHasMore || {};
                         blade.threadHasMore[threadId] = false;
                     }
-                    
+
                     loadUserInfoForMessages(response.results);
                 }
             }).$promise.finally(function() {
@@ -832,7 +839,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
         $scope.loadPreviousMessages = function() {
             if ($scope.isLoadingPrevious || blade.isScrollingToMessage) return;
-            
+
             var criteria = {
                 entityId: blade.entityId,
                 entityType: 'Product',
@@ -844,14 +851,14 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             };
 
             $scope.isLoadingPrevious = true;
-            
+
             api.searchMessages(criteria, function(response) {
                 if (response && response.results) {
                     // Add messages to the beginning of the array
                     blade.messages = response.results.reverse().concat(blade.messages);
                     blade.totalCount = response.totalCount;
                     blade.hasPrevious = blade.messages.length < response.totalCount;
-                    
+
                     loadUserInfoForMessages(response.results);
                 }
             }).$promise.finally(function() {
@@ -863,7 +870,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             var threadId = message.threadId || message.id;
             var currentReplies = blade.threadsMap[threadId] || [];
             if ($scope.threadLoadingStates.previous[threadId] || blade.isScrollingToMessage) return;
-            
+
             var criteria = {
                 threadId: threadId,
                 entityId: blade.entityId,
@@ -875,16 +882,16 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             };
 
             $scope.threadLoadingStates.previous[threadId] = true;
-            
+
             api.searchMessages(criteria, function(response) {
                 if (response && response.results) {
                     // Add replies to the beginning of the array
                     blade.threadsMap[threadId] = response.results.reverse().concat(blade.threadsMap[threadId] || []);
                     blade.threadTotalCounts[threadId] = response.totalCount;
-                    
+
                     // Update flag for previous messages
                     blade.threadHasPrevious[threadId] = blade.threadsMap[threadId].length < response.totalCount;
-                    
+
                     loadUserInfoForMessages(response.results);
                 }
             }).$promise.finally(function() {
@@ -903,7 +910,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 var messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
                 if (messageElement) {
                     messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    
+
                     // Reset scroll flag after animation completes (>1000ms)
                     $timeout(function() {
                         blade.isScrollingToMessage = false;
@@ -950,7 +957,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                         blade.totalCount = response.totalCount;
                         blade.hasMore = false;
                         blade.hasPrevious = blade.messages.length < response.totalCount;
-                        
+
                         loadUserInfoForMessages(response.results);
 
                          // Find and scroll to the new message
@@ -958,7 +965,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                             var timeDiff = Math.abs(new Date(msg.createdDate).getTime() - sentTime.getTime());
                             return msg.content === messageContent && timeDiff <= 10000;
                         });
-                        
+
                         if (newMessage) {
                             $scope.mainForm.text = '';
                             scrollToMessage(newMessage.id);
@@ -976,7 +983,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             }
 
             // Find recipient record for current user
-            const recipientRecord = message.recipients.find(r => 
+            const recipientRecord = message.recipients.find(r =>
                 r.recipientId === $scope.currentUser.id
             );
 
@@ -999,12 +1006,12 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 callback: function(confirm) {
                     if (confirm) {
                         blade.isLoading = true;
-                        
+
                         // Create object with data
                         var data = {
-                            messageIds: messageIds
+                            messageIds: messageIds,
                         };
-                        
+
                         // Pass data as a parameter
                         api.deleteMessage(data).$promise.then(function() {
                             // If it's a reply, remove it from the thread
@@ -1013,14 +1020,22 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                                 var index = threadMessages.findIndex(m => m.id === message.id);
                                 if (index !== -1) {
                                     threadMessages.splice(index, 1);
-                                    
+
+                                    Object.keys(blade.threadsMap).forEach(key => {
+                                        const parentMessage = blade.threadsMap[key].find(m => m.id === message.threadId);
+                                        if (parentMessage) {
+                                            parentMessage.answersCount = (parentMessage.answersCount || 1) - 1;
+                                        }
+                                    });
+
                                     // Update the answers count of the parent message
                                     var parentMessage = blade.messages.find(m => m.id === message.threadId);
+
                                     if (parentMessage) {
                                         parentMessage.answersCount = (parentMessage.answersCount || 1) - 1;
                                     }
                                 }
-                            } 
+                            }
                             // If it's a root message, remove it and its thread
                             else {
                                 var index = blade.messages.findIndex(m => m.id === message.id);
@@ -1035,16 +1050,11 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     }
                 }
             };
-            
+
             dialogService.showConfirmationDialog(dialog);
         };
 
         $scope.updateMessage = function(args) {
-            console.log('Controller updateMessage called', {
-                message: args.message,
-                newContent: args.newContent
-            });
-
             if (!args.newContent || !args.newContent.trim()) return;
 
             blade.isLoading = true;
@@ -1057,14 +1067,14 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             api.updateMessage(command, function(response) {
                 // Update message content
                 args.message.content = args.newContent.trim();
-                
+
                 // If this is a root message
                 if (!args.message.threadId) {
                     var index = blade.messages.findIndex(m => m.id === args.message.id);
                     if (index !== -1) {
                         blade.messages[index].content = args.newContent.trim();
                     }
-                } 
+                }
                 // If this is a reply
                 else {
                     var threadMessages = blade.threadsMap[args.message.threadId] || [];
@@ -1076,6 +1086,33 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             }).$promise.finally(function() {
                 blade.isLoading = false;
             });
+        };
+
+        // Add new property to track if we've loaded data at least once
+        $scope.isInitialLoadComplete = false;
+
+        // Modify refresh to set isInitialLoadComplete
+        blade.refresh = function() {
+            blade.isLoading = true;
+            blade.currentPage = 1;
+            blade.hasMore = true;
+
+            var criteria = {
+                entityId: blade.entityId,
+                entityType: 'Product',
+                rootsOnly: true,
+                skip: 0,
+                take: blade.pageSize,
+                responseGroup: 'Full'
+            };
+
+            loadMessages(criteria, true);
+            $scope.isInitialLoadComplete = true;
+        };
+
+        // Add helper method to start conversation
+        $scope.startConversation = function() {
+            $scope.expandForm();
         };
 
         initialize();
