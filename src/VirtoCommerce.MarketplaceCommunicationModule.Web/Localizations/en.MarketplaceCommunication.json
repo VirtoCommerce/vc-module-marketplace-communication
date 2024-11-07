@@ -6,7 +6,7 @@
         "labels": {
           "date": "Date",
           "message": "Message",
-          "no-messages": "Start conversation with vendor",
+          "no-messages": "Start conversation with vendor team",
           "sender": "Sender",
           "edit-message": "Edit your message...",
           "write-reply": "Write your reply...",
