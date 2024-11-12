@@ -18,11 +18,11 @@
                  style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; padding: 20px; text-align: center;">
                 <i class="fas fa-comment" style="font-size: 48px; color: #dee9f0; margin-bottom: 20px;"></i>
                 <div style="font-size: 16px; color: #999; margin-bottom: 20px;">
-                    {{ 'marketplaceCommunication.blades.product-communication.labels.no-messages' | translate }}
+                  {{ 'marketplaceCommunication.blades.entity-communication.labels.no-messages' | translate }}
                 </div>
                 <button class="btn" ng-click="startConversation()">
-                    <span class="fa fa-plus" style="margin-right: 5px;"></span>
-                    {{ 'marketplaceCommunication.blades.product-communication.buttons.start-conversation' | translate }}
+                  <span class="fa fa-plus" style="margin-right: 5px;"></span>
+                  {{ 'marketplaceCommunication.blades.entity-communication.buttons.start-conversation' | translate }}
                 </button>
             </div>
 
@@ -57,7 +57,7 @@
                      on-visible="loadPreviousMessages()"
                      is-scrolling="blade.isScrollingToMessage"
                      style="text-align: center; padding: 20px;">
-                    {{ 'marketplaceCommunication.blades.product-communication.labels.loading-previous' | translate }}
+                  {{ 'marketplaceCommunication.blades.entity-communication.labels.loading-previous' | translate }}
                 </div>
 
                 <div ng-repeat="message in blade.messages">
@@ -116,33 +116,33 @@
             <!-- Root message form -->
             <div style="flex-shrink: 0; border-top: 1px solid #dee9f0; padding: 15px; background: white;">
                 <!-- Collapsed input -->
-                <div ng-if="!isFormExpanded"
-                     ng-click="expandForm()"
-                     style="padding: 8px; border: 1px solid #dee9f0; border-radius: 4px; font: inherit; cursor: text; color: #666; font: inherit;">
-                     {{ 'marketplaceCommunication.blades.product-communication.labels.start-conversation' | translate }}
-                </div>
+              <div ng-if="!isFormExpanded"
+                   ng-click="expandForm()"
+                   style="padding: 8px; border: 1px solid #dee9f0; border-radius: 4px; font: inherit; cursor: text; color: #666; font: inherit;">
+                {{ 'marketplaceCommunication.blades.entity-communication.labels.start-conversation' | translate }}
+              </div>
 
                 <!-- Expanded form -->
                 <div ng-if="isFormExpanded" style="display: flex; flex-direction: column; gap: 10px;">
                     <textarea
                         ng-model="mainForm.text"
                         style="min-height: 60px; padding: 8px; border: 1px solid #dee9f0; border-radius: 4px; font: inherit;"
-                        placeholder="{{ 'marketplaceCommunication.blades.product-communication.labels.enter-message' | translate }}"
+                        placeholder="{{ 'marketplaceCommunication.blades.entity-communication.labels.enter-message' | translate }}"
                         vc-focus="isFormExpanded"></textarea>
                     <div class="form-group">
-                        <button class="btn __cancel"
-                                ng-click="cancelMessage()"
-                                style="align-self: flex-end;">
-                                <span class="fa fa-times" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.product-communication.buttons.cancel' | translate }}
-                        </button>
-                        <button class="btn"
-                                ng-click="sendRootMessage()"
-                                ng-disabled="!mainForm.text || blade.isLoading"
-                                style="align-self: flex-end;">
-                            <span class="fa fa-paper-plane" style="margin-right: 5px;"></span>
-                            {{blade.isLoading ? ('marketplaceCommunication.blades.product-communication.labels.sending' | translate) : ('marketplaceCommunication.blades.product-communication.labels.send' | translate)}}
-                        </button>
+                      <button class="btn __cancel"
+                              ng-click="cancelMessage()"
+                              style="align-self: flex-end;">
+                        <span class="fa fa-times" style="margin-right: 5px;"></span>
+                        {{ 'marketplaceCommunication.blades.entity-communication.buttons.cancel' | translate }}
+                      </button>
+                      <button class="btn"
+                              ng-click="sendRootMessage()"
+                              ng-disabled="!mainForm.text || blade.isLoading"
+                              style="align-self: flex-end;">
+                        <span class="fa fa-paper-plane" style="margin-right: 5px;"></span>
+                        {{blade.isLoading ? ('marketplaceCommunication.blades.entity-communication.labels.sending' | translate) : ('marketplaceCommunication.blades.entity-communication.labels.send' | translate)}}
+                      </button>
                     </div>
                 </div>
             </div>

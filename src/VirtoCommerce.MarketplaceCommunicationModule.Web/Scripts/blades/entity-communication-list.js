@@ -76,7 +76,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                                 style="width: 32px; height: 32px; border-radius: 50%; margin-right: 10px;">
                                 <img ng-src="{{message.senderInfo.avatarUrl}}"
                                     style="width: 100%; height: 100%; border-radius: 50%;"
-                                    alt="{{ 'marketplaceCommunication.blades.product-communication.labels.user-avatar' | translate }}">
+                                    alt="{{ 'marketplaceCommunication.blades.entity-communication.labels.user-avatar' | translate }}">
                             </div>
                             <div ng-if="!message.senderInfo.avatarUrl"
                                 style="width: 32px; height: 32px; border-radius: 50%; margin-right: 10px; background: #e0e0e0; display: flex; align-items: center; justify-content: center;">
@@ -111,11 +111,11 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                              style="color: #1c84c6; cursor: pointer; padding-top: 5px; user-select: none;">
                             <span ng-if="!isExpanded">
                                 <i class="fa fa-chevron-down" style="margin-right: 5px;"></i>
-                                {{ 'marketplaceCommunication.blades.product-communication.labels.show-more' | translate }}
+                                {{ 'marketplaceCommunication.blades.entity-communication.labels.show-more' | translate }}
                             </span>
                             <span ng-if="isExpanded">
                                 <i class="fa fa-chevron-up" style="margin-right: 5px;"></i>
-                                {{ 'marketplaceCommunication.blades.product-communication.labels.show-less' | translate }}
+                                {{ 'marketplaceCommunication.blades.entity-communication.labels.show-less' | translate }}
                             </span>
                         </div>
                     </div>
@@ -125,16 +125,16 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                         <textarea
                             ng-model="editMode.text"
                             style="width: -webkit-fill-available; min-height: 80px; margin-bottom: 10px; padding: 8px; font: inherit;"
-                            placeholder="{{ 'marketplaceCommunication.blades.product-communication.labels.edit-message' | translate }}"
+                            placeholder="{{ 'marketplaceCommunication.blades.entity-communication.labels.edit-message' | translate }}"
                             vc-focus="editMode.isActive"></textarea>
                         <div>
                             <button class="btn __cancel" ng-click="cancelEdit()">
                                 <span class="fa fa-times" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.product-communication.buttons.cancel' | translate }}
+                                {{ 'marketplaceCommunication.blades.entity-communication.buttons.cancel' | translate }}
                             </button>
                             <button class="btn" ng-click="submitEdit()" ng-disabled="!editMode.text">
                                 <span class="fa fa-paper-plane" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.product-communication.buttons.save' | translate }}
+                                {{ 'marketplaceCommunication.blades.entity-communication.buttons.save' | translate }}
                             </button>
                         </div>
                     </div>
@@ -145,17 +145,17 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                             <button class="btn" ng-click="showReplyForm()"
                                     ng-if="!editMode.isActive && !replyForm.isVisible">
                                 <span class="fa fa-reply" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.product-communication.buttons.reply' | translate }}
+                                {{ 'marketplaceCommunication.blades.entity-communication.buttons.reply' | translate }}
                             </button>
                             <button class="btn" ng-click="startEdit()"
                                     ng-if="message.senderId === currentUser.id && message.answersCount === 0 && !editMode.isActive && !replyForm.isVisible">
                                 <span class="fa fa-pencil" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.product-communication.buttons.edit' | translate }}
+                                {{ 'marketplaceCommunication.blades.entity-communication.buttons.edit' | translate }}
                             </button>
                             <button class="btn __cancel" ng-click="onDelete({message: message})"
                                     ng-if="message.senderId === currentUser.id && message.answersCount === 0 && !editMode.isActive && !replyForm.isVisible">
                                 <span class="fa fa-trash-o" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.product-communication.buttons.delete' | translate }}
+                                {{ 'marketplaceCommunication.blades.entity-communication.buttons.delete' | translate }}
                             </button>
                         </div>
                         <div class="form-group">
@@ -165,9 +165,9 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                                     ng-click="onToggleReplies({message: message})">
                             <span ng-if="message.isExpanded" class="fa fa-chevron-up" style="margin-right: 5px;"></span>
                             <span ng-if="!message.isExpanded" class="fa fa-chevron-down" style="margin-right: 5px;"></span>
-                            <span ng-if="message.isExpanded" translate="marketplaceCommunication.blades.product-communication.labels.hide-replies"></span>
+                            <span ng-if="message.isExpanded" translate="marketplaceCommunication.blades.entity-communication.labels.hide-replies"></span>
                             <span ng-if="!message.isExpanded"
-                                  translate="marketplaceCommunication.blades.product-communication.labels.show-replies"
+                                  translate="marketplaceCommunication.blades.entity-communication.labels.show-replies"
                                   translate-values="{ count: message.answersCount }"></span>
                             </button>
                         </div>
@@ -178,16 +178,16 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                         <textarea
                             ng-model="replyForm.text"
                             style="width: -webkit-fill-available; min-height: 80px; margin-bottom: 10px; padding: 8px; font: inherit;"
-                            placeholder="{{ 'marketplaceCommunication.blades.product-communication.labels.write-reply' | translate }}"
+                            placeholder="{{ 'marketplaceCommunication.blades.entity-communication.labels.write-reply' | translate }}"
                             vc-focus="replyForm.isVisible"></textarea>
                         <div>
                             <button class="btn __cancel" ng-click="hideReplyForm()">
                                 <span class="fa fa-times" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.product-communication.buttons.cancel' | translate }}
+                                {{ 'marketplaceCommunication.blades.entity-communication.buttons.cancel' | translate }}
                             </button>
                             <button class="btn" ng-click="submitReply()" ng-disabled="!replyForm.text">
                                 <span class="fa fa-paper-plane" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.product-communication.buttons.send' | translate }}
+                                {{ 'marketplaceCommunication.blades.entity-communication.buttons.send' | translate }}
                             </button>
                         </div>
                     </div>
@@ -410,7 +410,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
     };
     return service;
 })
-.controller('virtoCommerce.marketplaceCommunicationModule.productCommunicationListController',
+    .controller('virtoCommerce.marketplaceCommunicationModule.entityCommunicationListController',
     ['$scope', '$timeout', 'virtoCommerce.marketplaceCommunicationModule.webApi', 'platformWebApp.dialogService', 'messageFormsService',
     function ($scope, $timeout, api, dialogService, messageFormsService) {
         var blade = $scope.blade;
@@ -503,7 +503,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
             api.getSellerUser({
                 entityId: blade.entityId,
-                entityType: 'Product'
+                entityType: blade.entityType
             }, function(seller) {
                 $scope.sellerUser = seller;
             });
@@ -521,7 +521,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 message: {
                     content: replyText.trim(),
                     entityId: blade.entityId,
-                    entityType: 'Product',
+                    entityType: blade.entityType,
                     replyTo: parentMessage.id,
                     senderId: $scope.currentUser.id,
                     recipientId: parentMessage.senderId
@@ -531,7 +531,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             api.sendMessage(command, function() {
                 var searchCriteria = {
                     entityId: blade.entityId,
-                    entityType: 'Product',
+                    entityType: blade.entityType,
                     threadId: parentMessage.id,
                     responseGroup: 'Full',
                     take: 10,
@@ -598,7 +598,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             var criteria = {
                 threadId: threadId,
                 entityId: blade.entityId,
-                entityType: 'Product',
+                entityType: blade.entityType,
                 responseGroup: 'Full',
                 skip: reset ? 0 : (blade.threadPagesMap[threadId] - 1) * blade.threadPageSize,
                 take: blade.threadPageSize
@@ -739,7 +739,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
             var criteria = {
                 entityId: blade.entityId,
-                entityType: 'Product',
+                entityType: blade.entityType,
                 rootsOnly: true,
                 skip: 0,
                 take: blade.pageSize,
@@ -765,7 +765,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
             var criteria = {
                 entityId: blade.entityId,
-                entityType: 'Product',
+                entityType: blade.entityType,
                 rootsOnly: true,
                 skip: blade.messages.length,
                 take: blade.pageSize,
@@ -810,7 +810,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             var criteria = {
                 threadId: threadId,
                 entityId: blade.entityId,
-                entityType: 'Product',
+                entityType: blade.entityType,
                 responseGroup: 'Full',
                 skip: currentReplies.length,
                 take: blade.threadPageSize,
@@ -842,7 +842,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
             var criteria = {
                 entityId: blade.entityId,
-                entityType: 'Product',
+                entityType: blade.entityType,
                 rootsOnly: true,
                 skip: blade.messages.length,
                 take: blade.pageSize,
@@ -874,7 +874,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             var criteria = {
                 threadId: threadId,
                 entityId: blade.entityId,
-                entityType: 'Product',
+                entityType: blade.entityType,
                 responseGroup: 'Full',
                 skip: currentReplies.length,
                 take: blade.threadPageSize,
@@ -932,7 +932,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 message: {
                     content: messageContent,
                     entityId: blade.entityId,
-                    entityType: 'Product',
+                    entityType: blade.entityType,
                     senderId: $scope.currentUser.id,
                     recipientId: $scope.sellerUser.id,
                     rootsOnly: true
@@ -944,7 +944,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
                 var searchCriteria = {
                     entityId: blade.entityId,
-                    entityType: 'Product',
+                    entityType: blade.entityType,
                     rootsOnly: true,
                     responseGroup: 'Full',
                     take: 20,
@@ -1001,8 +1001,8 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
             var dialog = {
                 id: "confirmDeleteMessage",
-                title: "marketplaceCommunication.blades.product-communication.dialogs.delete.title",
-                message: "marketplaceCommunication.blades.product-communication.dialogs.delete.message",
+                title: "marketplaceCommunication.blades.entity-communication.dialogs.delete.title",
+                message: "marketplaceCommunication.blades.entity-communication.dialogs.delete.message",
                 callback: function(confirm) {
                     if (confirm) {
                         blade.isLoading = true;
@@ -1099,7 +1099,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
             var criteria = {
                 entityId: blade.entityId,
-                entityType: 'Product',
+                entityType: blade.entityType,
                 rootsOnly: true,
                 skip: 0,
                 take: blade.pageSize,

@@ -8,8 +8,8 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     id: 'productCommunication',
                     entityId: $scope.blade.currentEntity.id,
                     entityType: 'Product',
-                    controller: 'virtoCommerce.marketplaceCommunicationModule.productCommunicationListController',
-                    template: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/blades/product-communication-list.tpl.html'
+                    controller: 'virtoCommerce.marketplaceCommunicationModule.entityCommunicationListController',
+                    template: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/blades/entity-communication-list.tpl.html'
                 };
                 bladeNavigationService.showBlade(newBlade, blade);
             };

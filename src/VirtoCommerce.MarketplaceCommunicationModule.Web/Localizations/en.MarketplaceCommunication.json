@@ -1,7 +1,7 @@
 {
   "marketplaceCommunication": {
     "blades": {
-      "product-communication": {
+      "entity-communication": {
         "title": "Messages",
         "labels": {
           "date": "Date",
