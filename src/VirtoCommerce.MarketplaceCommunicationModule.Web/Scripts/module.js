@@ -47,5 +47,18 @@ angular.module(moduleName, [])
             };
             widgetService.registerWidget(productCommunicationWidget, 'sellerProductDetailsWidgetContainer');
 
+            // Order details: communication widget
+            var orderCommunicationWidget = {
+                controller: 'virtoCommerce.marketplaceCommunicationModule.orderCommunicationWidgetController',
+                template: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/widgets/order-communication-widget.tpl.html'
+            };
+            widgetService.registerWidget(orderCommunicationWidget, 'customerOrderDetailWidgets');
+
+            // Offer details: communication widget
+            var offerCommunicationWidget = {
+                controller: 'virtoCommerce.marketplaceCommunicationModule.offerCommunicationWidgetController',
+                template: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/widgets/order-communication-widget.tpl.html'
+            };
+            widgetService.registerWidget(offerCommunicationWidget, 'offerDetailsWidgetContainer');
         }
     ]);
