@@ -85,6 +85,13 @@ public static class ModuleConstants
 
     }
 
+    public static class EntityType
+    {
+        public const string Product = "VirtoCommerce.MarketplaceVendorModule.Core.Domains.SellerProduct";
+        public const string Order = "VirtoCommerce.OrdersModule.Core.Model.CustomerOrder";
+        public const string Offer = "VirtoCommerce.MarketplaceVendorModule.Core.Domains.Offer";
+    }
+
     public static class Settings
     {
         public static class General

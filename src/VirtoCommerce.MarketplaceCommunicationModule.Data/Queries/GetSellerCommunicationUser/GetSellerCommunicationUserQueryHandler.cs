@@ -6,6 +6,7 @@ using VirtoCommerce.CommunicationModule.Core.Models;
 using VirtoCommerce.CommunicationModule.Core.Services;
 using VirtoCommerce.MarketplaceVendorModule.Core.Common;
 using VirtoCommerce.MarketplaceVendorModule.Data.Services;
+using static VirtoCommerce.MarketplaceCommunicationModule.Core.ModuleConstants;
 using CoreModuleConstants = VirtoCommerce.CommunicationModule.Core.ModuleConstants;
 
 namespace VirtoCommerce.MarketplaceCommunicationModule.Data.Queries.GetSellerCommunicationUser;
@@ -50,17 +51,18 @@ public class GetSellerCommunicationUserQueryHandler : IQueryHandler<GetSellerCom
         }
 
         var sellerId = string.Empty;
+
         switch (request.EntityType)
         {
-            case CoreModuleConstants.EntityType.Product:
+            case EntityType.Product:
                 var product = (await _sellerProductService.GetAsync([request.EntityId])).FirstOrDefault();
                 sellerId = product?.SellerId;
                 break;
-            case "Offer":
+            case EntityType.Offer:
                 var offer = (await _offerCrudService.GetAsync([request.EntityId])).FirstOrDefault();
                 sellerId = offer?.SellerId;
                 break;
-            case CoreModuleConstants.EntityType.Order:
+            case EntityType.Order:
                 var order = (await _sellerOrderCrudService.GetByIdsAsync([request.EntityId])).FirstOrDefault();
                 sellerId = order?.SellerId;
                 break;

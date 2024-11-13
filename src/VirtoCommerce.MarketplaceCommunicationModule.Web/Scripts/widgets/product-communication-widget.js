@@ -7,7 +7,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 var newBlade = {
                     id: 'productCommunication',
                     entityId: $scope.blade.currentEntity.id,
-                    entityType: 'Product',
+                    entityType: 'VirtoCommerce.MarketplaceVendorModule.Core.Domains.SellerProduct',
                     controller: 'virtoCommerce.marketplaceCommunicationModule.entityCommunicationListController',
                     template: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/blades/entity-communication-list.tpl.html'
                 };
