@@ -52,7 +52,8 @@
     "widgets": {
       "communication": {
         "title": "Communication",
-        "is-disabled": "Communication is unavailable"
+        "communication-not-possible": "Communication not possible here.",
+        "open-seller-order": "Open seller order to chat with a Vendor."
       }
     }
   },
