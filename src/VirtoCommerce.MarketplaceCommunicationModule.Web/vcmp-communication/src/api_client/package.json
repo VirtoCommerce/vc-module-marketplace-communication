@@ -7,7 +7,7 @@
   "exports": {
     "./marketplacecommunication": {
       "import": "./virtocommerce.marketplacecommunication.js",
-      "types": "./types/virtocommerce.marketplacecommunication.d.ts"
+      "types": "./types/virtocommerce.marketplacecommunication.js"
     }
   }
 }

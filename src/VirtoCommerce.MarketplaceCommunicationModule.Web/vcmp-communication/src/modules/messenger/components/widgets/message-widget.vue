@@ -19,9 +19,7 @@ export interface Props {
   modelValue: {
     item: {
       id: string;
-    };
-    settings: {
-      id: string;
+      objectType: string;
     };
   };
 }
@@ -38,7 +36,7 @@ const openMessageBlade = () => {
   openBlade({
     blade: resolveBladeByName("Messenger"),
     options: {
-      entityType: props.modelValue?.settings.id,
+      entityType: props.modelValue?.item?.objectType,
       entityId: props.modelValue?.item?.id,
     },
   });
@@ -49,7 +47,7 @@ const populateCounter = async () => {
     loading.value = true;
     messageCount.value = await getUnreadCount({
       entityId: props.modelValue?.item?.id,
-      entityType: props.modelValue?.settings.id,
+      entityType: props.modelValue?.item?.objectType,
     });
   } catch (error) {
     console.error("Error getting unread count:", error);

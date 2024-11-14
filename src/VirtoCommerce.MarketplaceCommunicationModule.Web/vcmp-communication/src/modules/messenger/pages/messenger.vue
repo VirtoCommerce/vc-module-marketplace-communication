@@ -67,19 +67,20 @@
             />
           </template>
 
-
-            <div class="tw-w-full tw-h-full tw-box-border tw-flex tw-flex-col tw-items-center tw-justify-center"  v-if="!rootMessages.length">
-              <VcIcon
-                icon="fas fa-comment"
-                class="tw-text-[color:var(--empty-communication)]"
-                size="xxxl"
-              />
-              <div class="tw-m-4 tw-text-xl tw-font-medium">
-                {{ $t("MESSENGER.NO_MESSAGES") }}
-              </div>
-              <VcButton @click="setActiveForm('main', null)">{{ $t("MESSENGER.NEW_MESSAGE") }}</VcButton>
+          <div
+            v-if="!rootMessages.length"
+            class="tw-w-full tw-h-full tw-box-border tw-flex tw-flex-col tw-items-center tw-justify-center"
+          >
+            <VcIcon
+              icon="fas fa-comment"
+              class="tw-text-[color:var(--empty-communication)]"
+              size="xxxl"
+            />
+            <div class="tw-m-4 tw-text-xl tw-font-medium">
+              {{ $t("MESSENGER.NO_MESSAGES") }}
             </div>
-
+            <VcButton @click="setActiveForm('main', null)">{{ $t("MESSENGER.NEW_MESSAGE") }}</VcButton>
+          </div>
         </template>
 
         <div
