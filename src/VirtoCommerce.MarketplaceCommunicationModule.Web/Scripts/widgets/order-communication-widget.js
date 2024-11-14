@@ -3,6 +3,11 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
     ['$scope', 'platformWebApp.bladeNavigationService',
         function ($scope, bladeNavigationService) {
             var blade = $scope.widget.blade;
+
+            $scope.isDisabled = function () {
+                return $scope.blade.currentEntity.employeeId === null;
+            }
+
             $scope.openBlade = function () {
                 var newBlade = {
                     id: 'orderCommunication',

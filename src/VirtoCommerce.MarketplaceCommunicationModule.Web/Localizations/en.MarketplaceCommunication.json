@@ -51,7 +51,8 @@
     },
     "widgets": {
       "communication": {
-        "title": "Communication"
+        "title": "Communication",
+        "is-disabled": "Communication is unavailable"
       }
     }
   },
