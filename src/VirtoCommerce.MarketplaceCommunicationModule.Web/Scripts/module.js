@@ -8,37 +8,37 @@ if (AppDependencies !== undefined) {
 angular.module(moduleName, [])
     .config(['$stateProvider',
         function ($stateProvider) {
-        //    $stateProvider
-        //        .state('workspace.MarketplaceCommunicationModuleState', {
-        //            url: '/MarketplaceCommunicationModule',
-        //            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-        //            controller: [
-        //                'platformWebApp.bladeNavigationService',
-        //                function (bladeNavigationService) {
-        //                    var newBlade = {
-        //                        id: 'blade1',
-        //                        controller: 'MarketplaceCommunicationModule.helloWorldController',
-        //                        template: 'Modules/$(VirtoCommerce.MarketplaceCommunicationModule)/Scripts/blades/hello-world.html',
-        //                        isClosingDisabled: true,
-        //                    };
-        //                    bladeNavigationService.showBlade(newBlade);
-        //                }
-        //            ]
-        //        });
+            $stateProvider
+                .state('workspace.communication', {
+                    url: '/communication',
+                    templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+                    controller: [
+                        'platformWebApp.bladeNavigationService',
+                        function (bladeNavigationService) {
+                            var newBlade = {
+                                id: 'communicationList',
+                                controller: 'virtoCommerce.marketplaceCommunicationModule.conversationListController',
+                                template: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/blades/conversation-list.tpl.html',
+                                isClosingDisabled: true,
+                            };
+                            bladeNavigationService.showBlade(newBlade);
+                        }
+                    ]
+                });
         }
     ])
     .run(['platformWebApp.mainMenuService', '$state', 'platformWebApp.widgetService',
         function (mainMenuService, $state, widgetService) {
             //Register module in main menu
-        //    var menuItem = {
-        //        path: 'browse/MarketplaceCommunicationModule',
-        //        icon: 'fa fa-cube',
-        //        title: 'MarketplaceCommunicationModule',
-        //        priority: 100,
-        //        action: function () { $state.go('workspace.MarketplaceCommunicationModuleState'); },
-        //        permission: 'MarketplaceCommunicationModule:access',
-        //    };
-        //    mainMenuService.addMenuItem(menuItem);
+            var menuItem = {
+                path: 'browse/communication',
+                icon: 'fas fa-comment-dots',
+                title: 'marketplaceCommunication.main-menu-title',
+                priority: 100,
+                action: function () { $state.go('workspace.communication'); },
+                permission: 'seller:message:read',
+            };
+            mainMenuService.addMenuItem(menuItem);
 
             // Seller product details: communication widget
             var productCommunicationWidget = {

@@ -28,17 +28,15 @@ public class SearchConversationsQueryHandler : IQueryHandler<SearchConversations
             throw new ArgumentNullException(nameof(request));
         }
 
-        var userId = request.UserId;
-
-        if (string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(request.SellerId))
+        if ((request.UserIds == null || request.UserIds.Length == 0) && !string.IsNullOrEmpty(request.SellerId))
         {
             var sellerCommunicationUser = await _communicationUserService.GetOrCreateCommunicationUser(request.SellerId, CoreModuleConstants.CommunicationUserType.Organization);
-            userId = sellerCommunicationUser?.Id;
+            request.UserIds = [sellerCommunicationUser?.Id];
         }
 
-        if (string.IsNullOrEmpty(userId))
+        if ((request.UserIds == null || request.UserIds.Length == 0))
         {
-            throw new ArgumentException(nameof(request.UserId));
+            throw new ArgumentException(nameof(request.UserIds));
         }
 
         var result = await _conversationSearchService.SearchAsync(request);

@@ -1,5 +1,6 @@
 {
   "marketplaceCommunication": {
+    "main-menu-title": "Communication",
     "blades": {
       "entity-communication": {
         "title": "Messages",

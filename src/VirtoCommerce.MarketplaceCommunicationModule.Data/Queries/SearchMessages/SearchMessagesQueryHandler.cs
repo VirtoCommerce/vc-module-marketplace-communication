@@ -9,12 +9,15 @@ namespace VirtoCommerce.MarketplaceCommunicationModule.Data.Queries;
 public class SearchMessagesQueryHandler : IQueryHandler<SearchMessagesQuery, SearchMessageResult>
 {
     private readonly IMessageSearchService _messageSearchService;
+    private readonly IConversationService _conversationService;
 
     public SearchMessagesQueryHandler(
-        IMessageSearchService messageSearchService
+        IMessageSearchService messageSearchService,
+        IConversationService conversationService
         )
     {
         _messageSearchService = messageSearchService;
+        _conversationService = conversationService;
     }
 
     public virtual async Task<SearchMessageResult> Handle(SearchMessagesQuery request, CancellationToken cancellationToken)
@@ -24,16 +27,18 @@ public class SearchMessagesQueryHandler : IQueryHandler<SearchMessagesQuery, Sea
             throw new ArgumentNullException(nameof(request));
         }
 
-        if (string.IsNullOrEmpty(request.EntityId))
+        var conversationId = request.ConversationId;
+        if (string.IsNullOrEmpty(conversationId) && !string.IsNullOrEmpty(request.EntityId) && !string.IsNullOrEmpty(request.EntityType))
         {
-            throw new ArgumentException(nameof(request.EntityId));
+            conversationId = (await _conversationService.GetConversationByEntity(request.EntityId, request.EntityType))?.Id;
         }
 
-        if (string.IsNullOrEmpty(request.EntityType))
+        if (string.IsNullOrEmpty(conversationId))
         {
-            throw new ArgumentException(nameof(request.EntityType));
+            throw new ArgumentException(nameof(request.ConversationId));
         }
 
+        request.ConversationId = conversationId;
         return await _messageSearchService.SearchAsync(request);
     }
 }

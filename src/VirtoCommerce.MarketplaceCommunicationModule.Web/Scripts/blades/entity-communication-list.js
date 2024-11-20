@@ -522,6 +522,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     content: replyText.trim(),
                     entityId: blade.entityId,
                     entityType: blade.entityType,
+                    conversationId: blade.conversationId,
                     replyTo: parentMessage.id,
                     senderId: $scope.currentUser.id,
                     recipientId: parentMessage.senderId
@@ -532,6 +533,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 var searchCriteria = {
                     entityId: blade.entityId,
                     entityType: blade.entityType,
+                    conversationId: blade.conversationId,
                     threadId: parentMessage.id,
                     responseGroup: 'Full',
                     take: 10,
@@ -599,6 +601,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 threadId: threadId,
                 entityId: blade.entityId,
                 entityType: blade.entityType,
+                conversationId: blade.conversationId,
                 responseGroup: 'Full',
                 skip: reset ? 0 : (blade.threadPagesMap[threadId] - 1) * blade.threadPageSize,
                 take: blade.threadPageSize
@@ -740,6 +743,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             var criteria = {
                 entityId: blade.entityId,
                 entityType: blade.entityType,
+                conversationId: blade.conversationId,
                 rootsOnly: true,
                 skip: 0,
                 take: blade.pageSize,
@@ -766,6 +770,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             var criteria = {
                 entityId: blade.entityId,
                 entityType: blade.entityType,
+                conversationId: blade.conversationId,
                 rootsOnly: true,
                 skip: blade.messages.length,
                 take: blade.pageSize,
@@ -811,6 +816,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 threadId: threadId,
                 entityId: blade.entityId,
                 entityType: blade.entityType,
+                conversationId: blade.conversationId,
                 responseGroup: 'Full',
                 skip: currentReplies.length,
                 take: blade.threadPageSize,
@@ -843,6 +849,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             var criteria = {
                 entityId: blade.entityId,
                 entityType: blade.entityType,
+                conversationId: blade.conversationId,
                 rootsOnly: true,
                 skip: blade.messages.length,
                 take: blade.pageSize,
@@ -875,6 +882,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 threadId: threadId,
                 entityId: blade.entityId,
                 entityType: blade.entityType,
+                conversationId: blade.conversationId,
                 responseGroup: 'Full',
                 skip: currentReplies.length,
                 take: blade.threadPageSize,
@@ -933,6 +941,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     content: messageContent,
                     entityId: blade.entityId,
                     entityType: blade.entityType,
+                    conversationId: blade.conversationId,
                     senderId: $scope.currentUser.id,
                     recipientId: $scope.sellerUser.id,
                     rootsOnly: true
@@ -945,6 +954,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 var searchCriteria = {
                     entityId: blade.entityId,
                     entityType: blade.entityType,
+                    conversationId: blade.conversationId,
                     rootsOnly: true,
                     responseGroup: 'Full',
                     take: 20,
@@ -1100,6 +1110,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             var criteria = {
                 entityId: blade.entityId,
                 entityType: blade.entityType,
+                conversationId: blade.conversationId,
                 rootsOnly: true,
                 skip: 0,
                 take: blade.pageSize,
