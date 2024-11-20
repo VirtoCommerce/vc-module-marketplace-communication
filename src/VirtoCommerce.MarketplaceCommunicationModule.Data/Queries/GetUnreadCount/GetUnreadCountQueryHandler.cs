@@ -10,14 +10,17 @@ public class GetUnreadCountQueryHandler : IQueryHandler<GetUnreadCountQuery, int
 {
     private readonly IMessageService _messageService;
     private readonly ICommunicationUserService _communicationUserService;
+    private readonly IConversationService _conversationService;
 
     public GetUnreadCountQueryHandler(
         IMessageService messageService,
-        ICommunicationUserService communicationUserService
+        ICommunicationUserService communicationUserService,
+        IConversationService conversationService
         )
     {
         _messageService = messageService;
         _communicationUserService = communicationUserService;
+        _conversationService = conversationService;
     }
 
     public virtual async Task<int> Handle(GetUnreadCountQuery request, CancellationToken cancellationToken)
@@ -40,7 +43,9 @@ public class GetUnreadCountQueryHandler : IQueryHandler<GetUnreadCountQuery, int
             throw new ArgumentNullException(nameof(request.RecipientId));
         }
 
-        var result = await _messageService.GetUnreadMessagesCount(recipientId, request.EntityId, request.EntityType);
+        var conversation = await _conversationService.GetConversationByEntity(request.EntityId, request.EntityType);
+
+        var result = await _messageService.GetUnreadMessagesCount(recipientId, conversation?.Id);
 
         return result;
     }
