@@ -32,7 +32,7 @@ angular.module(moduleName, [])
             //Register module in main menu
             var menuItem = {
                 path: 'browse/communication',
-                icon: 'fas fa-comment-dots',
+                icon: 'fas fa-comment',
                 title: 'marketplaceCommunication.main-menu-title',
                 priority: 100,
                 action: function () { $state.go('workspace.communication'); },

@@ -501,12 +501,22 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 $scope.currentUser = operator;
             });
 
-            api.getSellerUser({
-                entityId: blade.entityId,
-                entityType: blade.entityType
-            }, function(seller) {
-                $scope.sellerUser = seller;
-            });
+            if (blade.conversationId) {
+                api.getConversationById({
+                    conversationId: blade.conversationId
+                }, function (conversation) {
+                    $scope.messageRecipientId = conversation.users?.find(x => x.userId != $scope.currentUser.id)?.userId;
+                });
+            }
+            else if (blade.entityId && blade.entityType) {
+                api.getSellerUser({
+                    entityId: blade.entityId,
+                    entityType: blade.entityType
+                }, function (seller) {
+                    $scope.sellerUser = seller;
+                    $scope.messageRecipientId = seller.id;
+                });
+            }
         }
 
         $scope.sendReply = function(parentMessage, replyText) {
@@ -943,7 +953,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     entityType: blade.entityType,
                     conversationId: blade.conversationId,
                     senderId: $scope.currentUser.id,
-                    recipientId: $scope.sellerUser.id,
+                    recipientId: $scope.messageRecipientId,
                     rootsOnly: true
                 }
             };

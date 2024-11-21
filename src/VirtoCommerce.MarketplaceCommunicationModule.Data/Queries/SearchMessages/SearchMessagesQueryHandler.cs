@@ -27,18 +27,11 @@ public class SearchMessagesQueryHandler : IQueryHandler<SearchMessagesQuery, Sea
             throw new ArgumentNullException(nameof(request));
         }
 
-        var conversationId = request.ConversationId;
-        if (string.IsNullOrEmpty(conversationId) && !string.IsNullOrEmpty(request.EntityId) && !string.IsNullOrEmpty(request.EntityType))
+        if (string.IsNullOrEmpty(request.ConversationId) && !string.IsNullOrEmpty(request.EntityId) && !string.IsNullOrEmpty(request.EntityType))
         {
-            conversationId = (await _conversationService.GetConversationByEntity(request.EntityId, request.EntityType))?.Id;
+            request.ConversationId = (await _conversationService.GetConversationByEntity(request.EntityId, request.EntityType))?.Id;
         }
 
-        if (string.IsNullOrEmpty(conversationId))
-        {
-            throw new ArgumentException(nameof(request.ConversationId));
-        }
-
-        request.ConversationId = conversationId;
         return await _messageSearchService.SearchAsync(request);
     }
 }

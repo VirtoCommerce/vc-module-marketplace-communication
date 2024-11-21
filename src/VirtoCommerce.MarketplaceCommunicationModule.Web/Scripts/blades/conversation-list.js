@@ -4,7 +4,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             $scope.uiGridConstants = uiGridHelper.uiGridConstants;
 
             var blade = $scope.blade;
-            blade.headIcon = 'fas fa-comment-dots';
+            blade.headIcon = 'fas fa-comment';
             blade.userIds = [];
             $scope.userName = '';
 

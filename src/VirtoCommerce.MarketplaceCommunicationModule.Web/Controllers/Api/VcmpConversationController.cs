@@ -40,6 +40,24 @@ public class VcmpConversationController : ControllerBase
         return Ok(result);
     }
 
+
+    [HttpGet]
+    [Route("getbyid")]
+    public async Task<ActionResult<Conversation>> GetById([FromQuery] string conversationId)
+    {
+        var query = AbstractTypeFactory<GetConversationQuery>.TryCreateInstance();
+        query.ConversationId = conversationId;
+
+        var authorizationResult = await _authorizationService.AuthorizeAsync(User, query, new SellerAuthorizationRequirement(Core.ModuleConstants.Security.Permissions.Read));
+        if (!authorizationResult.Succeeded)
+        {
+            return Forbid();
+        }
+        var result = await _mediator.Send(query);
+
+        return Ok(result);
+    }
+
     [HttpGet]
     [Route("getbyentity")]
     public async Task<ActionResult<Conversation>> GetByEntity([FromQuery] string entityId, [FromQuery] string entityType)

@@ -4,17 +4,21 @@ using System.Threading.Tasks;
 using VirtoCommerce.CommunicationModule.Core.Models;
 using VirtoCommerce.CommunicationModule.Core.Services;
 using VirtoCommerce.MarketplaceVendorModule.Core.Common;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketplaceCommunicationModule.Data.Queries;
 public class GetConversationQueryHandler : IQueryHandler<GetConversationQuery, Conversation>
 {
     private readonly IConversationService _conversationService;
+    private readonly IConversationCrudService _conversationCrudService;
 
     public GetConversationQueryHandler(
-        IConversationService conversationService
+        IConversationService conversationService,
+        IConversationCrudService conversationCrudService
         )
     {
         _conversationService = conversationService;
+        _conversationCrudService = conversationCrudService;
     }
 
     public virtual async Task<Conversation> Handle(GetConversationQuery request, CancellationToken cancellationToken)
@@ -24,18 +28,16 @@ public class GetConversationQueryHandler : IQueryHandler<GetConversationQuery, C
             throw new ArgumentNullException(nameof(request));
         }
 
-        if (string.IsNullOrEmpty(request.EntityId))
+        if (!string.IsNullOrEmpty(request.ConversationId))
         {
-            throw new ArgumentNullException(nameof(request.EntityId));
+            return await _conversationCrudService.GetByIdAsync(request.ConversationId);
         }
 
-        if (string.IsNullOrEmpty(request.EntityType))
+        if (!string.IsNullOrEmpty(request.EntityId) && !string.IsNullOrEmpty(request.EntityType))
         {
-            throw new ArgumentNullException(nameof(request.EntityType));
+            return await _conversationService.GetConversationByEntity(request.EntityId, request.EntityType);
         }
 
-        var result = await _conversationService.GetConversationByEntity(request.EntityId, request.EntityType);
-
-        return result;
+        return null;
     }
 }

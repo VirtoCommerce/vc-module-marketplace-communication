@@ -27,6 +27,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             getSellerUser: { method: 'POST', url: 'api/vcmp/communicationuser/seller' },
             // conversation
             searchConversations: { method: 'POST', url: 'api/vcmp/conversation/search' },
+            getConversationById: { method: 'GET', url: 'api/vcmp/conversation/getbyid' },
 
         });
     }]);
