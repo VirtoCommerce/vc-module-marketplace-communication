@@ -11,7 +11,7 @@
                 </em>
                 <span class="list-name">{{ data.name }}</span>
                 <span class="table-date" am-time-ago="data.lastMessageTimestamp"></span>
-                <span class="vc-badge">{{ data.unreadMessagesCount }}</span>
+                <span class="vc-badge" ng-if="data.unreadMessagesCount > 0">{{ data.unreadMessagesCount }}</span>
                 <br>
                 <span class="table-date" ng-if="data.lastMessage.sender.userName == userName">You:</span>
                 <span class="table-date" ng-if="data.lastMessage.sender.userName != userName">{{ data.lastMessage.sender.userName }}:</span>
