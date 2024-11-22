@@ -86,7 +86,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             function getSearchCriteria() {
                 var searchCriteria = {
                     userIds: blade.userIds,
-                    responseGroup: 'WithLastMessage'
+                    responseGroup: 'Full'
                 };
                 return searchCriteria;
             }
