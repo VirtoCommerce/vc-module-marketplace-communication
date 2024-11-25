@@ -13,7 +13,7 @@
         size="xxxl"
       />
       <div class="tw-m-4 tw-text-xl tw-font-medium">
-        {{ $t("ALL_MESSAGES.LIST.NO-DATA") }}
+        {{ $t("ALL_MESSAGES.LIST.NO_DATA") }}
       </div>
     </div>
 
