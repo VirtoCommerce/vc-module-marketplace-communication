@@ -50,7 +50,7 @@ defineOptions({
   menuItem: {
     title: "ALL_MESSAGES.MENU_TITLE",
     icon: "fas fa-comment",
-    priority: 1,
+    priority: 6,
   },
 });
 
