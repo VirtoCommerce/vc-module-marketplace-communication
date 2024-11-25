@@ -307,7 +307,7 @@ export const useMessages = (): IUseMessages => {
       messages?.forEach((message) => {
         const user = users.find((u) => u.id === message.senderId);
         if (user) {
-          message.senderInfo = user;
+          message.sender = user;
         }
       });
     }

@@ -13,8 +13,8 @@
       <div class="message-item__header">
         <div class="message-item__author-info">
           <VcImage
-            v-if="message.senderInfo?.avatarUrl"
-            :src="message.senderInfo?.avatarUrl"
+            v-if="message.sender?.avatarUrl"
+            :src="message.sender?.avatarUrl"
             rounded
             size="s"
             class="message-item__avatar"
@@ -26,7 +26,7 @@
           />
           <div class="message-item__author-info-wrapper">
             <div class="message-item__author-row">
-              <span class="message-item__author">{{ message.senderInfo?.userName || message.senderId }}</span>
+              <span class="message-item__author">{{ message.sender?.userName || message.senderId }}</span>
               <span
                 v-if="isUnread"
                 class="message-item__unread-indicator"
@@ -139,6 +139,7 @@ import { usePopup, VcButton } from "@vc-shell/framework";
 import moment from "moment";
 import { CommunicationUser, Message } from "@vcmp-communication/api/marketplacecommunication";
 import { useElementVisibility, useIntersectionObserver } from "@vueuse/core";
+import { formatDate, dateAgo } from "../utils";
 
 export interface Props {
   message: Message;
@@ -173,8 +174,6 @@ const setActiveForm = inject("setActiveForm") as (
 ) => void;
 
 const seller = inject("seller", ref()) as Ref<CommunicationUser | undefined>;
-
-const locale = window.navigator.language;
 
 const isFormVisible = computed(
   () =>
@@ -217,22 +216,6 @@ const handleDelete = async () => {
       withReplies: true,
     });
   }
-};
-
-const formatDate = (date: Date | undefined) => {
-  if (!date) return "";
-  return new Intl.DateTimeFormat(locale, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-};
-
-const dateAgo = (date: Date | undefined) => {
-  if (!date) return "";
-  return moment(date).fromNow();
 };
 
 const messageItemRef = ref<HTMLElement | null>(null);
@@ -293,7 +276,7 @@ onUnmounted(() => {
 });
 
 const canManageMessage = computed(() => {
-  return currentSeller.value.id === props.message?.senderInfo?.userId && props.message?.answersCount === 0;
+  return currentSeller.value.id === props.message?.sender?.userId && props.message?.answersCount === 0;
 });
 
 const isRepliesExpanded = ref(false);

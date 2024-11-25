@@ -30,6 +30,39 @@ export declare class VcmpCommunicationUserClient extends AuthApiBase {
     getSeller(body?: GetSellerCommunicationUserQuery | undefined): Promise<CommunicationUser>;
     protected processGetSeller(response: Response): Promise<CommunicationUser>;
 }
+export declare class VcmpConversationClient extends AuthApiBase {
+    private http;
+    private baseUrl;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined;
+    constructor(baseUrl?: string, http?: {
+        fetch(url: RequestInfo, init?: RequestInit): Promise<Response>;
+    });
+    /**
+     * @param body (optional)
+     * @return OK
+     */
+    search(body?: SearchConversationsQuery | undefined): Promise<SearchConversationResult>;
+    protected processSearch(response: Response): Promise<SearchConversationResult>;
+    /**
+     * @param conversationId (optional)
+     * @return OK
+     */
+    getById(conversationId?: string | undefined): Promise<Conversation>;
+    protected processGetById(response: Response): Promise<Conversation>;
+    /**
+     * @param entityId (optional)
+     * @param entityType (optional)
+     * @return OK
+     */
+    getByEntity(entityId?: string | undefined, entityType?: string | undefined): Promise<Conversation>;
+    protected processGetByEntity(response: Response): Promise<Conversation>;
+    /**
+     * @param body (optional)
+     * @return OK
+     */
+    createConversation(body?: SearchConversationsQuery | undefined): Promise<Conversation>;
+    protected processCreateConversation(response: Response): Promise<Conversation>;
+}
 export declare class VcmpMessageClient extends AuthApiBase {
     private http;
     private baseUrl;
@@ -112,6 +145,64 @@ export interface ICommunicationUser {
     modifiedBy?: string | undefined;
     id?: string | undefined;
 }
+export declare class Conversation implements IConversation {
+    name?: string | undefined;
+    iconUrl?: string | undefined;
+    entityId?: string | undefined;
+    entityType?: string | undefined;
+    lastMessageId?: string | undefined;
+    lastMessageTimestamp?: Date;
+    users?: ConversationUser[] | undefined;
+    unreadMessagesCount?: number;
+    lastMessage?: Message | undefined;
+    createdDate?: Date;
+    modifiedDate?: Date | undefined;
+    createdBy?: string | undefined;
+    modifiedBy?: string | undefined;
+    id?: string | undefined;
+    constructor(data?: IConversation);
+    init(_data?: any): void;
+    static fromJS(data: any): Conversation;
+    toJSON(data?: any): any;
+}
+export interface IConversation {
+    name?: string | undefined;
+    iconUrl?: string | undefined;
+    entityId?: string | undefined;
+    entityType?: string | undefined;
+    lastMessageId?: string | undefined;
+    lastMessageTimestamp?: Date;
+    users?: ConversationUser[] | undefined;
+    unreadMessagesCount?: number;
+    lastMessage?: Message | undefined;
+    createdDate?: Date;
+    modifiedDate?: Date | undefined;
+    createdBy?: string | undefined;
+    modifiedBy?: string | undefined;
+    id?: string | undefined;
+}
+export declare class ConversationUser implements IConversationUser {
+    conversationId?: string | undefined;
+    userId?: string | undefined;
+    createdDate?: Date;
+    modifiedDate?: Date | undefined;
+    createdBy?: string | undefined;
+    modifiedBy?: string | undefined;
+    id?: string | undefined;
+    constructor(data?: IConversationUser);
+    init(_data?: any): void;
+    static fromJS(data: any): ConversationUser;
+    toJSON(data?: any): any;
+}
+export interface IConversationUser {
+    conversationId?: string | undefined;
+    userId?: string | undefined;
+    createdDate?: Date;
+    modifiedDate?: Date | undefined;
+    createdBy?: string | undefined;
+    modifiedBy?: string | undefined;
+    id?: string | undefined;
+}
 export declare class DeleteMessageCommand implements IDeleteMessageCommand {
     sellerId?: string | undefined;
     sellerName?: string | undefined;
@@ -176,15 +267,18 @@ export interface IMarkMessageAsReadCommand {
 }
 export declare class Message implements IMessage {
     senderId?: string | undefined;
-    entityId?: string | undefined;
-    entityType?: string | undefined;
     content?: string | undefined;
     threadId?: string | undefined;
+    conversationId?: string | undefined;
     attachments?: MessageAttachment[] | undefined;
     recipients?: MessageRecipient[] | undefined;
     reactions?: MessageReaction[] | undefined;
     answers?: Message[] | undefined;
+    conversation?: Conversation | undefined;
     readonly answersCount?: number | undefined;
+    readonly entityId?: string | undefined;
+    readonly entityType?: string | undefined;
+    sender?: CommunicationUser | undefined;
     createdDate?: Date;
     modifiedDate?: Date | undefined;
     createdBy?: string | undefined;
@@ -197,15 +291,18 @@ export declare class Message implements IMessage {
 }
 export interface IMessage {
     senderId?: string | undefined;
-    entityId?: string | undefined;
-    entityType?: string | undefined;
     content?: string | undefined;
     threadId?: string | undefined;
+    conversationId?: string | undefined;
     attachments?: MessageAttachment[] | undefined;
     recipients?: MessageRecipient[] | undefined;
     reactions?: MessageReaction[] | undefined;
     answers?: Message[] | undefined;
+    conversation?: Conversation | undefined;
     answersCount?: number | undefined;
+    entityId?: string | undefined;
+    entityType?: string | undefined;
+    sender?: CommunicationUser | undefined;
     createdDate?: Date;
     modifiedDate?: Date | undefined;
     createdBy?: string | undefined;
@@ -291,6 +388,7 @@ export interface IMessageRecipient {
 export declare class MessageShort implements IMessageShort {
     senderId?: string | undefined;
     recipientId?: string | undefined;
+    conversationId?: string | undefined;
     entityId?: string | undefined;
     entityType?: string | undefined;
     content?: string | undefined;
@@ -303,10 +401,59 @@ export declare class MessageShort implements IMessageShort {
 export interface IMessageShort {
     senderId?: string | undefined;
     recipientId?: string | undefined;
+    conversationId?: string | undefined;
     entityId?: string | undefined;
     entityType?: string | undefined;
     content?: string | undefined;
     replyTo?: string | undefined;
+}
+export declare class SearchConversationResult implements ISearchConversationResult {
+    totalCount?: number;
+    results?: Conversation[] | undefined;
+    constructor(data?: ISearchConversationResult);
+    init(_data?: any): void;
+    static fromJS(data: any): SearchConversationResult;
+    toJSON(data?: any): any;
+}
+export interface ISearchConversationResult {
+    totalCount?: number;
+    results?: Conversation[] | undefined;
+}
+export declare class SearchConversationsQuery implements ISearchConversationsQuery {
+    sellerId?: string | undefined;
+    sellerName?: string | undefined;
+    userIds?: string[] | undefined;
+    responseGroup?: string | undefined;
+    objectType?: string | undefined;
+    objectTypes?: string[] | undefined;
+    objectIds?: string[] | undefined;
+    keyword?: string | undefined;
+    searchPhrase?: string | undefined;
+    languageCode?: string | undefined;
+    sort?: string | undefined;
+    readonly sortInfos?: SortInfo[] | undefined;
+    skip?: number;
+    take?: number;
+    constructor(data?: ISearchConversationsQuery);
+    init(_data?: any): void;
+    static fromJS(data: any): SearchConversationsQuery;
+    toJSON(data?: any): any;
+}
+export interface ISearchConversationsQuery {
+    sellerId?: string | undefined;
+    sellerName?: string | undefined;
+    userIds?: string[] | undefined;
+    responseGroup?: string | undefined;
+    objectType?: string | undefined;
+    objectTypes?: string[] | undefined;
+    objectIds?: string[] | undefined;
+    keyword?: string | undefined;
+    searchPhrase?: string | undefined;
+    languageCode?: string | undefined;
+    sort?: string | undefined;
+    sortInfos?: SortInfo[] | undefined;
+    skip?: number;
+    take?: number;
 }
 export declare class SearchMessageResult implements ISearchMessageResult {
     totalCount?: number;
@@ -323,6 +470,7 @@ export interface ISearchMessageResult {
 export declare class SearchMessagesQuery implements ISearchMessagesQuery {
     entityId?: string | undefined;
     entityType?: string | undefined;
+    conversationId?: string | undefined;
     threadId?: string | undefined;
     rootsOnly?: boolean;
     responseGroup?: string | undefined;
@@ -344,6 +492,7 @@ export declare class SearchMessagesQuery implements ISearchMessagesQuery {
 export interface ISearchMessagesQuery {
     entityId?: string | undefined;
     entityType?: string | undefined;
+    conversationId?: string | undefined;
     threadId?: string | undefined;
     rootsOnly?: boolean;
     responseGroup?: string | undefined;

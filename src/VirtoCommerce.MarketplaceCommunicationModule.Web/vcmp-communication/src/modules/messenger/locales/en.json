@@ -1,4 +1,21 @@
 {
+  "ALL_MESSAGES": {
+    "MENU_TITLE": "Communication",
+    "TITLE": "Communication",
+    "TOOLBAR": {
+      "REFRESH": "Refresh"
+    },
+    "TABLE": {
+      "COLUMNS": {
+        "NAME": "Name",
+        "LAST_MESSAGE": "Last message"
+      }
+    },
+    "LIST": {
+      "YOU": "You",
+      "NO_DATA": "No conversations found"
+    }
+  },
   "MESSENGER": {
     "TITLE": "Communication",
     "REPLY": "Reply",

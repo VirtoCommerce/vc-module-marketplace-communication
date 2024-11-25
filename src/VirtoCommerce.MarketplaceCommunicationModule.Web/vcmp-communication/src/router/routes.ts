@@ -1,25 +1,31 @@
 import { RouteRecordRaw } from "vue-router";
 import App from "../pages/App.vue";
-import { Invite, Login, ResetPassword, useBladeNavigation, ChangePasswordPage } from "@vc-shell/framework";
+import { Invite, Login, ResetPassword, useBladeNavigation, ChangePasswordPage, BladeVNode } from "@vc-shell/framework";
 // eslint-disable-next-line import/no-unresolved
 import whiteLogoImage from "/assets/logo-white.svg";
 // eslint-disable-next-line import/no-unresolved
 import bgImage from "/assets/background.jpg";
 
+const sellerIdRegex = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
+
 export const routes: RouteRecordRaw[] = [
   {
-    path: "/",
+    path: `/:sellerId(${sellerIdRegex})?`,
     component: App,
     name: "App",
     meta: {
       root: true,
     },
     children: [],
-    redirect: (to) => {
-      if (to.name === "App") {
-        return { path: "/details", params: to.params };
+    redirect: "/communication",
+    beforeEnter: (to) => {
+      const { sellerId } = to.params;
+
+      if (!sellerId || new RegExp(sellerIdRegex).test(sellerId as string)) {
+        return true;
+      } else {
+        return { path: (to.matched[1].components?.default as BladeVNode).type.url as string };
       }
-      return to.path;
     },
   },
   {
@@ -68,7 +74,7 @@ export const routes: RouteRecordRaw[] = [
     }),
   },
   {
-    path: "/:pathMatch(.*)*",
+    path: `/:sellerId(${sellerIdRegex})?/:pathMatch(.*)*`,
     component: App,
     beforeEnter: async (to) => {
       const { routeResolver } = useBladeNavigation();

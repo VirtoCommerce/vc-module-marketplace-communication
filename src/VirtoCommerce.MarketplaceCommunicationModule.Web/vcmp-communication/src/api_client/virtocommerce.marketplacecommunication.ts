@@ -200,6 +200,199 @@ export class VcmpCommunicationUserClient extends AuthApiBase {
     }
 }
 
+export class VcmpConversationClient extends AuthApiBase {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super();
+        this.http = http ? http : window as any;
+        this.baseUrl = this.getBaseUrl("", baseUrl);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    search(body?: SearchConversationsQuery | undefined): Promise<SearchConversationResult> {
+        let url_ = this.baseUrl + "/api/vcmp/conversation/search";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json-patch+json",
+                "Accept": "text/plain"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processSearch(_response);
+        });
+    }
+
+    protected processSearch(response: Response): Promise<SearchConversationResult> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = SearchConversationResult.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<SearchConversationResult>(null as any);
+    }
+
+    /**
+     * @param conversationId (optional) 
+     * @return OK
+     */
+    getById(conversationId?: string | undefined): Promise<Conversation> {
+        let url_ = this.baseUrl + "/api/vcmp/conversation/getbyid?";
+        if (conversationId === null)
+            throw new Error("The parameter 'conversationId' cannot be null.");
+        else if (conversationId !== undefined)
+            url_ += "conversationId=" + encodeURIComponent("" + conversationId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "text/plain"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetById(_response);
+        });
+    }
+
+    protected processGetById(response: Response): Promise<Conversation> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Conversation.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Conversation>(null as any);
+    }
+
+    /**
+     * @param entityId (optional) 
+     * @param entityType (optional) 
+     * @return OK
+     */
+    getByEntity(entityId?: string | undefined, entityType?: string | undefined): Promise<Conversation> {
+        let url_ = this.baseUrl + "/api/vcmp/conversation/getbyentity?";
+        if (entityId === null)
+            throw new Error("The parameter 'entityId' cannot be null.");
+        else if (entityId !== undefined)
+            url_ += "entityId=" + encodeURIComponent("" + entityId) + "&";
+        if (entityType === null)
+            throw new Error("The parameter 'entityType' cannot be null.");
+        else if (entityType !== undefined)
+            url_ += "entityType=" + encodeURIComponent("" + entityType) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "text/plain"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetByEntity(_response);
+        });
+    }
+
+    protected processGetByEntity(response: Response): Promise<Conversation> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Conversation.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Conversation>(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    createConversation(body?: SearchConversationsQuery | undefined): Promise<Conversation> {
+        let url_ = this.baseUrl + "/api/vcmp/conversation/new";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json-patch+json",
+                "Accept": "text/plain"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processCreateConversation(_response);
+        });
+    }
+
+    protected processCreateConversation(response: Response): Promise<Conversation> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Conversation.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Conversation>(null as any);
+    }
+}
+
 export class VcmpMessageClient extends AuthApiBase {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
@@ -620,6 +813,162 @@ export interface ICommunicationUser {
     id?: string | undefined;
 }
 
+export class Conversation implements IConversation {
+    name?: string | undefined;
+    iconUrl?: string | undefined;
+    entityId?: string | undefined;
+    entityType?: string | undefined;
+    lastMessageId?: string | undefined;
+    lastMessageTimestamp?: Date;
+    users?: ConversationUser[] | undefined;
+    unreadMessagesCount?: number;
+    lastMessage?: Message | undefined;
+    createdDate?: Date;
+    modifiedDate?: Date | undefined;
+    createdBy?: string | undefined;
+    modifiedBy?: string | undefined;
+    id?: string | undefined;
+
+    constructor(data?: IConversation) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.name = _data["name"];
+            this.iconUrl = _data["iconUrl"];
+            this.entityId = _data["entityId"];
+            this.entityType = _data["entityType"];
+            this.lastMessageId = _data["lastMessageId"];
+            this.lastMessageTimestamp = _data["lastMessageTimestamp"] ? new Date(_data["lastMessageTimestamp"].toString()) : <any>undefined;
+            if (Array.isArray(_data["users"])) {
+                this.users = [] as any;
+                for (let item of _data["users"])
+                    this.users!.push(ConversationUser.fromJS(item));
+            }
+            this.unreadMessagesCount = _data["unreadMessagesCount"];
+            this.lastMessage = _data["lastMessage"] ? Message.fromJS(_data["lastMessage"]) : <any>undefined;
+            this.createdDate = _data["createdDate"] ? new Date(_data["createdDate"].toString()) : <any>undefined;
+            this.modifiedDate = _data["modifiedDate"] ? new Date(_data["modifiedDate"].toString()) : <any>undefined;
+            this.createdBy = _data["createdBy"];
+            this.modifiedBy = _data["modifiedBy"];
+            this.id = _data["id"];
+        }
+    }
+
+    static fromJS(data: any): Conversation {
+        data = typeof data === 'object' ? data : {};
+        let result = new Conversation();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        data["iconUrl"] = this.iconUrl;
+        data["entityId"] = this.entityId;
+        data["entityType"] = this.entityType;
+        data["lastMessageId"] = this.lastMessageId;
+        data["lastMessageTimestamp"] = this.lastMessageTimestamp ? this.lastMessageTimestamp.toISOString() : <any>undefined;
+        if (Array.isArray(this.users)) {
+            data["users"] = [];
+            for (let item of this.users)
+                data["users"].push(item.toJSON());
+        }
+        data["unreadMessagesCount"] = this.unreadMessagesCount;
+        data["lastMessage"] = this.lastMessage ? this.lastMessage.toJSON() : <any>undefined;
+        data["createdDate"] = this.createdDate ? this.createdDate.toISOString() : <any>undefined;
+        data["modifiedDate"] = this.modifiedDate ? this.modifiedDate.toISOString() : <any>undefined;
+        data["createdBy"] = this.createdBy;
+        data["modifiedBy"] = this.modifiedBy;
+        data["id"] = this.id;
+        return data;
+    }
+}
+
+export interface IConversation {
+    name?: string | undefined;
+    iconUrl?: string | undefined;
+    entityId?: string | undefined;
+    entityType?: string | undefined;
+    lastMessageId?: string | undefined;
+    lastMessageTimestamp?: Date;
+    users?: ConversationUser[] | undefined;
+    unreadMessagesCount?: number;
+    lastMessage?: Message | undefined;
+    createdDate?: Date;
+    modifiedDate?: Date | undefined;
+    createdBy?: string | undefined;
+    modifiedBy?: string | undefined;
+    id?: string | undefined;
+}
+
+export class ConversationUser implements IConversationUser {
+    conversationId?: string | undefined;
+    userId?: string | undefined;
+    createdDate?: Date;
+    modifiedDate?: Date | undefined;
+    createdBy?: string | undefined;
+    modifiedBy?: string | undefined;
+    id?: string | undefined;
+
+    constructor(data?: IConversationUser) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.conversationId = _data["conversationId"];
+            this.userId = _data["userId"];
+            this.createdDate = _data["createdDate"] ? new Date(_data["createdDate"].toString()) : <any>undefined;
+            this.modifiedDate = _data["modifiedDate"] ? new Date(_data["modifiedDate"].toString()) : <any>undefined;
+            this.createdBy = _data["createdBy"];
+            this.modifiedBy = _data["modifiedBy"];
+            this.id = _data["id"];
+        }
+    }
+
+    static fromJS(data: any): ConversationUser {
+        data = typeof data === 'object' ? data : {};
+        let result = new ConversationUser();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["conversationId"] = this.conversationId;
+        data["userId"] = this.userId;
+        data["createdDate"] = this.createdDate ? this.createdDate.toISOString() : <any>undefined;
+        data["modifiedDate"] = this.modifiedDate ? this.modifiedDate.toISOString() : <any>undefined;
+        data["createdBy"] = this.createdBy;
+        data["modifiedBy"] = this.modifiedBy;
+        data["id"] = this.id;
+        return data;
+    }
+}
+
+export interface IConversationUser {
+    conversationId?: string | undefined;
+    userId?: string | undefined;
+    createdDate?: Date;
+    modifiedDate?: Date | undefined;
+    createdBy?: string | undefined;
+    modifiedBy?: string | undefined;
+    id?: string | undefined;
+}
+
 export class DeleteMessageCommand implements IDeleteMessageCommand {
     sellerId?: string | undefined;
     sellerName?: string | undefined;
@@ -821,15 +1170,18 @@ export interface IMarkMessageAsReadCommand {
 
 export class Message implements IMessage {
     senderId?: string | undefined;
-    entityId?: string | undefined;
-    entityType?: string | undefined;
     content?: string | undefined;
     threadId?: string | undefined;
+    conversationId?: string | undefined;
     attachments?: MessageAttachment[] | undefined;
     recipients?: MessageRecipient[] | undefined;
     reactions?: MessageReaction[] | undefined;
     answers?: Message[] | undefined;
+    conversation?: Conversation | undefined;
     readonly answersCount?: number | undefined;
+    readonly entityId?: string | undefined;
+    readonly entityType?: string | undefined;
+    sender?: CommunicationUser | undefined;
     createdDate?: Date;
     modifiedDate?: Date | undefined;
     createdBy?: string | undefined;
@@ -848,10 +1200,9 @@ export class Message implements IMessage {
     init(_data?: any) {
         if (_data) {
             this.senderId = _data["senderId"];
-            this.entityId = _data["entityId"];
-            this.entityType = _data["entityType"];
             this.content = _data["content"];
             this.threadId = _data["threadId"];
+            this.conversationId = _data["conversationId"];
             if (Array.isArray(_data["attachments"])) {
                 this.attachments = [] as any;
                 for (let item of _data["attachments"])
@@ -872,7 +1223,11 @@ export class Message implements IMessage {
                 for (let item of _data["answers"])
                     this.answers!.push(Message.fromJS(item));
             }
+            this.conversation = _data["conversation"] ? Conversation.fromJS(_data["conversation"]) : <any>undefined;
             (<any>this).answersCount = _data["answersCount"];
+            (<any>this).entityId = _data["entityId"];
+            (<any>this).entityType = _data["entityType"];
+            this.sender = _data["sender"] ? CommunicationUser.fromJS(_data["sender"]) : <any>undefined;
             this.createdDate = _data["createdDate"] ? new Date(_data["createdDate"].toString()) : <any>undefined;
             this.modifiedDate = _data["modifiedDate"] ? new Date(_data["modifiedDate"].toString()) : <any>undefined;
             this.createdBy = _data["createdBy"];
@@ -891,10 +1246,9 @@ export class Message implements IMessage {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["senderId"] = this.senderId;
-        data["entityId"] = this.entityId;
-        data["entityType"] = this.entityType;
         data["content"] = this.content;
         data["threadId"] = this.threadId;
+        data["conversationId"] = this.conversationId;
         if (Array.isArray(this.attachments)) {
             data["attachments"] = [];
             for (let item of this.attachments)
@@ -915,7 +1269,11 @@ export class Message implements IMessage {
             for (let item of this.answers)
                 data["answers"].push(item.toJSON());
         }
+        data["conversation"] = this.conversation ? this.conversation.toJSON() : <any>undefined;
         data["answersCount"] = this.answersCount;
+        data["entityId"] = this.entityId;
+        data["entityType"] = this.entityType;
+        data["sender"] = this.sender ? this.sender.toJSON() : <any>undefined;
         data["createdDate"] = this.createdDate ? this.createdDate.toISOString() : <any>undefined;
         data["modifiedDate"] = this.modifiedDate ? this.modifiedDate.toISOString() : <any>undefined;
         data["createdBy"] = this.createdBy;
@@ -927,15 +1285,18 @@ export class Message implements IMessage {
 
 export interface IMessage {
     senderId?: string | undefined;
-    entityId?: string | undefined;
-    entityType?: string | undefined;
     content?: string | undefined;
     threadId?: string | undefined;
+    conversationId?: string | undefined;
     attachments?: MessageAttachment[] | undefined;
     recipients?: MessageRecipient[] | undefined;
     reactions?: MessageReaction[] | undefined;
     answers?: Message[] | undefined;
+    conversation?: Conversation | undefined;
     answersCount?: number | undefined;
+    entityId?: string | undefined;
+    entityType?: string | undefined;
+    sender?: CommunicationUser | undefined;
     createdDate?: Date;
     modifiedDate?: Date | undefined;
     createdBy?: string | undefined;
@@ -1146,6 +1507,7 @@ export interface IMessageRecipient {
 export class MessageShort implements IMessageShort {
     senderId?: string | undefined;
     recipientId?: string | undefined;
+    conversationId?: string | undefined;
     entityId?: string | undefined;
     entityType?: string | undefined;
     content?: string | undefined;
@@ -1164,6 +1526,7 @@ export class MessageShort implements IMessageShort {
         if (_data) {
             this.senderId = _data["senderId"];
             this.recipientId = _data["recipientId"];
+            this.conversationId = _data["conversationId"];
             this.entityId = _data["entityId"];
             this.entityType = _data["entityType"];
             this.content = _data["content"];
@@ -1182,6 +1545,7 @@ export class MessageShort implements IMessageShort {
         data = typeof data === 'object' ? data : {};
         data["senderId"] = this.senderId;
         data["recipientId"] = this.recipientId;
+        data["conversationId"] = this.conversationId;
         data["entityId"] = this.entityId;
         data["entityType"] = this.entityType;
         data["content"] = this.content;
@@ -1193,10 +1557,179 @@ export class MessageShort implements IMessageShort {
 export interface IMessageShort {
     senderId?: string | undefined;
     recipientId?: string | undefined;
+    conversationId?: string | undefined;
     entityId?: string | undefined;
     entityType?: string | undefined;
     content?: string | undefined;
     replyTo?: string | undefined;
+}
+
+export class SearchConversationResult implements ISearchConversationResult {
+    totalCount?: number;
+    results?: Conversation[] | undefined;
+
+    constructor(data?: ISearchConversationResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.totalCount = _data["totalCount"];
+            if (Array.isArray(_data["results"])) {
+                this.results = [] as any;
+                for (let item of _data["results"])
+                    this.results!.push(Conversation.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): SearchConversationResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new SearchConversationResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["totalCount"] = this.totalCount;
+        if (Array.isArray(this.results)) {
+            data["results"] = [];
+            for (let item of this.results)
+                data["results"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface ISearchConversationResult {
+    totalCount?: number;
+    results?: Conversation[] | undefined;
+}
+
+export class SearchConversationsQuery implements ISearchConversationsQuery {
+    sellerId?: string | undefined;
+    sellerName?: string | undefined;
+    userIds?: string[] | undefined;
+    responseGroup?: string | undefined;
+    objectType?: string | undefined;
+    objectTypes?: string[] | undefined;
+    objectIds?: string[] | undefined;
+    keyword?: string | undefined;
+    searchPhrase?: string | undefined;
+    languageCode?: string | undefined;
+    sort?: string | undefined;
+    readonly sortInfos?: SortInfo[] | undefined;
+    skip?: number;
+    take?: number;
+
+    constructor(data?: ISearchConversationsQuery) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.sellerId = _data["sellerId"];
+            this.sellerName = _data["sellerName"];
+            if (Array.isArray(_data["userIds"])) {
+                this.userIds = [] as any;
+                for (let item of _data["userIds"])
+                    this.userIds!.push(item);
+            }
+            this.responseGroup = _data["responseGroup"];
+            this.objectType = _data["objectType"];
+            if (Array.isArray(_data["objectTypes"])) {
+                this.objectTypes = [] as any;
+                for (let item of _data["objectTypes"])
+                    this.objectTypes!.push(item);
+            }
+            if (Array.isArray(_data["objectIds"])) {
+                this.objectIds = [] as any;
+                for (let item of _data["objectIds"])
+                    this.objectIds!.push(item);
+            }
+            this.keyword = _data["keyword"];
+            this.searchPhrase = _data["searchPhrase"];
+            this.languageCode = _data["languageCode"];
+            this.sort = _data["sort"];
+            if (Array.isArray(_data["sortInfos"])) {
+                (<any>this).sortInfos = [] as any;
+                for (let item of _data["sortInfos"])
+                    (<any>this).sortInfos!.push(SortInfo.fromJS(item));
+            }
+            this.skip = _data["skip"];
+            this.take = _data["take"];
+        }
+    }
+
+    static fromJS(data: any): SearchConversationsQuery {
+        data = typeof data === 'object' ? data : {};
+        let result = new SearchConversationsQuery();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["sellerId"] = this.sellerId;
+        data["sellerName"] = this.sellerName;
+        if (Array.isArray(this.userIds)) {
+            data["userIds"] = [];
+            for (let item of this.userIds)
+                data["userIds"].push(item);
+        }
+        data["responseGroup"] = this.responseGroup;
+        data["objectType"] = this.objectType;
+        if (Array.isArray(this.objectTypes)) {
+            data["objectTypes"] = [];
+            for (let item of this.objectTypes)
+                data["objectTypes"].push(item);
+        }
+        if (Array.isArray(this.objectIds)) {
+            data["objectIds"] = [];
+            for (let item of this.objectIds)
+                data["objectIds"].push(item);
+        }
+        data["keyword"] = this.keyword;
+        data["searchPhrase"] = this.searchPhrase;
+        data["languageCode"] = this.languageCode;
+        data["sort"] = this.sort;
+        if (Array.isArray(this.sortInfos)) {
+            data["sortInfos"] = [];
+            for (let item of this.sortInfos)
+                data["sortInfos"].push(item.toJSON());
+        }
+        data["skip"] = this.skip;
+        data["take"] = this.take;
+        return data;
+    }
+}
+
+export interface ISearchConversationsQuery {
+    sellerId?: string | undefined;
+    sellerName?: string | undefined;
+    userIds?: string[] | undefined;
+    responseGroup?: string | undefined;
+    objectType?: string | undefined;
+    objectTypes?: string[] | undefined;
+    objectIds?: string[] | undefined;
+    keyword?: string | undefined;
+    searchPhrase?: string | undefined;
+    languageCode?: string | undefined;
+    sort?: string | undefined;
+    sortInfos?: SortInfo[] | undefined;
+    skip?: number;
+    take?: number;
 }
 
 export class SearchMessageResult implements ISearchMessageResult {
@@ -1250,6 +1783,7 @@ export interface ISearchMessageResult {
 export class SearchMessagesQuery implements ISearchMessagesQuery {
     entityId?: string | undefined;
     entityType?: string | undefined;
+    conversationId?: string | undefined;
     threadId?: string | undefined;
     rootsOnly?: boolean;
     responseGroup?: string | undefined;
@@ -1277,6 +1811,7 @@ export class SearchMessagesQuery implements ISearchMessagesQuery {
         if (_data) {
             this.entityId = _data["entityId"];
             this.entityType = _data["entityType"];
+            this.conversationId = _data["conversationId"];
             this.threadId = _data["threadId"];
             this.rootsOnly = _data["rootsOnly"];
             this.responseGroup = _data["responseGroup"];
@@ -1316,6 +1851,7 @@ export class SearchMessagesQuery implements ISearchMessagesQuery {
         data = typeof data === 'object' ? data : {};
         data["entityId"] = this.entityId;
         data["entityType"] = this.entityType;
+        data["conversationId"] = this.conversationId;
         data["threadId"] = this.threadId;
         data["rootsOnly"] = this.rootsOnly;
         data["responseGroup"] = this.responseGroup;
@@ -1348,6 +1884,7 @@ export class SearchMessagesQuery implements ISearchMessagesQuery {
 export interface ISearchMessagesQuery {
     entityId?: string | undefined;
     entityType?: string | undefined;
+    conversationId?: string | undefined;
     threadId?: string | undefined;
     rootsOnly?: boolean;
     responseGroup?: string | undefined;

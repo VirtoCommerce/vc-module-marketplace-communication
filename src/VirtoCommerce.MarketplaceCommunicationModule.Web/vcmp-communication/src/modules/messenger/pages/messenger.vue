@@ -42,6 +42,7 @@
             @update-parent-message="updateParentMessage"
             @remove-parent-message="removeParentMessage"
             @mark-read="markMessageAsRead"
+            @update="updateParent"
           />
         </template>
 
@@ -49,7 +50,7 @@
           <template v-if="searchMessagesLoading">
             <MessageSkeleton
               v-for="n in 10"
-              :key="n"
+              :key="'skeleton-top-' + n"
               class="messenger__skeleton"
             />
           </template>
@@ -64,6 +65,7 @@
               @update-parent-message="updateParentMessage"
               @remove-parent-message="removeParentMessage"
               @mark-read="markMessageAsRead"
+              @update="updateParent"
             />
           </template>
 
@@ -89,7 +91,7 @@
         >
           <MessageSkeleton
             v-for="n in 10"
-            :key="n"
+            :key="'skeleton-bottom-' + n"
             class="messenger__skeleton"
           />
         </div>
@@ -201,10 +203,16 @@ provide("entityType", props.options?.entityType);
 provide("entityId", props.options?.entityId);
 provide("updateMessage", update);
 provide("removeMessage", remove);
-provide("sellerId", currentSeller.value?.id);
-provide("sellerName", currentSeller.value?.name);
+provide("sellerId", currentSeller?.value?.id);
+provide("sellerName", currentSeller?.value?.name);
 provide("operator", operator);
 provide("seller", seller);
+
+function updateParent() {
+  emit("parent:call", {
+    method: "refresh",
+  });
+}
 
 async function markMessageAsRead(args: { messageId: string; recipientId: string }) {
   messages.value = messages.value?.map((m) =>
@@ -221,18 +229,26 @@ async function markMessageAsRead(args: { messageId: string; recipientId: string 
 
 async function updateParentMessage(message: Message) {
   messages.value = messages.value?.map((m) => (m.id === message.id ? message : m));
+
+  updateParent();
 }
 
 async function removeParentMessage(message: Message) {
   messages.value = messages.value?.filter((m) => m.id !== message.id);
+
+  updateParent();
 }
 
 async function remove(args: { messageIds: string[]; withReplies: boolean }) {
   await removeMessage(args);
+
+  updateParent();
 }
 
 async function update(args: { content: string; messageId: string }) {
   await updateMessage(args);
+
+  updateParent();
 }
 
 // Add new ref for tracking programmatic scroll
@@ -251,6 +267,8 @@ async function sendRootMessage(args: {
       sellerName: currentSeller.value?.name,
       rootsOnly: true,
     });
+
+    updateParent();
 
     // Scroll to new message after it's rendered
     if (newMessage) {

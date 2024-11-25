@@ -20,7 +20,7 @@ export default (() => {
     locales,
   });
 
-  const module = createAppModule(pages, undefined, notifications, components);
+  const module = createAppModule(pages, locales, notifications, components);
 
   return {
     install(app: App, options: { router: Router }): void {

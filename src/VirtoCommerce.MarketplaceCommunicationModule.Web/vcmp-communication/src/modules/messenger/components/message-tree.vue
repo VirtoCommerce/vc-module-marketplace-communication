@@ -66,13 +66,13 @@
             <div class="message-tree__reply-content">
               <MessageTree
                 :message="childMessage"
-                :users-info="users"
                 :target-message-id="targetMessageId"
                 :is-last-child="index === childMessages.length - 1"
                 :loading="onChangeLoading"
                 @update-parent-message="updateParentMessage"
                 @remove-parent-message="removeParentMessage"
                 @mark-read="markAsRead"
+                @update="emit('update')"
               />
             </div>
           </div>
@@ -131,6 +131,7 @@ const emit = defineEmits<{
   (e: "update-parent-message", message: Message): void;
   (e: "remove-parent-message", message: Message): void;
   (e: "mark-read", args: { messageId: string; recipientId: string }): void;
+  (e: "update"): void;
 }>();
 
 const {
@@ -202,10 +203,11 @@ async function searchNestedMessages(threadId: string) {
 
 async function updateParentMessage(message: Message) {
   messages.value = messages.value?.map((m) => (m.id === message.id ? message : m));
+
+ emit('update')
 }
 
 async function removeParentMessage(message: Message) {
-  console.log('removeParentMessage', message, props.message)
   messages.value = messages.value?.filter((m) => m.id !== message.id);
 
   const parentMessage = {
