@@ -51,6 +51,9 @@ public class SendMessageCommandHandler : ICommandHandler<SendMessageCommand>
             throw new ArgumentNullException(nameof(request.Message));
         }
 
+        var senderId = request.Message.SenderId
+            ?? (await _communicationUserService.GetOrCreateCommunicationUser(request.SellerId, CoreModuleConstants.CommunicationUserType.Organization)).Id;
+
         var conversationId = request.Message.ConversationId;
         if (string.IsNullOrEmpty(conversationId) && !string.IsNullOrEmpty(request.Message.EntityId) && !string.IsNullOrEmpty(request.Message.EntityType))
         {
@@ -61,7 +64,7 @@ public class SendMessageCommandHandler : ICommandHandler<SendMessageCommand>
         {
             var userIds = new List<string>
             {
-                request.Message.SenderId,
+                senderId,
                 request.Message.RecipientId
             };
 
@@ -74,7 +77,7 @@ public class SendMessageCommandHandler : ICommandHandler<SendMessageCommand>
         {
             var userIds = new List<string>
             {
-                request.Message.SenderId,
+                senderId,
                 request.Message.RecipientId
             };
 
@@ -87,8 +90,7 @@ public class SendMessageCommandHandler : ICommandHandler<SendMessageCommand>
         }
 
         var message = AbstractTypeFactory<Message>.TryCreateInstance();
-        message.SenderId = request.Message.SenderId
-            ?? (await _communicationUserService.GetOrCreateCommunicationUser(request.SellerId, CoreModuleConstants.CommunicationUserType.Organization)).Id;
+        message.SenderId = senderId;
         message.Content = request.Message.Content;
         message.ConversationId = conversationId;
         message.ThreadId = request.Message.ReplyTo;
