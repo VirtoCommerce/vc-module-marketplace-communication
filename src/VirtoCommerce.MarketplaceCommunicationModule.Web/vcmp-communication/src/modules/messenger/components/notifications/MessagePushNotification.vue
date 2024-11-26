@@ -4,6 +4,7 @@
     color="var(--success-400)"
     icon="fas fa-envelope"
     :title="notification.title ?? ''"
+    @click="openMessageBlade"
   >
     <VcHint
       v-if="notification.content"
@@ -15,15 +16,9 @@
 
 <script lang="ts" setup>
 import { NotificationTemplate, useBladeNavigation, PushNotification, VcHint } from "@vc-shell/framework";
+import { MessagePushNotification } from "../../typings";
 
-interface MessagePushNotification extends PushNotification {
-  content: string;
-  notifyType: "MessagePushNotification";
-  senderId: string;
-  messageId: string;
-  entityType: string;
-  entityId: string;
-}
+
 
 export interface Props {
   notification: MessagePushNotification;
@@ -45,16 +40,16 @@ defineOptions({
 
 const { openBlade, resolveBladeByName } = useBladeNavigation();
 
-const openMessageBlade = () => {
-  emit("notificationClick");
-  openBlade({
-    blade: resolveBladeByName("Messenger"),
-    param: props.notification.messageId,
-    options: {
-      entityType: props.notification.entityType,
-      entityId: props.notification.entityId,
-    }
-  });
+const openMessageBlade = async () => {
+  await openBlade(
+    {
+      blade: resolveBladeByName("AllMessages"),
+      param: props.notification.conversationId,
+      options: {
+        messageId: props.notification.messageId,
+      }
+    },
+    true,
+  );
 };
-
 </script>

@@ -34,9 +34,8 @@
         <VcButton
           type="submit"
           icon="fas fa-paper-plane"
-          :disabled="!content.trim()"
+          :disabled="!content.trim() || !isModified"
           small
-
           class="new-message-form__submit"
           @click="send"
         >
@@ -89,6 +88,7 @@ const entityType = inject("entityType") as string;
 
 const content = ref(props.isEdit ? props.message?.content || "" : "");
 const textareaRef = ref<InstanceType<typeof VcTextarea>>();
+const isModified = computed(() => (props.isEdit ? content.value.trim() !== props.message?.content?.trim() : true));
 
 const submitButtonText = computed(() => {
   return props.isEdit ? t("MESSENGER.SAVE_CHANGES") : t("MESSENGER.ADD_COMMENT");

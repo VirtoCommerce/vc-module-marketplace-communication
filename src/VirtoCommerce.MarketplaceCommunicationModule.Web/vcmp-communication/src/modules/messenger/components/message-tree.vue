@@ -8,6 +8,7 @@
       :message="message"
       :is-target="message.id === targetMessageId"
       :loading="onChangeLoading"
+      :is-replies-open="isExpanded"
       @mounted="checkIfTarget"
       @send-reply-message="sendReplyMessage"
       @update-message="update"
@@ -25,11 +26,13 @@
         class="message-tree__replies"
       >
         <!-- Previous replies loader -->
-        <div
-          v-if="hasOlderMessages && !(previousLoading || searchMessagesLoading)"
-          ref="previousRepliesLoader"
-          class="message-tree__loader"
-        ></div>
+        <template v-if="!isThreadView">
+          <div
+            v-if="hasOlderMessages && !(previousLoading || searchMessagesLoading)"
+            ref="previousRepliesLoader"
+            class="message-tree__loader"
+          ></div>
+        </template>
 
         <div
           v-if="hasOlderMessages && (previousLoading || searchMessagesLoading)"
@@ -69,6 +72,7 @@
                 :target-message-id="targetMessageId"
                 :is-last-child="index === childMessages.length - 1"
                 :loading="onChangeLoading"
+                :is-thread-view="isThreadView"
                 @update-parent-message="updateParentMessage"
                 @remove-parent-message="removeParentMessage"
                 @mark-read="markAsRead"
@@ -94,11 +98,13 @@
         </div>
 
         <!-- Next replies loader -->
-        <div
-          v-if="hasNewerMessages && !(nextLoading || searchMessagesLoading)"
-          ref="nextRepliesLoader"
-          class="message-tree__loader"
-        ></div>
+        <template v-if="!isThreadView">
+          <div
+            v-if="hasNewerMessages && !(nextLoading || searchMessagesLoading)"
+            ref="nextRepliesLoader"
+            class="message-tree__loader"
+          ></div>
+        </template>
       </div>
     </div>
   </div>
@@ -121,6 +127,9 @@ import { useInfiniteScroll } from "../composables";
 export interface Props {
   message: Message;
   targetMessageId: string | null;
+  isThreadView?: boolean;
+  isLastChild?: boolean;
+  loading?: boolean;
 }
 
 const props = defineProps<Props>();
@@ -162,8 +171,24 @@ const setActiveForm = inject("setActiveForm") as (
 ) => void;
 
 const onChangeLoading = useLoading(sendMessageLoading, updateMessageLoading);
-const childMessages = computed(() => messages.value?.filter((m) => m.threadId === props.message.id) || []);
-const isExpanded = ref(false);
+const isExpanded = ref(props.isThreadView || false);
+
+watch(
+  () => props.isThreadView,
+  (newValue) => {
+    if (newValue && props.message.answers?.length) {
+      isExpanded.value = true;
+    }
+  },
+  { immediate: true },
+);
+
+const childMessages = computed(() => {
+  return (
+    (messages.value?.length ? messages.value : props.message.answers)?.filter((m) => m.threadId === props.message.id) ||
+    []
+  );
+});
 
 const repliesContainer = ref<HTMLElement | null>(null);
 
@@ -186,7 +211,7 @@ const expandBranch = () => {
 const handleToggleExpand = async () => {
   isExpanded.value = !isExpanded.value;
 
-  if (isExpanded.value) {
+  if (isExpanded.value && !props.isThreadView) {
     await searchNestedMessages(props.message.id!);
   }
 };
@@ -202,13 +227,17 @@ async function searchNestedMessages(threadId: string) {
 }
 
 async function updateParentMessage(message: Message) {
-  messages.value = messages.value?.map((m) => (m.id === message.id ? message : m));
+  messages.value = (messages.value?.length ? messages.value : props.message.answers)?.map((m) =>
+    m.id === message.id ? message : m,
+  );
 
- emit('update')
+  emit("update");
 }
 
 async function removeParentMessage(message: Message) {
-  messages.value = messages.value?.filter((m) => m.id !== message.id);
+  messages.value = (messages.value?.length ? messages.value : props.message.answers)?.filter(
+    (m) => m.id !== message.id,
+  );
 
   const parentMessage = {
     ...props.message,
@@ -239,6 +268,7 @@ const sendReplyMessage = async (content: {
 
   const parentMessage = {
     ...props.message,
+    answers: [...(props.message.answers || []), newMessage],
     answersCount: props.message.answersCount ? props.message.answersCount + 1 : 1,
   };
 

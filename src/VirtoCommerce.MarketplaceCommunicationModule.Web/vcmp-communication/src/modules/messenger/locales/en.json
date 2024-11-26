@@ -18,6 +18,7 @@
   },
   "MESSENGER": {
     "TITLE": "Communication",
+    "EXPAND_ALL_REPLIES": "Show all threads",
     "REPLY": "Reply",
     "ADD_COMMENT": "Send",
     "ADD_PLACEHOLDER": "Start new conversation...",

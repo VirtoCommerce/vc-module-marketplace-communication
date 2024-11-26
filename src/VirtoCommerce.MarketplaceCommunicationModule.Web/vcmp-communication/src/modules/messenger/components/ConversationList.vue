@@ -116,7 +116,7 @@ import { ConversationListType } from "../typings";
 
 const props = defineProps<{
   conversations: Conversation[];
-  selectedConversation: Conversation | null;
+  selectedConversation: Conversation | null | undefined;
   userName: string;
   isLoading: boolean;
   hasMore: boolean;

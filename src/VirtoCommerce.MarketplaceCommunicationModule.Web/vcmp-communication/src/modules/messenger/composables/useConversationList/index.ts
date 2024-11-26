@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { Ref, ref } from "vue";
 import {
   VcmpConversationClient,
   Conversation,
@@ -10,7 +10,7 @@ import { useApiClient, useAsync } from "@vc-shell/framework";
 const { getApiClient: conversationClient } = useApiClient(VcmpConversationClient);
 
 export function useConversationList() {
-  const conversations = ref<Conversation[]>([]);
+  const conversations = ref<Conversation[]>([]) as Ref<Conversation[]>;
   const searchQuery = ref<ISearchConversationsQuery>({
     skip: 0,
     take: 20,

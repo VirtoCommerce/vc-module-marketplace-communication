@@ -145,6 +145,7 @@ export interface Props {
   message: Message;
   isTarget: boolean;
   loading: boolean;
+  isRepliesOpen: boolean;
 }
 
 export interface Emits {
@@ -279,7 +280,7 @@ const canManageMessage = computed(() => {
   return currentSeller.value.id === props.message?.sender?.userId && props.message?.answersCount === 0;
 });
 
-const isRepliesExpanded = ref(false);
+const isRepliesExpanded = ref(props.isRepliesOpen);
 
 const toggleReplies = () => {
   isRepliesExpanded.value = !isRepliesExpanded.value;

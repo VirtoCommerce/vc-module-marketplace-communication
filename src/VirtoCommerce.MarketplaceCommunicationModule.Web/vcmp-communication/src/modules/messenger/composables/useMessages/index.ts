@@ -21,6 +21,7 @@ import {
   GetUnreadCountQuery,
   IGetUnreadCountQuery,
   IGetSellerCommunicationUserQuery,
+  IMessage,
 } from "@vcmp-communication/api/marketplacecommunication";
 
 export interface IUseMessages {
@@ -150,8 +151,6 @@ export const useMessages = (): IUseMessages => {
     await loadUserInfoForMessages(result.results);
 
     messages.value = result.results?.reverse() || [];
-
-
 
     hasOlderMessages.value = (result.totalCount || 0) > (messages.value?.length || 0);
     hasNewerMessages.value = false;
@@ -297,7 +296,39 @@ export const useMessages = (): IUseMessages => {
   const { action: getThread } = useAsync<string | undefined>(async (id) => {
     const client = await getMessagingClient();
     const result = await client.getThread(id);
-    loadedThread.value = result;
+
+    const buildMessageTree = (messages: Message[]): Message[] => {
+      const messageMap = new Map<string, IMessage>();
+      const rootMessages: Message[] = [];
+
+      messages.forEach((msg) => {
+        messageMap.set(msg.id!, { ...msg, answers: [] });
+      });
+
+      messages.forEach((msg) => {
+        const message = messageMap.get(msg.id!);
+        if (message) {
+          if (msg.threadId) {
+            const parentMessage = messageMap.get(msg.threadId);
+            if (parentMessage) {
+              if (!parentMessage.answers) {
+                parentMessage.answers = [];
+              }
+              parentMessage.answers.push(new Message(message));
+              parentMessage.answersCount = parentMessage.answers.length;
+            }
+          } else {
+            rootMessages.push(new Message(message));
+          }
+        }
+      });
+
+      return rootMessages;
+    };
+
+    loadedThread.value = buildMessageTree(result);
+
+    messages.value = result;
   });
 
   async function loadUserInfoForMessages(messages: Message[] | undefined) {

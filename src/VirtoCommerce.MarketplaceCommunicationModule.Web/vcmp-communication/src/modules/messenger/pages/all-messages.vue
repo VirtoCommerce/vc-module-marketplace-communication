@@ -10,6 +10,7 @@
     @collapse="$emit('collapse:blade')"
   >
     <ConversationList
+      v-if="isReady"
       :conversations="conversations"
       :selected-conversation="selectedConversation"
       :user-name="currentSeller.name"
@@ -22,17 +23,30 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ComputedRef, inject, onMounted, ref } from "vue";
+import { computed, ComputedRef, inject, onMounted, Ref, ref, watch } from "vue";
 import { useConversationList } from "../composables";
-import { IBladeToolbar, IParentCallArgs, useBladeNavigation } from "@vc-shell/framework";
+import {
+  IBladeToolbar,
+  IParentCallArgs,
+  notification,
+  useBladeNavigation,
+  useNotifications,
+} from "@vc-shell/framework";
 import type { Conversation } from "../../../api_client/virtocommerce.marketplacecommunication";
 import { useI18n } from "vue-i18n";
 import { ConversationList } from "../components";
+import { useMounted } from "@vueuse/core";
+import { MessagePushNotification } from "../typings";
 
 const props = defineProps<{
   expanded?: boolean;
   closable?: boolean;
   param?: string;
+  options?: {
+    entityId?: string;
+    entityType?: string;
+    messageId?: string;
+  };
 }>();
 
 const emit = defineEmits<{
@@ -50,22 +64,50 @@ defineOptions({
   menuItem: {
     title: "ALL_MESSAGES.MENU_TITLE",
     icon: "fas fa-comment",
-    priority: 6,
+    priority: 5,
   },
 });
 
 const { t } = useI18n({ useScope: "global" });
 const { openBlade, resolveBladeByName } = useBladeNavigation();
+const { setNotificationHandler } = useNotifications("MessagePushNotification");
 
-const selectedConversation = ref<Conversation | null>(null);
+setNotificationHandler(async (notify) => {
+  const messageNotify = notify as MessagePushNotification;
+  notification(messageNotify.title + ": " + messageNotify.content);
+  await load();
+});
+
+const selectedConversation = ref<Conversation | null | undefined>(null) as Ref<Conversation | null | undefined>;
 
 const { conversations, loading, getConversations, hasMore, loadMore } = useConversationList();
 
 const currentSeller = inject<ComputedRef<{ id: string; name: string }>>("currentSeller");
+const isReady = ref(false);
 
 if (!currentSeller?.value) {
   throw new Error("Seller is not provided");
 }
+
+watch(
+  [() => props.param, () => conversations.value, useMounted()],
+  async ([conversationId, conversations, mounted]) => {
+    if (selectedConversation.value) {
+      return;
+    }
+
+    if (conversations && conversationId && mounted) {
+      selectedConversation.value = conversations.find((c) => c.id === conversationId);
+
+      if (selectedConversation.value) {
+        handleConversationSelect(selectedConversation.value, props.options?.messageId);
+      }
+    } else {
+      selectedConversation.value = null;
+    }
+  },
+  { immediate: true },
+);
 
 const bladeToolbar = computed<IBladeToolbar[]>(() => [
   {
@@ -76,9 +118,10 @@ const bladeToolbar = computed<IBladeToolbar[]>(() => [
   },
 ]);
 
-const handleConversationSelect = (conversation: Conversation) => {
+function handleConversationSelect(conversation: Conversation, messageId?: string) {
   openBlade({
     blade: resolveBladeByName("Messenger"),
+    param: messageId,
     options: {
       entityId: conversation.entityId,
       entityType: conversation.entityType,
@@ -90,7 +133,7 @@ const handleConversationSelect = (conversation: Conversation) => {
       selectedConversation.value = null;
     },
   });
-};
+}
 
 const refresh = async () => {
   if (currentSeller?.value) {
@@ -106,11 +149,25 @@ const handleLoadMore = async () => {
   }
 };
 
+async function load() {
+  if (currentSeller?.value) {
+    await refresh();
+    isReady.value = true;
+  }
+}
+
+function expandAllReplies() {
+  if (selectedConversation.value) {
+    handleConversationSelect(selectedConversation.value, undefined);
+  }
+}
+
 onMounted(async () => {
-  await refresh();
+  await load();
 });
 
 defineExpose({
   refresh,
+  expandAllReplies,
 });
 </script>

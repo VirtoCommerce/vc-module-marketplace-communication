@@ -34,14 +34,20 @@
         </div>
 
         <template v-if="props.param && loadedThread?.length">
+          <VcButton
+            text
+            @click="expandAllReplies"
+            >{{ $t("MESSENGER.EXPAND_ALL_REPLIES") }}</VcButton
+          >
           <MessageTree
             v-for="message in loadedThread"
             :key="message.id"
             :message="message"
             :target-message-id="targetMessageId"
-            @update-parent-message="updateParentMessage"
-            @remove-parent-message="removeParentMessage"
-            @mark-read="markMessageAsRead"
+            is-thread-view
+            @update-parent-message="updateParentThreadMessage"
+            @remove-parent-message="removeParentThreadMessage"
+            @mark-read="markThreadMessageAsRead"
             @update="updateParent"
           />
         </template>
@@ -208,10 +214,37 @@ provide("sellerName", currentSeller?.value?.name);
 provide("operator", operator);
 provide("seller", seller);
 
+function expandAllReplies() {
+  emit("parent:call", {
+    method: "expandAllReplies",
+  });
+}
+
 function updateParent() {
   emit("parent:call", {
     method: "refresh",
   });
+}
+
+function updateParentThreadMessage(message: Message) {
+  loadedThread.value = loadedThread.value?.map((m) => (m.id === message.id ? message : m));
+}
+
+function removeParentThreadMessage(message: Message) {
+  loadedThread.value = loadedThread.value?.filter((m) => m.id !== message.id);
+}
+
+function markThreadMessageAsRead(args: { messageId: string; recipientId: string }) {
+  loadedThread.value = loadedThread.value?.map((m) =>
+    m.id === args.messageId
+      ? new Message({
+          ...m,
+          recipients: m.recipients?.map((r) =>
+            r.recipientId === args.recipientId ? new MessageRecipient({ ...r, readStatus: "Read" }) : r,
+          ),
+        })
+      : m,
+  );
 }
 
 async function markMessageAsRead(args: { messageId: string; recipientId: string }) {
@@ -299,6 +332,7 @@ async function search(query?: ISearchMessagesQuery) {
 }
 
 onMounted(async () => {
+  await getOperator();
   if (props.param) {
     await getThread(props.param);
 
@@ -306,7 +340,7 @@ onMounted(async () => {
   }
   if (props.options?.entityId && props.options?.entityType) {
     await search();
-    await getOperator();
+
     await getSeller({
       entityId: props.options?.entityId,
       entityType: props.options?.entityType,

@@ -18,6 +18,8 @@ export default (() => {
   const dynamic = createDynamicAppModule({
     overrides,
     locales,
+    moduleComponents: components,
+    notificationTemplates: notifications,
   });
 
   const module = createAppModule(pages, locales, notifications, components);
