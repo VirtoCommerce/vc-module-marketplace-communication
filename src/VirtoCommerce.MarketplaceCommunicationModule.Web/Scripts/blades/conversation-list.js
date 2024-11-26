@@ -5,6 +5,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
             var blade = $scope.blade;
             blade.headIcon = 'fas fa-comment';
+            blade.title = 'marketplaceCommunication.blades.conversations.title';
             blade.userIds = [];
             $scope.userName = '';
 
@@ -75,9 +76,13 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             $scope.showDetails = function (listItem, isNew) {
                 var newBlade = {
                     id: 'conversationCommunication',
+                    title: listItem.name,
+                    entityId: listItem.entityId,
+                    entityType: listItem.entityType,
                     conversationId: listItem.id,
-                    controller: 'virtoCommerce.marketplaceCommunicationModule.entityCommunicationListController',
-                    template: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/blades/entity-communication-list.tpl.html'
+                    conversation: listItem,
+                    controller: 'virtoCommerce.marketplaceCommunicationModule.messageListController',
+                    template: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/blades/message-list.tpl.html'
                 };
                 blade.childBlade = newBlade;
                 bladeNavigationService.showBlade(newBlade, blade);

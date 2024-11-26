@@ -2,7 +2,7 @@
   "marketplaceCommunication": {
     "main-menu-title": "Communication",
     "blades": {
-      "entity-communication": {
+      "message-list": {
         "title": "Messages",
         "labels": {
           "date": "Date",
@@ -48,6 +48,9 @@
           "delete-failed": "Failed to delete message",
           "send-failed": "Failed to send message"
         }
+      },
+      "conversations": {
+        "title": "Communication"
       }
     },
     "widgets": {
@@ -55,6 +58,12 @@
         "title": "Communication",
         "communication-not-possible": "Communication not possible here.",
         "open-seller-order": "Open seller order to chat with a Vendor."
+      }
+    },
+    "dialogs": {
+      "unknown-entity-type": {
+        "title": "Error resolve Entity Type",
+        "message": "Cannot resolve an unknown type: '{{entityType}}'"
       }
     }
   },

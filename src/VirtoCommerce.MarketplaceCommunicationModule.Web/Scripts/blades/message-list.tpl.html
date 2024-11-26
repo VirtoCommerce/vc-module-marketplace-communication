@@ -13,16 +13,29 @@
 
     <div class="blade-inner">
         <div class="inner-block" style="display: flex; flex-direction: column; height: 100%; width: 100%;">
+            <!-- Entity header -->
+          <div ng-if="isInitialLoadComplete && blade.entityId && blade.entityType && blade.conversation"
+               style="padding-top: 20px; padding-left: 20px;">
+            <em class="product-img" ng-attr-title="{{ blade.conversation.name }}">
+              <i class="table-ico" ng-if="blade.conversation.iconUrl">
+                <img class="list-icon" fallback-src="{{ blade.conversation.iconUrl }}" ng-src="{{ blade.conversation.iconUrl | thumbnail: '_64x64' }}">
+              </i>
+            </em>
+            <a href="" ng-click="blade.openEntityDetails()">
+              <label class="font-large">{{ blade.conversation.name }}</label>
+            </a>
+          </div>
+
             <!-- Empty state -->
             <div ng-if="isInitialLoadComplete && !blade.messages.length && !blade.isLoading"
                  style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; padding: 20px; text-align: center;">
                 <i class="fas fa-comment" style="font-size: 48px; color: #dee9f0; margin-bottom: 20px;"></i>
                 <div style="font-size: 16px; color: #999; margin-bottom: 20px;">
-                  {{ 'marketplaceCommunication.blades.entity-communication.labels.no-messages' | translate }}
+                  {{ 'marketplaceCommunication.blades.message-list.labels.no-messages' | translate }}
                 </div>
                 <button class="btn" ng-click="startConversation()">
                   <span class="fa fa-plus" style="margin-right: 5px;"></span>
-                  {{ 'marketplaceCommunication.blades.entity-communication.buttons.start-conversation' | translate }}
+                  {{ 'marketplaceCommunication.blades.message-list.buttons.start-conversation' | translate }}
                 </button>
             </div>
 
@@ -57,7 +70,7 @@
                      on-visible="loadPreviousMessages()"
                      is-scrolling="blade.isScrollingToMessage"
                      style="text-align: center; padding: 20px;">
-                  {{ 'marketplaceCommunication.blades.entity-communication.labels.loading-previous' | translate }}
+                  {{ 'marketplaceCommunication.blades.message-list.labels.loading-previous' | translate }}
                 </div>
 
                 <div ng-repeat="message in blade.messages">
@@ -119,7 +132,7 @@
               <div ng-if="!isFormExpanded"
                    ng-click="expandForm()"
                    style="padding: 8px; border: 1px solid #dee9f0; border-radius: 4px; font: inherit; cursor: text; color: #666; font: inherit;">
-                {{ 'marketplaceCommunication.blades.entity-communication.labels.start-conversation' | translate }}
+                {{ 'marketplaceCommunication.blades.message-list.labels.start-conversation' | translate }}
               </div>
 
                 <!-- Expanded form -->
@@ -127,21 +140,21 @@
                     <textarea
                         ng-model="mainForm.text"
                         style="min-height: 60px; padding: 8px; border: 1px solid #dee9f0; border-radius: 4px; font: inherit;"
-                        placeholder="{{ 'marketplaceCommunication.blades.entity-communication.labels.enter-message' | translate }}"
+                        placeholder="{{ 'marketplaceCommunication.blades.message-list.labels.enter-message' | translate }}"
                         vc-focus="isFormExpanded"></textarea>
                     <div class="form-group">
                       <button class="btn __cancel"
                               ng-click="cancelMessage()"
                               style="align-self: flex-end;">
                         <span class="fa fa-times" style="margin-right: 5px;"></span>
-                        {{ 'marketplaceCommunication.blades.entity-communication.buttons.cancel' | translate }}
+                        {{ 'marketplaceCommunication.blades.message-list.buttons.cancel' | translate }}
                       </button>
                       <button class="btn"
                               ng-click="sendRootMessage()"
                               ng-disabled="!mainForm.text || blade.isLoading"
                               style="align-self: flex-end;">
                         <span class="fa fa-paper-plane" style="margin-right: 5px;"></span>
-                        {{blade.isLoading ? ('marketplaceCommunication.blades.entity-communication.labels.sending' | translate) : ('marketplaceCommunication.blades.entity-communication.labels.send' | translate)}}
+                        {{ blade.isLoading ? ('marketplaceCommunication.blades.message-list.labels.sending' | translate) : ('marketplaceCommunication.blades.entity-communication.labels.send' | translate) }}
                       </button>
                     </div>
                 </div>

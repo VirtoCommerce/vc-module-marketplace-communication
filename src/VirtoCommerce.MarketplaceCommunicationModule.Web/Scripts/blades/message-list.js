@@ -76,7 +76,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                                 style="width: 32px; height: 32px; border-radius: 50%; margin-right: 10px;">
                                 <img ng-src="{{message.senderInfo.avatarUrl}}"
                                     style="width: 100%; height: 100%; border-radius: 50%;"
-                                    alt="{{ 'marketplaceCommunication.blades.entity-communication.labels.user-avatar' | translate }}">
+                                    alt="{{ 'marketplaceCommunication.blades.message-list.labels.user-avatar' | translate }}">
                             </div>
                             <div ng-if="!message.senderInfo.avatarUrl"
                                 style="width: 32px; height: 32px; border-radius: 50%; margin-right: 10px; background: #e0e0e0; display: flex; align-items: center; justify-content: center;">
@@ -111,11 +111,11 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                              style="color: #1c84c6; cursor: pointer; padding-top: 5px; user-select: none;">
                             <span ng-if="!isExpanded">
                                 <i class="fa fa-chevron-down" style="margin-right: 5px;"></i>
-                                {{ 'marketplaceCommunication.blades.entity-communication.labels.show-more' | translate }}
+                                {{ 'marketplaceCommunication.blades.message-list.labels.show-more' | translate }}
                             </span>
                             <span ng-if="isExpanded">
                                 <i class="fa fa-chevron-up" style="margin-right: 5px;"></i>
-                                {{ 'marketplaceCommunication.blades.entity-communication.labels.show-less' | translate }}
+                                {{ 'marketplaceCommunication.blades.message-list.labels.show-less' | translate }}
                             </span>
                         </div>
                     </div>
@@ -125,16 +125,16 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                         <textarea
                             ng-model="editMode.text"
                             style="width: -webkit-fill-available; min-height: 80px; margin-bottom: 10px; padding: 8px; font: inherit;"
-                            placeholder="{{ 'marketplaceCommunication.blades.entity-communication.labels.edit-message' | translate }}"
+                            placeholder="{{ 'marketplaceCommunication.blades.message-list.labels.edit-message' | translate }}"
                             vc-focus="editMode.isActive"></textarea>
                         <div>
                             <button class="btn __cancel" ng-click="cancelEdit()">
                                 <span class="fa fa-times" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.entity-communication.buttons.cancel' | translate }}
+                                {{ 'marketplaceCommunication.blades.message-list.buttons.cancel' | translate }}
                             </button>
                             <button class="btn" ng-click="submitEdit()" ng-disabled="!editMode.text">
                                 <span class="fa fa-paper-plane" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.entity-communication.buttons.save' | translate }}
+                                {{ 'marketplaceCommunication.blades.message-list.buttons.save' | translate }}
                             </button>
                         </div>
                     </div>
@@ -145,17 +145,17 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                             <button class="btn" ng-click="showReplyForm()"
                                     ng-if="!editMode.isActive && !replyForm.isVisible">
                                 <span class="fa fa-reply" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.entity-communication.buttons.reply' | translate }}
+                                {{ 'marketplaceCommunication.blades.message-list.buttons.reply' | translate }}
                             </button>
                             <button class="btn" ng-click="startEdit()"
                                     ng-if="message.senderId === currentUser.id && message.answersCount === 0 && !editMode.isActive && !replyForm.isVisible">
                                 <span class="fa fa-pencil" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.entity-communication.buttons.edit' | translate }}
+                                {{ 'marketplaceCommunication.blades.message-list.buttons.edit' | translate }}
                             </button>
                             <button class="btn __cancel" ng-click="onDelete({message: message})"
                                     ng-if="message.senderId === currentUser.id && message.answersCount === 0 && !editMode.isActive && !replyForm.isVisible">
                                 <span class="fa fa-trash-o" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.entity-communication.buttons.delete' | translate }}
+                                {{ 'marketplaceCommunication.blades.message-list.buttons.delete' | translate }}
                             </button>
                         </div>
                         <div class="form-group">
@@ -165,9 +165,9 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                                     ng-click="onToggleReplies({message: message})">
                             <span ng-if="message.isExpanded" class="fa fa-chevron-up" style="margin-right: 5px;"></span>
                             <span ng-if="!message.isExpanded" class="fa fa-chevron-down" style="margin-right: 5px;"></span>
-                            <span ng-if="message.isExpanded" translate="marketplaceCommunication.blades.entity-communication.labels.hide-replies"></span>
+                            <span ng-if="message.isExpanded" translate="marketplaceCommunication.blades.message-list.labels.hide-replies"></span>
                             <span ng-if="!message.isExpanded"
-                                  translate="marketplaceCommunication.blades.entity-communication.labels.show-replies"
+                                  translate="marketplaceCommunication.blades.message-list.labels.show-replies"
                                   translate-values="{ count: message.answersCount }"></span>
                             </button>
                         </div>
@@ -178,16 +178,16 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                         <textarea
                             ng-model="replyForm.text"
                             style="width: -webkit-fill-available; min-height: 80px; margin-bottom: 10px; padding: 8px; font: inherit;"
-                            placeholder="{{ 'marketplaceCommunication.blades.entity-communication.labels.write-reply' | translate }}"
+                            placeholder="{{ 'marketplaceCommunication.blades.message-list.labels.write-reply' | translate }}"
                             vc-focus="replyForm.isVisible"></textarea>
                         <div>
                             <button class="btn __cancel" ng-click="hideReplyForm()">
                                 <span class="fa fa-times" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.entity-communication.buttons.cancel' | translate }}
+                                {{ 'marketplaceCommunication.blades.message-list.buttons.cancel' | translate }}
                             </button>
                             <button class="btn" ng-click="submitReply()" ng-disabled="!replyForm.text">
                                 <span class="fa fa-paper-plane" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.entity-communication.buttons.send' | translate }}
+                                {{ 'marketplaceCommunication.blades.message-list.buttons.send' | translate }}
                             </button>
                         </div>
                     </div>
@@ -410,12 +410,18 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
     };
     return service;
 })
-    .controller('virtoCommerce.marketplaceCommunicationModule.entityCommunicationListController',
-    ['$scope', '$timeout', 'virtoCommerce.marketplaceCommunicationModule.webApi', 'platformWebApp.dialogService', 'messageFormsService',
-    function ($scope, $timeout, api, dialogService, messageFormsService) {
+    .controller('virtoCommerce.marketplaceCommunicationModule.messageListController',
+        ['$scope', '$timeout', 'virtoCommerce.marketplaceCommunicationModule.webApi',
+            'platformWebApp.dialogService', 'messageFormsService',
+            'virtoCommerce.marketplaceCommunicationModule.entityTypesResolverService',
+            'platformWebApp.bladeNavigationService',
+            function ($scope, $timeout, api,
+                dialogService, messageFormsService,
+                entityTypesResolverService,
+                bladeNavigationService) {
+
         var blade = $scope.blade;
         blade.headIcon = 'fas fa-comment';
-        blade.title = 'Communication';
 
         blade.messages = [];
         blade.threadsMap = {};
@@ -519,6 +525,30 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             }
         }
 
+        blade.openEntityDetails = function () {
+            var entityTemplate = entityTypesResolverService.resolve(blade.entityType);
+            if (entityTemplate) {
+                var entityBlade = angular.copy(entityTemplate.detailBlade);
+                entityBlade[entityTemplate.entityIdFieldName] = blade.entityId;
+                if (entityTemplate.getEntity && entityTemplate.entityFieldName) {
+                    entityTemplate.getEntity(blade.entityId, function (result) {
+                        entityBlade[entityTemplate.entityFieldName] = result;
+                        bladeNavigationService.showBlade(entityBlade, blade);
+                    })
+                }
+                else {
+                    bladeNavigationService.showBlade(entityBlade, blade);
+                }
+            } else {
+                dialogService.showNotificationDialog({
+                    id: "error",
+                    title: "marketplaceCommunication.dialogs.unknown-entity-type.title",
+                    message: "marketplaceCommunication.dialogs.unknown-entity-type.message",
+                    messageValues: { entityType: blade.entityType }
+                });
+            }
+        }
+
         $scope.sendReply = function(parentMessage, replyText) {
             if (!replyText || !replyText.trim()) {
                 return;
@@ -539,7 +569,9 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 }
             };
 
-            api.sendMessage(command, function() {
+            api.sendMessage(command, function () {
+                blade.parentBlade.refresh();
+
                 var searchCriteria = {
                     entityId: blade.entityId,
                     entityType: blade.entityType,
@@ -961,6 +993,8 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             api.sendMessage(command, function() {
                 $scope.cancelMessage();
 
+                blade.parentBlade.refresh();
+
                 var searchCriteria = {
                     entityId: blade.entityId,
                     entityType: blade.entityType,
@@ -1021,8 +1055,8 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
             var dialog = {
                 id: "confirmDeleteMessage",
-                title: "marketplaceCommunication.blades.entity-communication.dialogs.delete.title",
-                message: "marketplaceCommunication.blades.entity-communication.dialogs.delete.message",
+                title: "marketplaceCommunication.blades.message-list.dialogs.delete.title",
+                message: "marketplaceCommunication.blades.message-list.dialogs.delete.message",
                 callback: function(confirm) {
                     if (confirm) {
                         blade.isLoading = true;

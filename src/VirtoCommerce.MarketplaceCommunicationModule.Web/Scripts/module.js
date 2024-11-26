@@ -16,7 +16,7 @@ angular.module(moduleName, [])
                         'platformWebApp.bladeNavigationService',
                         function (bladeNavigationService) {
                             var newBlade = {
-                                id: 'communicationList',
+                                id: 'conversationList',
                                 controller: 'virtoCommerce.marketplaceCommunicationModule.conversationListController',
                                 template: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/blades/conversation-list.tpl.html',
                                 isClosingDisabled: true,
@@ -28,7 +28,12 @@ angular.module(moduleName, [])
         }
     ])
     .run(['platformWebApp.mainMenuService', '$state', 'platformWebApp.widgetService',
-        function (mainMenuService, $state, widgetService) {
+        'platformWebApp.metaFormsService', 'virtoCommerce.orderModule.knownOperations', 'virtoCommerce.marketplaceCommunicationModule.entityTypesResolverService',
+        'virtoCommerce.marketplaceModule.webApi', 'virtoCommerce.orderModule.order_res_customerOrders',
+        function (mainMenuService, $state, widgetService,
+            metaFormsService, orderKnownOperations, entityTypesResolverService,
+            marketplaceApi, ordersApi) {
+
             //Register module in main menu
             var menuItem = {
                 path: 'browse/communication',
@@ -60,5 +65,53 @@ angular.module(moduleName, [])
                 template: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/widgets/order-communication-widget.tpl.html'
             };
             widgetService.registerWidget(offerCommunicationWidget, 'offerDetailsWidgetContainer');
+
+            // SellerProduct entityType resolver
+            var sellerProductMetaFields = metaFormsService.getMetaFields('SellerProductDetails');
+            entityTypesResolverService.registerType({
+                entityType: 'VirtoCommerce.MarketplaceVendorModule.Core.Domains.SellerProduct',
+                entityIdFieldName: 'sellerProductId',
+                detailBlade: {
+                    id: 'sellerProductDetails',
+                    headIcon: 'fas fa-folder',
+                    controller: 'virtoCommerce.marketplaceModule.sellerProductDetailsController',
+                    template: 'Modules/$(VirtoCommerce.MarketplaceVendor)/Scripts/blades/seller-product-details.tpl.html',
+                    metaFields: sellerProductMetaFields
+                },
+                knownChildrenTypes: []
+            });
+
+            // Offer entityType resolver
+            var offerMetaFieldsReadonly = metaFormsService.getMetaFields('OfferDetailsReadonly');
+            var offerMetaFieldsEditable = metaFormsService.getMetaFields('OfferDetailsEditable');
+            entityTypesResolverService.registerType({
+                entityType: 'VirtoCommerce.MarketplaceVendorModule.Core.Domains.Offer',
+                entityIdFieldName: 'offerId',
+                detailBlade: {
+                    id: 'offerDetails',
+                    headIcon: 'fas fa-store',
+                    controller: 'virtoCommerce.marketplaceModule.offerDetailsController',
+                    template: 'Modules/$(VirtoCommerce.MarketplaceVendor)/Scripts/blades/offer-details.tpl.html',
+                    metaFieldsReadonly: offerMetaFieldsReadonly,
+                    metaFieldsEditable: offerMetaFieldsEditable
+                },
+                knownChildrenTypes: []
+            });
+
+            // Order entityType resolver
+            var orderTemplate = orderKnownOperations.getOperation('CustomerOrder');
+            entityTypesResolverService.registerType({
+                entityType: 'VirtoCommerce.OrdersModule.Core.Model.CustomerOrder',
+                entityIdFieldName: 'currentEntityId',
+                entityFieldName: 'customerOrder',
+                detailBlade: orderTemplate ? orderTemplate.detailBlade : {},
+                getEntity: function (entityId, setEntityCallback) {
+                    ordersApi.get({ id: entityId }, (data) => {
+                        setEntityCallback(data);
+                    });
+                },
+                knownChildrenTypes: []
+            });
+
         }
     ]);
