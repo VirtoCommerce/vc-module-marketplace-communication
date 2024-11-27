@@ -505,16 +505,17 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
             api.getOperator({}, function(operator) {
                 $scope.currentUser = operator;
+
+                if (blade.conversationId) {
+                    api.getConversationById({
+                        conversationId: blade.conversationId
+                    }, function (conversation) {
+                        $scope.messageRecipientId = conversation.users?.find(x => x.userId != $scope.currentUser.id)?.userId;
+                    });
+                }
             });
 
-            if (blade.conversationId) {
-                api.getConversationById({
-                    conversationId: blade.conversationId
-                }, function (conversation) {
-                    $scope.messageRecipientId = conversation.users?.find(x => x.userId != $scope.currentUser.id)?.userId;
-                });
-            }
-            else if (blade.entityId && blade.entityType) {
+            if (!blade.conversationId && blade.entityId && blade.entityType) {
                 api.getSellerUser({
                     entityId: blade.entityId,
                     entityType: blade.entityType
