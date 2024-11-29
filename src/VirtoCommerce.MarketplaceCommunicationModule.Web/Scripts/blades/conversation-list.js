@@ -1,16 +1,29 @@
 angular.module('virtoCommerce.marketplaceCommunicationModule')
-    .controller('virtoCommerce.marketplaceCommunicationModule.conversationListController', ['$scope', 'platformWebApp.bladeUtils', 'platformWebApp.bladeNavigationService', 'virtoCommerce.marketplaceCommunicationModule.webApi', 'platformWebApp.uiGridHelper', 'platformWebApp.ui-grid.extension',
-        function ($scope, bladeUtils, bladeNavigationService, communicationApi, uiGridHelper, gridOptionExtension) {
+    .controller('virtoCommerce.marketplaceCommunicationModule.conversationListController', ['$scope', 
+        'platformWebApp.bladeUtils', 'platformWebApp.bladeNavigationService',
+        'platformWebApp.metaFormsService',
+        'virtoCommerce.marketplaceCommunicationModule.webApi',
+        'platformWebApp.uiGridHelper', 'platformWebApp.ui-grid.extension',
+        function ($scope, 
+            bladeUtils, bladeNavigationService,
+            metaFormsService,
+            communicationApi,
+            uiGridHelper, gridOptionExtension) {
             $scope.uiGridConstants = uiGridHelper.uiGridConstants;
 
             var blade = $scope.blade;
             blade.headIcon = 'fas fa-comment';
-            blade.title = 'marketplaceCommunication.blades.conversations.title';
+            blade.title = 'marketplaceCommunication.blades.conversation-list.title';
             blade.userIds = [];
             $scope.userName = '';
+            $scope.hasMore = true;
+            var filter = blade.filter = $scope.filter = {};
 
             blade.refresh = function () {
                 blade.isLoading = true;
+
+                if ($scope.pageSettings.currentPage !== 1)
+                    $scope.pageSettings.currentPage = 1;
 
                 communicationApi.getOperator(function (operator) {
                     blade.userIds = [operator.id];
@@ -35,12 +48,17 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                             }
                         }
 
+                        $scope.pageSettings.totalItems = data.totalCount;
+                        $scope.hasMore = data.results.length === $scope.pageSettings.itemsPerPageCount;
+
                         if (blade.childBlade && blade.selectedItem) {
                             blade.childBlade.currentEntity = blade.selectedItem;
                             blade.childBlade.refresh();
                         }
                     });
                 });
+
+                resetStateGrid();
             };
 
             blade.toolbarCommands = [
@@ -62,18 +80,35 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 }
             ];
 
-            var setSelectedNode = function (listItem) {
+            $scope.manageConversation = function (listItem) {
+                var conversationTemplate = metaFormsService.getMetaFields('Conversation');
+                var newBlade = {
+                    id: 'conversationManage',
+                    title: listItem.name,
+                    entityId: listItem.entityId,
+                    entityType: listItem.entityType,
+                    conversationId: listItem.id,
+                    conversation: listItem,
+                    controller: 'virtoCommerce.marketplaceCommunicationModule.conversationDetailsController',
+                    template: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/blades/conversation-details.tpl.html',
+                    metaFields: conversationTemplate
+                };
+                blade.childBlade = newBlade;
+                bladeNavigationService.showBlade(newBlade, blade);
+            }
+
+            var setSelectedItem = function (listItem) {
                 $scope.selectedNodeId = listItem.id;
                 blade.selectedItem = listItem;
             };
 
-            $scope.selectNode = function (listItem) {
-                setSelectedNode(listItem);
+            $scope.selectItem = function (e, listItem) {
+                setSelectedItem(listItem);
 
                 $scope.showDetails(listItem);
             }
 
-            $scope.showDetails = function (listItem, isNew) {
+            $scope.showDetails = function (listItem) {
                 var newBlade = {
                     id: 'conversationCommunication',
                     title: listItem.name,
@@ -88,14 +123,75 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 bladeNavigationService.showBlade(newBlade, blade);
             }
 
+            $scope.getEntityType = function (entityType) {
+                return "marketplaceCommunication." + entityType;
+            }
+
+            filter.criteriaChanged = function () {
+                if ($scope.pageSettings.currentPage > 1) {
+                    $scope.pageSettings.currentPage = 1;
+                } else {
+                    blade.refresh();
+                }
+            };
+
             function getSearchCriteria() {
                 var searchCriteria = {
+                    //sort: uiGridHelper.getSortExpression($scope),
+                    keyword: filter.keyword,
                     userIds: blade.userIds,
-                    responseGroup: 'Full'
+                    responseGroup: 'Full',
+                    skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
+                    take: $scope.pageSettings.itemsPerPageCount
                 };
                 return searchCriteria;
             }
 
-            blade.refresh();
+            function showMore() {
+                if ($scope.hasMore) {
+
+                    ++$scope.pageSettings.currentPage;
+                    $scope.gridApi.infiniteScroll.saveScrollPercentage();
+                    blade.isLoading = true;
+
+                    var searchCriteria = getSearchCriteria();
+
+                    communicationApi.searchConversations(
+                        searchCriteria,
+                        function (data) {
+                            //transformByFilters(data.results);
+                            blade.isLoading = false;
+                            $scope.pageSettings.totalItems = data.totalCount;
+                            $scope.listEntries = $scope.listEntries.concat(data.results);
+                            $scope.hasMore = data.results.length === $scope.pageSettings.itemsPerPageCount;
+                            $scope.gridApi.infiniteScroll.dataLoaded();
+                        });
+                }
+            }
+
+            function resetStateGrid() {
+                if ($scope.gridApi) {
+                    $scope.items = [];
+//                    $scope.gridApi.selection.clearSelectedRows();
+                    $scope.gridApi.infiniteScroll.resetScroll(true, true);
+                    $scope.gridApi.infiniteScroll.dataLoaded();
+                }
+            }
+
+            $scope.setGridOptions = function (gridOptions) {
+                bladeUtils.initializePagination($scope, true);
+
+                $scope.pageSettings.itemsPerPageCount = 30;
+
+                uiGridHelper.initialize($scope, gridOptions, function (gridApi) {
+                    $scope.gridApi = gridApi;
+
+                    //uiGridHelper.bindRefreshOnSortChanged($scope);
+                    $scope.gridApi.infiniteScroll.on.needLoadMoreData($scope, showMore);
+                });
+                $scope.$watch('blade.filter.showUnread', blade.refresh);
+            };
+
+            //blade.refresh();
         }
     ]);

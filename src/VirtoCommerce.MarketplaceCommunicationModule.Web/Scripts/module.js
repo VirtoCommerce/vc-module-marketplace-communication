@@ -123,6 +123,20 @@ angular.module(moduleName, [])
                 knownChildrenTypes: []
             });
 
-        }
-    ])
+            metaFormsService.registerMetaFields('Conversation',
+                [
+                    {
+                        name: 'name',
+                        title: 'marketplaceCommunication.blades.conversation-details.labels.name',
+                        valueType: 'ShortText'
+                    },
+                    {
+                        name: 'iconUrl',
+                        title: 'marketplaceCommunication.blades.conversation-details.labels.icon',
+                        templateUrl: 'conversationDetails-iconImage.html'
+                    },
+                ]
+            );
 
+        }
+    ]);

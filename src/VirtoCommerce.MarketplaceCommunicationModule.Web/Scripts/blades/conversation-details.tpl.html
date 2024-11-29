@@ -1,0 +1,24 @@
+<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form class="form" name="formScope" ng-controller="virtoCommerce.marketplaceCommunicationModule.conversationDetailsController">
+                <fieldset>
+                    <va-metaform registered-inputs="blade.metaFields" blade="blade" ng-init="setForm(formScope)"></va-metaform>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="text/ng-template" id="conversationDetails-iconImage.html">
+  <div class="form-input">
+    <div class="image-preview-small"
+         ng-class="{'image-preview-no-image': !blade.currentEntity.iconUrl }"
+         style="cursor: pointer">
+      <img ng-if="blade.currentEntity.iconUrl" ng-src="{{ blade.currentEntity.iconUrl }}" ng-click="blade.openUrl(blade.currentEntity.iconUrl)" />
+      <i ng-if="!blade.currentEntity.iconUrl" class="gallery-ico fas fa-image" ng-click="blade.uploadImage()"></i>
+    </div>
+    <a href ng-click="blade.uploadLogo()">Upload</a>
+    <a href ng-click="blade.clearLogo()">Delete</a>
+  </div>
+</script>

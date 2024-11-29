@@ -28,6 +28,6 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             // conversation
             searchConversations: { method: 'POST', url: 'api/vcmp/conversation/search' },
             getConversationById: { method: 'GET', url: 'api/vcmp/conversation/getbyid' },
-
+            updateConversation: { method: 'POST', url: 'api/vcmp/conversation/update' }
         });
     }]);

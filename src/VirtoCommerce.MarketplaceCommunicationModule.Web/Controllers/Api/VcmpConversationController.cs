@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.CommunicationModule.Core.Models;
 using VirtoCommerce.CommunicationModule.Core.Models.Search;
+using VirtoCommerce.MarketplaceCommunicationModule.Data.Commands;
 using VirtoCommerce.MarketplaceCommunicationModule.Data.Queries;
 using VirtoCommerce.MarketplaceVendorModule.Data.Authorization;
 using VirtoCommerce.Platform.Core.Common;
@@ -78,14 +79,28 @@ public class VcmpConversationController : ControllerBase
 
     [HttpPost]
     [Route("new")]
-    public async Task<ActionResult<Conversation>> CreateConversation([FromBody] SearchConversationsQuery query)
+    public async Task<ActionResult<Conversation>> CreateConversation([FromBody] CreateConversationCommand command)
     {
-        var authorizationResult = await _authorizationService.AuthorizeAsync(User, query, new SellerAuthorizationRequirement(Core.ModuleConstants.Security.Permissions.Read));
+        var authorizationResult = await _authorizationService.AuthorizeAsync(User, command, new SellerAuthorizationRequirement(Core.ModuleConstants.Security.Permissions.Send));
         if (!authorizationResult.Succeeded)
         {
             return Forbid();
         }
-        var result = await _mediator.Send(query);
+        var result = await _mediator.Send(command);
+
+        return Ok(result);
+    }
+
+    [HttpPost]
+    [Route("update")]
+    public async Task<ActionResult<Conversation>> UpdateConversation([FromBody] UpdateConversationCommand command)
+    {
+        var authorizationResult = await _authorizationService.AuthorizeAsync(User, command, new SellerAuthorizationRequirement(Core.ModuleConstants.Security.Permissions.Send));
+        if (!authorizationResult.Succeeded)
+        {
+            return Forbid();
+        }
+        var result = await _mediator.Send(command);
 
         return Ok(result);
     }

@@ -49,8 +49,21 @@
           "send-failed": "Failed to send message"
         }
       },
-      "conversations": {
-        "title": "Communication"
+      "conversation-list": {
+        "title": "Communication",
+        "labels": {
+          "name": "Conversation name"
+        },
+        "menu": {
+          "manage": "Manage"
+        }
+      },
+      "conversation-details": {
+        "title": "Manage conversation",
+        "labels": {
+          "name": "Name",
+          "icon": "Conversation icon"
+        }
       }
     },
     "widgets": {
@@ -65,6 +78,11 @@
         "title": "Error resolve Entity Type",
         "message": "Cannot resolve an unknown type: '{{entityType}}'"
       }
+    },
+    "entity-types": {
+      "VirtoCommerce.MarketplaceVendorModule.Core.Domains.SellerProduct": "Product",
+      "VirtoCommerce.MarketplaceVendorModule.Core.Domains.Offer": "Offer",
+      "VirtoCommerce.OrdersModule.Core.Model.CustomerOrder": "Order"
     }
   },
   "settings": {
