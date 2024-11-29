@@ -1,397 +1,4 @@
 angular.module('virtoCommerce.marketplaceCommunicationModule')
-.directive('onVisible', ['$timeout', function($timeout) {
-    return {
-        restrict: 'A',
-        scope: {
-            onVisible: '&',
-            isScrolling: '='
-        },
-        link: function(scope, element, attrs) {
-            var observer = new IntersectionObserver(function(entries) {
-                entries.forEach(function(entry) {
-                    if (entry.isIntersecting && !scope.isScrolling) {
-                        $timeout(function() {
-                            scope.onVisible();
-                        });
-                        observer.disconnect();
-                    }
-                });
-            }, { threshold: [0.1], rootMargin: '100px' });
-
-            observer.observe(element[0]);
-
-            scope.$on('$destroy', function() {
-                observer.disconnect();
-            });
-        }
-    };
-}])
-.directive('vcFocus', ['$timeout', function ($timeout) {
-    return {
-        restrict: 'A',
-        link: function (scope, element, attrs) {
-            scope.$watch(attrs.vcFocus, function (value) {
-                if (value === true) {
-                    $timeout(function () {
-                        element[0].focus();
-                    });
-                }
-            });
-        }
-    };
-}])
-.directive('messageTree', ['$compile', '$timeout', 'messageFormsService', function($compile, $timeout, messageFormsService) {
-    return {
-        restrict: 'E',
-        scope: {
-            message: '=',
-            currentUser: '=',
-            parentController: '=',
-            onDelete: '&',
-            onEdit: '&',
-            onMarkRead: '&',
-            onToggleReplies: '&',
-            getMessageReplies: '&',
-            hasReplies: '&',
-            searchMessagesLoading: '=',
-            hasMoreReplies: '&',
-            loadMoreReplies: '&',
-            hasPreviousReplies: '=',
-            loadPreviousReplies: '&',
-            loadingStates: '=',
-            shouldShowUnreadDot: '&',
-            maxLines: '=?'
-        },
-        template: `
-            <div class="message-item"
-                 style="padding: 10px; margin-bottom: 5px; border: 1px solid #dee9f0; border-radius: 4px;"
-                 data-message-id="{{message.id}}"
-                 is-scrolling="parentController.blade.isScrollingToMessage"
-                 ng-style="{'background-color': message.id === selectedMessageId ? '#ecf7fc' : 'transparent'}">
-                <div>
-                    <!-- Header with avatar and user info -->
-                    <div style="margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between;">
-                        <div style="display: flex; align-items: center;">
-                            <div ng-if="message.senderInfo.avatarUrl"
-                                style="width: 32px; height: 32px; border-radius: 50%; margin-right: 10px;">
-                                <img ng-src="{{message.senderInfo.avatarUrl}}"
-                                    style="width: 100%; height: 100%; border-radius: 50%;"
-                                    alt="{{ 'marketplaceCommunication.blades.message-list.labels.user-avatar' | translate }}">
-                            </div>
-                            <div ng-if="!message.senderInfo.avatarUrl"
-                                style="width: 32px; height: 32px; border-radius: 50%; margin-right: 10px; background: #e0e0e0; display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-user" style="color: #666;"></i>
-                            </div>
-                            <div style="display: flex; flex-direction: column;">
-                                <span style="font-weight: bold;">
-                                    {{message.senderInfo.userName || message.senderId}}
-                                </span>
-                                <span style="color: #999; font-size: 12px;" am-time-ago="message.createdDate"></span>
-                            </div>
-                        </div>
-                        <div ng-if="shouldShowUnreadDot(message)"
-                             on-visible="delayedMarkRead(message)"
-                             style="width: 8px; height: 8px; border-radius: 50%; background-color: #e53935;">
-                        </div>
-                    </div>
-
-                    <!-- Message content -->
-                    <div ng-if="!editMode.isActive" style="margin: 10px 0;">
-                        <div class="message-content"
-                             ng-class="{'expanded': isExpanded}"
-                             ng-style="!isExpanded && {'max-height': maxLines * 20 + 'px'}"
-                             style="position: relative; line-height: 20px; overflow: hidden; transition: max-height 0.3s ease-out;">
-                            <div>{{message.content}}</div>
-                            <!-- Gradient overlay -->
-                            <div ng-if="!isExpanded && needsExpansion"
-                                 style="position: absolute; bottom: 0; left: 0; right: 0; height: 20px; background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%); pointer-events: none;"></div>
-                        </div>
-                        <div ng-if="needsExpansion"
-                             ng-click="toggleContent()"
-                             style="color: #1c84c6; cursor: pointer; padding-top: 5px; user-select: none;">
-                            <span ng-if="!isExpanded">
-                                <i class="fa fa-chevron-down" style="margin-right: 5px;"></i>
-                                {{ 'marketplaceCommunication.blades.message-list.labels.show-more' | translate }}
-                            </span>
-                            <span ng-if="isExpanded">
-                                <i class="fa fa-chevron-up" style="margin-right: 5px;"></i>
-                                {{ 'marketplaceCommunication.blades.message-list.labels.show-less' | translate }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Edit form -->
-                    <div ng-if="editMode.isActive" style="margin: 10px 0;">
-                        <textarea
-                            ng-model="editMode.text"
-                            style="width: -webkit-fill-available; min-height: 80px; margin-bottom: 10px; padding: 8px; font: inherit;"
-                            placeholder="{{ 'marketplaceCommunication.blades.message-list.labels.edit-message' | translate }}"
-                            vc-focus="editMode.isActive"></textarea>
-                        <div>
-                            <button class="btn __cancel" ng-click="cancelEdit()">
-                                <span class="fa fa-times" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.message-list.buttons.cancel' | translate }}
-                            </button>
-                            <button class="btn" ng-click="submitEdit()" ng-disabled="!editMode.text">
-                                <span class="fa fa-paper-plane" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.message-list.buttons.save' | translate }}
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Actions -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                        <div class="form-group">
-                            <button class="btn" ng-click="showReplyForm()"
-                                    ng-if="!editMode.isActive && !replyForm.isVisible">
-                                <span class="fa fa-reply" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.message-list.buttons.reply' | translate }}
-                            </button>
-                            <button class="btn" ng-click="startEdit()"
-                                    ng-if="message.senderId === currentUser.id && message.answersCount === 0 && !editMode.isActive && !replyForm.isVisible">
-                                <span class="fa fa-pencil" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.message-list.buttons.edit' | translate }}
-                            </button>
-                            <button class="btn __cancel" ng-click="onDelete({message: message})"
-                                    ng-if="message.senderId === currentUser.id && message.answersCount === 0 && !editMode.isActive && !replyForm.isVisible">
-                                <span class="fa fa-trash-o" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.message-list.buttons.delete' | translate }}
-                            </button>
-                        </div>
-                        <div class="form-group">
-                            <button class="btn"
-                                    style="font-size: 12px;"
-                                    ng-if="hasReplies({message: message}) && !editMode.isActive && !replyForm.isVisible"
-                                    ng-click="onToggleReplies({message: message})">
-                            <span ng-if="message.isExpanded" class="fa fa-chevron-up" style="margin-right: 5px;"></span>
-                            <span ng-if="!message.isExpanded" class="fa fa-chevron-down" style="margin-right: 5px;"></span>
-                            <span ng-if="message.isExpanded" translate="marketplaceCommunication.blades.message-list.labels.hide-replies"></span>
-                            <span ng-if="!message.isExpanded"
-                                  translate="marketplaceCommunication.blades.message-list.labels.show-replies"
-                                  translate-values="{ count: message.answersCount }"></span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Reply form -->
-                    <div ng-if="replyForm.isVisible" style="margin-top: 10px; padding: 10px; border: 1px solid #dee9f0; border-radius: 4px;">
-                        <textarea
-                            ng-model="replyForm.text"
-                            style="width: -webkit-fill-available; min-height: 80px; margin-bottom: 10px; padding: 8px; font: inherit;"
-                            placeholder="{{ 'marketplaceCommunication.blades.message-list.labels.write-reply' | translate }}"
-                            vc-focus="replyForm.isVisible"></textarea>
-                        <div>
-                            <button class="btn __cancel" ng-click="hideReplyForm()">
-                                <span class="fa fa-times" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.message-list.buttons.cancel' | translate }}
-                            </button>
-                            <button class="btn" ng-click="submitReply()" ng-disabled="!replyForm.text">
-                                <span class="fa fa-paper-plane" style="margin-right: 5px;"></span>
-                                {{ 'marketplaceCommunication.blades.message-list.buttons.send' | translate }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Replies container -->
-            <div ng-if="hasReplies({message: message}) && message.isExpanded" style="position: relative; margin-left: 24px;">
-                <!-- Previous replies skeleton -->
-                <div ng-if="loadingStates.previous[message.id]"
-                     style="padding-bottom: 10px;">
-                    <div class="loading-skeleton" style="height: 60px; margin-bottom: 10px; background: #f0f0f0; border-radius: 4px; animation: pulse 1.5s infinite;">
-                        <div style="display: flex; gap: 10px; padding: 10px;">
-                            <div style="width: 40px; height: 40px; border-radius: 50%; background: #e0e0e0;"></div>
-                            <div style="flex-grow: 1;">
-                                <div style="width: 60%; height: 12px; background: #e0e0e0; margin-bottom: 8px;"></div>
-                                <div style="width: 40%; height: 12px; background: #e0e0e0;"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="loading-skeleton" style="height: 60px; background: #f0f0f0; border-radius: 4px; animation: pulse 1.5s infinite;">
-                        <div style="display: flex; gap: 10px; padding: 10px;">
-                            <div style="width: 40px; height: 40px; border-radius: 50%; background: #e0e0e0;"></div>
-                            <div style="flex-grow: 1;">
-                                <div style="width: 70%; height: 12px; background: #e0e0e0; margin-bottom: 8px;"></div>
-                                <div style="width: 50%; height: 12px; background: #e0e0e0;"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Previous replies loader -->
-                <div ng-if="!loadingStates.previous[message.id] && hasPreviousReplies"
-                     on-visible="loadPreviousReplies({message: message})"
-                     is-scrolling="parentController.blade.isScrollingToMessage"
-                     style="text-align: center; padding: 10px;">
-                </div>
-
-                <!-- Replies list -->
-                <div ng-repeat="reply in getMessageReplies({message: message})" style="position: relative;">
-                    <!-- Branch lines -->
-                    <div style="position: absolute; left: -24px; top: 0; bottom: 0;">
-                        <!-- Vertical line for non-last items -->
-                        <div ng-if="!$last"
-                             style="position: absolute; left: 0; top: 18px; bottom: 0; width: 1px; background-color: #dee9f0;"></div>
-                        <!-- Branch corner -->
-                        <div style="position: absolute; left: 0; top: -5px; width: 1px; height: 33px; background-color: #dee9f0;"></div>
-                        <div style="position: absolute; left: 0; top: 28px; width: 24px; height: 1px; background-color: #dee9f0;"></div>
-                    </div>
-
-                    <!-- Recursive message-tree -->
-                    <message-tree
-                        message="reply"
-                        current-user="currentUser"
-                        parent-controller="parentController"
-                        on-delete="onDelete({message: message})"
-                        on-edit="onEdit({message: message})"
-                        on-mark-read="onMarkRead({message: message})"
-                        on-toggle-replies="onToggleReplies({message: message})"
-                        get-message-replies="getMessageReplies({message: message})"
-                        has-replies="hasReplies({message: message})"
-                        has-more-replies="hasMoreReplies({message: message})"
-                        load-more-replies="loadMoreReplies({message: message})"
-                        has-previous-replies="hasPreviousReplies"
-                        load-previous-replies="loadPreviousReplies({message: message})"
-                        search-messages-loading="searchMessagesLoading">
-                    </message-tree>
-                </div>
-
-                <!-- Next replies skeleton -->
-                <div ng-if="loadingStates.more[message.id] && hasMoreReplies({message: message})"
-                     style="padding-top: 10px;">
-                    <div class="loading-skeleton" style="height: 60px; margin-bottom: 10px; background: #f0f0f0; border-radius: 4px; animation: pulse 1.5s infinite;">
-                        <div style="display: flex; gap: 10px; padding: 10px;">
-                            <div style="width: 40px; height: 40px; border-radius: 50%; background: #e0e0e0;"></div>
-                            <div style="flex-grow: 1;">
-                                <div style="width: 65%; height: 12px; background: #e0e0e0; margin-bottom: 8px;"></div>
-                                <div style="width: 45%; height: 12px; background: #e0e0e0;"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="loading-skeleton" style="height: 60px; background: #f0f0f0; border-radius: 4px; animation: pulse 1.5s infinite;">
-                        <div style="display: flex; gap: 10px; padding: 10px;">
-                            <div style="width: 40px; height: 40px; border-radius: 50%; background: #e0e0e0;"></div>
-                            <div style="flex-grow: 1;">
-                                <div style="width: 55%; height: 12px; background: #e0e0e0; margin-bottom: 8px;"></div>
-                                <div style="width: 35%; height: 12px; background: #e0e0e0;"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Next replies loader -->
-                <div ng-if="!loadingStates.more[message.id] && hasMoreReplies({message: message})"
-                     on-visible="loadMoreReplies({message: message})"
-                     is-scrolling="parentController.blade.isScrollingToMessage"
-                     style="text-align: center; padding: 10px;">
-                </div>
-            </div>
-        `,
-        link: function(scope, element, attrs) {
-            scope.replyForm = {
-                text: '',
-                isVisible: false
-            };
-
-            scope.editMode = {
-                isActive: false,
-                text: ''
-            };
-
-            scope.startEdit = function() {
-                scope.editMode.text = scope.message.content;
-                scope.editMode.isActive = true;
-                messageFormsService.openForm('edit-' + scope.message.id);
-            };
-
-            scope.cancelEdit = function() {
-                scope.editMode.isActive = false;
-                scope.editMode.text = '';
-            };
-
-            scope.showReplyForm = function() {
-                scope.replyForm.isVisible = true;
-                messageFormsService.openForm('reply-' + scope.message.id);
-            };
-
-            scope.hideReplyForm = function() {
-                if (messageFormsService.isFormActive('reply-' + scope.message.id)) {
-                    messageFormsService.closeAllForms();
-                }
-                scope.replyForm.isVisible = false;
-                scope.replyForm.text = '';
-            };
-
-            scope.submitReply = function() {
-                if (!scope.replyForm.text || !scope.replyForm.text.trim()) return;
-
-                // Call controller method directly
-                scope.parentController.sendReply(scope.message, scope.replyForm.text);
-                scope.hideReplyForm();
-            };
-
-            scope.submitEdit = function() {
-                if (!scope.editMode.text || !scope.editMode.text.trim()) return;
-
-                scope.parentController.updateMessage({
-                    message: scope.message,
-                    newContent: scope.editMode.text
-                });
-
-                scope.editMode.isActive = false;
-                scope.editMode.text = '';
-            };
-
-            scope.$watch(function() {
-                return messageFormsService.activeForm;
-            }, function(newFormId, oldFormId) {
-                // Only close forms if a different form is being opened
-                if (newFormId && newFormId !== oldFormId) {
-                    // Handle edit form
-                    if (scope.editMode.isActive && newFormId !== 'edit-' + scope.message.id) {
-                        scope.editMode.isActive = false;
-                        scope.editMode.text = '';
-                    }
-
-                    // Handle reply form
-                    if (scope.replyForm.isVisible && newFormId !== 'reply-' + scope.message.id) {
-                        scope.replyForm.isVisible = false;
-                        scope.replyForm.text = '';
-                    }
-                }
-            });
-
-            scope.delayedMarkRead = function(message) {
-                $timeout(function() {
-                    scope.onMarkRead({message: message});
-                }, 2000);
-            };
-
-            // Set default max lines
-            scope.maxLines = scope.maxLines || 4;
-            scope.isExpanded = false;
-            scope.needsExpansion = false;
-
-            // Check content height after content is rendered
-            $timeout(function() {
-                var contentElement = element[0].querySelector('.message-content');
-                if (contentElement) {
-                    var contentHeight = contentElement.scrollHeight;
-                    var lineHeight = 20; // matches the CSS line-height
-                    var maxHeight = scope.maxLines * lineHeight;
-                    scope.needsExpansion = contentHeight > maxHeight;
-                }
-            });
-
-            scope.toggleContent = function() {
-                scope.isExpanded = !scope.isExpanded;
-            };
-
-            $compile(element.contents())(scope);
-        }
-    };
-}])
 .factory('messageFormsService', function() {
     var service = {
         activeForm: null,  // 'root', 'edit-{messageId}', 'reply-{messageId}'
@@ -410,15 +17,15 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
     };
     return service;
 })
-    .controller('virtoCommerce.marketplaceCommunicationModule.messageListController',
-        ['$scope', '$timeout', 'virtoCommerce.marketplaceCommunicationModule.webApi',
-            'platformWebApp.dialogService', 'messageFormsService',
-            'virtoCommerce.marketplaceCommunicationModule.entityTypesResolverService',
-            'platformWebApp.bladeNavigationService',
-            function ($scope, $timeout, api,
-                dialogService, messageFormsService,
-                entityTypesResolverService,
-                bladeNavigationService) {
+.controller('virtoCommerce.marketplaceCommunicationModule.messageListController',
+    ['$scope', '$timeout', 'virtoCommerce.marketplaceCommunicationModule.webApi',
+        'platformWebApp.dialogService', 'messageFormsService',
+        'virtoCommerce.marketplaceCommunicationModule.entityTypesResolverService',
+        'platformWebApp.bladeNavigationService',
+        function ($scope, $timeout, api,
+            dialogService, messageFormsService,
+            entityTypesResolverService,
+            bladeNavigationService) {
 
         var blade = $scope.blade;
         blade.headIcon = 'fas fa-comment';
@@ -468,6 +75,9 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             previous: {},
             more: {}
         };
+
+        // memo
+        blade.searchCriteria = null;
 
         // Add this line to initialize the form state
         $scope.isFormExpanded = false;
@@ -550,6 +160,19 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             }
         }
 
+
+        function createSearchCriteria(options = {}) {
+            const defaultCriteria = {
+                entityId: blade.entityId,
+                entityType: blade.entityType,
+                conversationId: blade.conversationId,
+                responseGroup: 'Full'
+            };
+
+            return { ...defaultCriteria, ...options };
+        }
+
+
         $scope.sendReply = function(parentMessage, replyText) {
             if (!replyText || !replyText.trim()) {
                 return;
@@ -571,19 +194,15 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             };
 
             api.sendMessage(command, function () {
-                blade.parentBlade.refresh();
 
-                var searchCriteria = {
-                    entityId: blade.entityId,
-                    entityType: blade.entityType,
-                    conversationId: blade.conversationId,
+                const searchCriteria = createSearchCriteria({
                     threadId: parentMessage.id,
-                    responseGroup: 'Full',
                     take: 10,
                     sort: 'createdDate:desc'
-                };
+                });
 
                 api.searchMessages(searchCriteria, function(response) {
+
                     if (response && response.results) {
                         var threadId = parentMessage.id;
                         blade.threadsMap[threadId] = response.results.reverse();
@@ -640,15 +259,11 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         function loadThreadMessages(threadId, reset = true) {
             $scope.searchMessagesLoading = true;
 
-            var criteria = {
+            const criteria = createSearchCriteria({
                 threadId: threadId,
-                entityId: blade.entityId,
-                entityType: blade.entityType,
-                conversationId: blade.conversationId,
-                responseGroup: 'Full',
                 skip: reset ? 0 : (blade.threadPagesMap[threadId] - 1) * blade.threadPageSize,
                 take: blade.threadPageSize
-            };
+            });
 
             api.searchMessages(criteria, function(response) {
                 if (response && response.results) {
@@ -708,7 +323,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         }
 
         $scope.hasReplies = function(message) {
-            return message.answersCount && message.answersCount > 0;
+            return message && message.answersCount && message.answersCount > 0;
         };
 
         $scope.getMessageReplies = function(message) {
@@ -744,8 +359,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     replies.forEach(function(reply) {
                         const replyRecipient = reply.recipients?.find(r =>
                             r.recipientId === $scope.currentUser.id &&
-                            r.readStatus === 'New' &&
-                            reply.senderId !== $scope.currentUser.id
+                            r.readStatus === 'New'
                         );
 
                         if (replyRecipient) {
@@ -762,8 +376,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     if (rootMessage) {
                         const rootRecipient = rootMessage.recipients?.find(r =>
                             r.recipientId === $scope.currentUser.id &&
-                            r.readStatus === 'New' &&
-                            rootMessage.senderId !== $scope.currentUser.id
+                            r.readStatus === 'New'
                         );
 
                         if (rootRecipient) {
@@ -783,15 +396,11 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             blade.currentPage = 1;
             blade.hasMore = true;
 
-            var criteria = {
-                entityId: blade.entityId,
-                entityType: blade.entityType,
-                conversationId: blade.conversationId,
+            const criteria = createSearchCriteria({
                 rootsOnly: true,
                 skip: 0,
-                take: blade.pageSize,
-                responseGroup: 'Full'
-            };
+                take: blade.pageSize
+            });
 
             loadMessages(criteria, true);
             $scope.isInitialLoadComplete = true;
@@ -801,7 +410,6 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         $scope.loadMore = function() {
             if ($scope.isLoadingMore || blade.isScrollingToMessage) return;
 
-            // Calculate if we've loaded all items
             var currentPage = Math.ceil(blade.messages.length / blade.pageSize);
             var totalPages = Math.ceil(blade.totalCount / blade.pageSize);
 
@@ -810,15 +418,11 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 return;
             }
 
-            var criteria = {
-                entityId: blade.entityId,
-                entityType: blade.entityType,
-                conversationId: blade.conversationId,
+            const criteria = createSearchCriteria({
                 rootsOnly: true,
                 skip: blade.messages.length,
-                take: blade.pageSize,
-                responseGroup: 'Full'
-            };
+                take: blade.pageSize
+            });
 
             $scope.isLoadingMore = true;
 
@@ -855,16 +459,12 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             var currentReplies = blade.threadsMap[threadId] || [];
             if ($scope.threadLoadingStates.more[threadId] || blade.isScrollingToMessage) return;
 
-            var criteria = {
+            const criteria = createSearchCriteria({
                 threadId: threadId,
-                entityId: blade.entityId,
-                entityType: blade.entityType,
-                conversationId: blade.conversationId,
-                responseGroup: 'Full',
                 skip: currentReplies.length,
                 take: blade.threadPageSize,
                 sort: 'createdDate:asc'
-            };
+            });
 
             $scope.threadLoadingStates.more[threadId] = true;
 
@@ -887,24 +487,21 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         };
 
         $scope.loadPreviousMessages = function() {
-            if ($scope.isLoadingPrevious || blade.isScrollingToMessage) return;
+            if ($scope.isLoadingPrevious || blade.isScrollingToMessage) {
+                return;
+            }
 
-            var criteria = {
-                entityId: blade.entityId,
-                entityType: blade.entityType,
-                conversationId: blade.conversationId,
+            const criteria = createSearchCriteria({
                 rootsOnly: true,
                 skip: blade.messages.length,
                 take: blade.pageSize,
-                responseGroup: 'Full',
                 sort: 'createdDate:desc'
-            };
+            });
 
             $scope.isLoadingPrevious = true;
 
             api.searchMessages(criteria, function(response) {
                 if (response && response.results) {
-                    // Add messages to the beginning of the array
                     blade.messages = response.results.reverse().concat(blade.messages);
                     blade.totalCount = response.totalCount;
                     blade.hasPrevious = blade.messages.length < response.totalCount;
@@ -919,30 +516,25 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         $scope.loadPreviousReplies = function(message) {
             var threadId = message.threadId || message.id;
             var currentReplies = blade.threadsMap[threadId] || [];
-            if ($scope.threadLoadingStates.previous[threadId] || blade.isScrollingToMessage) return;
 
-            var criteria = {
+            if ($scope.threadLoadingStates.previous[threadId] || blade.isScrollingToMessage) {
+                return;
+            }
+
+            const criteria = createSearchCriteria({
                 threadId: threadId,
-                entityId: blade.entityId,
-                entityType: blade.entityType,
-                conversationId: blade.conversationId,
-                responseGroup: 'Full',
                 skip: currentReplies.length,
                 take: blade.threadPageSize,
                 sort: 'createdDate:desc'
-            };
+            });
 
             $scope.threadLoadingStates.previous[threadId] = true;
 
             api.searchMessages(criteria, function(response) {
                 if (response && response.results) {
-                    // Add replies to the beginning of the array
                     blade.threadsMap[threadId] = response.results.reverse().concat(blade.threadsMap[threadId] || []);
                     blade.threadTotalCounts[threadId] = response.totalCount;
-
-                    // Update flag for previous messages
                     blade.threadHasPrevious[threadId] = blade.threadsMap[threadId].length < response.totalCount;
-
                     loadUserInfoForMessages(response.results);
                 }
             }).$promise.finally(function() {
@@ -991,20 +583,19 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 }
             };
 
+
+
             api.sendMessage(command, function() {
                 $scope.cancelMessage();
 
-                blade.parentBlade.refresh();
-
-                var searchCriteria = {
-                    entityId: blade.entityId,
-                    entityType: blade.entityType,
-                    conversationId: blade.conversationId,
+                const searchCriteria = createSearchCriteria({
                     rootsOnly: true,
-                    responseGroup: 'Full',
                     take: 20,
                     sort: 'createdDate:desc'
-                };
+                });
+
+                blade.searchCriteria = angular.copy(searchCriteria);
+
 
                 api.searchMessages(searchCriteria, function(response) {
                     if (response && response.results) {
@@ -1028,6 +619,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     }
                 }).$promise.finally(function() {
                     blade.isLoading = false;
+                    // blade.parentBlade.refresh();
                 });
             });
         };
@@ -1109,33 +701,33 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             dialogService.showConfirmationDialog(dialog);
         };
 
-        $scope.updateMessage = function(args) {
-            if (!args.newContent || !args.newContent.trim()) return;
+        $scope.updateMessage = function(params) {
+
+            if (!params || !params.message || !params.newContent) {
+                console.error('Invalid params:', params);
+                return;
+            }
 
             blade.isLoading = true;
 
             var command = {
-                messageId: args.message.id,
-                content: args.newContent.trim()
+                messageId: params.message.id,
+                content: params.newContent.trim()
             };
 
             api.updateMessage(command, function(response) {
-                // Update message content
-                args.message.content = args.newContent.trim();
+                params.message.content = params.newContent.trim();
 
-                // If this is a root message
-                if (!args.message.threadId) {
-                    var index = blade.messages.findIndex(m => m.id === args.message.id);
+                if (!params.message.threadId) {
+                    var index = blade.messages.findIndex(m => m.id === params.message.id);
                     if (index !== -1) {
-                        blade.messages[index].content = args.newContent.trim();
+                        blade.messages[index].content = params.newContent.trim();
                     }
-                }
-                // If this is a reply
-                else {
-                    var threadMessages = blade.threadsMap[args.message.threadId] || [];
-                    var replyIndex = threadMessages.findIndex(m => m.id === args.message.id);
+                } else {
+                    var threadMessages = blade.threadsMap[params.message.threadId] || [];
+                    var replyIndex = threadMessages.findIndex(m => m.id === params.message.id);
                     if (replyIndex !== -1) {
-                        threadMessages[replyIndex].content = args.newContent.trim();
+                        threadMessages[replyIndex].content = params.newContent.trim();
                     }
                 }
             }).$promise.finally(function() {
@@ -1152,17 +744,15 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             blade.currentPage = 1;
             blade.hasMore = true;
 
-            var criteria = {
-                entityId: blade.entityId,
-                entityType: blade.entityType,
-                conversationId: blade.conversationId,
+            const criteria = blade.searchCriteria ? angular.copy(blade.searchCriteria) : createSearchCriteria({
                 rootsOnly: true,
                 skip: 0,
-                take: blade.pageSize,
-                responseGroup: 'Full'
-            };
+                take: blade.pageSize
+            });
 
             loadMessages(criteria, true);
+
+            blade.searchCriteria = null;
             $scope.isInitialLoadComplete = true;
         };
 
@@ -1183,3 +773,4 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             }
         });
     }]);
+

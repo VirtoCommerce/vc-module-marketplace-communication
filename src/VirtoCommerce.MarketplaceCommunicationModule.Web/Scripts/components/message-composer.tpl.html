@@ -1,0 +1,28 @@
+<div class="message-composer">
+    <div class="message-composer__collapsed"
+         ng-if="!$ctrl.isExpanded"
+         ng-click="$ctrl.onExpand()">
+        {{ 'marketplaceCommunication.blades.message-list.labels.start-conversation' | translate }}
+    </div>
+
+    <div class="message-composer__expanded" ng-if="$ctrl.isExpanded">
+        <textarea
+            class="message-composer__input"
+            ng-model="$ctrl.message"
+            placeholder="{{ 'marketplaceCommunication.blades.message-list.labels.enter-message' | translate }}"
+            vc-focus="$ctrl.isExpanded">
+        </textarea>
+        <div class="message-composer__actions">
+            <button class="btn __cancel" ng-click="$ctrl.onCancel()">
+                <span class="fa fa-times"></span>
+                {{ 'marketplaceCommunication.blades.message-list.buttons.cancel' | translate }}
+            </button>
+            <button class="btn"
+                    ng-click="$ctrl.onSend()"
+                    ng-disabled="!$ctrl.message || $ctrl.isLoading">
+                <span class="fa fa-paper-plane"></span>
+                {{ $ctrl.isLoading ? ('marketplaceCommunication.blades.message-list.labels.sending' | translate) : ('marketplaceCommunication.blades.message-list.labels.send' | translate) }}
+            </button>
+        </div>
+    </div>
+</div>

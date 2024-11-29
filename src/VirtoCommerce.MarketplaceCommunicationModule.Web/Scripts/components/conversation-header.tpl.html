@@ -1,0 +1,12 @@
+<div class="conversation-header">
+    <em class="conversation-header__image" ng-attr-title="{{ $ctrl.conversation.name }}">
+        <i class="table-ico" ng-if="$ctrl.conversation.iconUrl">
+            <img class="conversation-header__icon"
+                 fallback-src="{{ $ctrl.conversation.iconUrl }}"
+                 ng-src="{{ $ctrl.conversation.iconUrl | thumbnail: '_64x64' }}">
+        </i>
+    </em>
+    <a class="conversation-header__link" ng-click="onClick()">
+        <label class="conversation-header__title">{{ $ctrl.conversation.name }}</label>
+    </a>
+</div>

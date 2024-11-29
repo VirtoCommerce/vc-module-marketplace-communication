@@ -6,6 +6,16 @@ if (AppDependencies !== undefined) {
 }
 
 angular.module(moduleName, [])
+    .directive('onVisible', require('./directives/onVisible'))
+    .directive('vcFocus', require('./directives/vcFocus'))
+
+    .component('message-tree', require('./components/message-tree.component'))
+    .component('conversation-header', require('./components/conversation-header.component'))
+    .component('empty-state', require('./components/empty-state.component'))
+    .component('messages-container', require('./components/messages-container.component'))
+    .component('message-composer', require('./components/message-composer.component'))
+    .component('message-skeleton', require('./components/message-skeleton.component'))
+
     .config(['$stateProvider',
         function ($stateProvider) {
             $stateProvider
@@ -114,4 +124,5 @@ angular.module(moduleName, [])
             });
 
         }
-    ]);
+    ])
+

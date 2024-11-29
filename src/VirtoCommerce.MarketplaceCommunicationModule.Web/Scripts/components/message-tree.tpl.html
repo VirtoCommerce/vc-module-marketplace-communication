@@ -1,0 +1,228 @@
+<div
+  class="message-item"
+  ng-class="{'message-item--selected': $ctrl.message.id === $ctrl.selectedMessageId}"
+  data-message-id="{{$ctrl.message.id}}"
+  is-scrolling="$ctrl.parentController.blade.isScrollingToMessage"
+>
+
+  <div>
+    <!-- Header with avatar and user info -->
+    <div
+      class="message-header"
+    >
+      <div class="message-user">
+        <div class="message-avatar" ng-if="$ctrl.message.senderInfo.avatarUrl">
+          <img
+            ng-src="{{$ctrl.message.senderInfo.avatarUrl}}"
+            alt="{{ 'marketplaceCommunication.blades.message-list.labels.user-avatar' | translate }}"
+          />
+        </div>
+        <div class="message-avatar message-avatar--placeholder" ng-if="!$ctrl.message.senderInfo.avatarUrl">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="message-user-info">
+          <span class="message-username">
+            {{$ctrl.message.senderInfo.userName || $ctrl.message.senderId}}
+          </span>
+          <span class="message-timestamp" am-time-ago="$ctrl.message.createdDate"></span>
+        </div>
+      </div>
+      <div class="message-unread-dot"
+           ng-if="$ctrl.shouldShowUnreadDot($ctrl.message)"
+           on-visible="$ctrl.delayedMarkRead($ctrl.message)">
+      </div>
+    </div>
+
+    <!-- Message content -->
+    <div class="message-content-wrapper" ng-if="!$ctrl.editMode.isActive">
+      <div
+        class="message-content"
+        ng-class="{'message-content--expanded': $ctrl.isExpanded}"
+        ng-style="!$ctrl.isExpanded && {'max-height': $ctrl.maxLines * 20 + 'px'}"
+      >
+        <div>{{$ctrl.message.content}}</div>
+        <div class="message-content__gradient"
+             ng-if="!$ctrl.isExpanded && $ctrl.needsExpansion">
+        </div>
+      </div>
+      <div class="message-expand-toggle"
+           ng-if="$ctrl.needsExpansion"
+           ng-click="$ctrl.toggleContent()">
+        <span ng-if="!$ctrl.isExpanded">
+          <i class="fa fa-chevron-down message-icon"></i>
+          {{ 'marketplaceCommunication.blades.message-list.labels.show-more' |
+          translate }}
+        </span>
+        <span ng-if="$ctrl.isExpanded">
+          <i class="fa fa-chevron-up message-icon"></i>
+          {{ 'marketplaceCommunication.blades.message-list.labels.show-less' |
+          translate }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Edit form -->
+    <div class="message-edit-form" ng-if="$ctrl.editMode.isActive">
+      <textarea
+        class="message-edit-textarea"
+        ng-model="$ctrl.editMode.text"
+        placeholder="{{ 'marketplaceCommunication.blades.message-list.labels.edit-message' | translate }}"
+        vc-focus="$ctrl.editMode.isActive"
+      ></textarea>
+      <div>
+        <button class="btn __cancel" ng-click="$ctrl.cancelEdit()">
+          <span class="fa fa-times message-icon"></span>
+          {{ 'marketplaceCommunication.blades.message-list.buttons.cancel' |
+          translate }}
+        </button>
+        <button
+          class="btn"
+          ng-click="$ctrl.submitEdit()"
+          ng-disabled="!$ctrl.editMode.text"
+        >
+          <span class="fa fa-paper-plane message-icon"></span>
+          {{ 'marketplaceCommunication.blades.message-list.buttons.save' |
+          translate }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="message-actions">
+      <div class="form-group">
+        <button
+          class="btn"
+          ng-click="$ctrl.showReplyForm()"
+          ng-if="!$ctrl.editMode.isActive && !$ctrl.replyForm.isVisible"
+        >
+          <span class="fa fa-reply message-icon"></span>
+          {{ 'marketplaceCommunication.blades.message-list.buttons.reply' |
+          translate }}
+        </button>
+        <button
+          class="btn"
+          ng-click="$ctrl.startEdit()"
+          ng-if="$ctrl.message.senderId === $ctrl.currentUser.id && $ctrl.message.answersCount === 0 && !$ctrl.editMode.isActive && !$ctrl.replyForm.isVisible"
+        >
+          <span class="fa fa-pencil message-icon"></span>
+          {{ 'marketplaceCommunication.blades.message-list.buttons.edit' |
+          translate }}
+        </button>
+        <button
+          class="btn __cancel"
+          ng-click="$ctrl.onDelete({message: $ctrl.message})"
+          ng-if="$ctrl.message.senderId === $ctrl.currentUser.id && $ctrl.message.answersCount === 0 && !$ctrl.editMode.isActive && !$ctrl.replyForm.isVisible"
+        >
+          <span class="fa fa-trash-o message-icon"></span>
+          {{ 'marketplaceCommunication.blades.message-list.buttons.delete' |
+          translate }}
+        </button>
+      </div>
+      <div class="form-group">
+        <button
+          class="btn message-button-small"
+          ng-if="$ctrl.checkHasReplies($ctrl.message) && !$ctrl.editMode.isActive && !$ctrl.replyForm.isVisible"
+          ng-click="$ctrl.onToggleReplies({message: $ctrl.message})"
+        >
+          <span ng-if="$ctrl.message.isExpanded" class="fa fa-chevron-up message-icon"></span>
+          <span ng-if="!$ctrl.message.isExpanded" class="fa fa-chevron-down message-icon"></span>
+          <span ng-if="$ctrl.message.isExpanded"
+                translate="marketplaceCommunication.blades.message-list.labels.hide-replies">
+          </span>
+          <span ng-if="!$ctrl.message.isExpanded"
+                translate="marketplaceCommunication.blades.message-list.labels.show-replies"
+                translate-values="{ count: $ctrl.message.answersCount }">
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Reply form -->
+    <div class="message-reply-form" ng-if="$ctrl.replyForm.isVisible">
+      <textarea
+        class="message-edit-textarea"
+        ng-model="$ctrl.replyForm.text"
+        placeholder="{{ 'marketplaceCommunication.blades.message-list.labels.write-reply' | translate }}"
+        vc-focus="$ctrl.replyForm.isVisible"
+      ></textarea>
+      <div>
+        <button class="btn __cancel" ng-click="$ctrl.hideReplyForm()">
+          <span class="fa fa-times message-icon"></span>
+          {{ 'marketplaceCommunication.blades.message-list.buttons.cancel' |
+          translate }}
+        </button>
+        <button
+          class="btn"
+          ng-click="$ctrl.submitReply()"
+          ng-disabled="!$ctrl.replyForm.text"
+        >
+          <span class="fa fa-paper-plane message-icon"></span>
+          {{ 'marketplaceCommunication.blades.message-list.buttons.send' |
+          translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Replies container -->
+<div class="message-replies"
+     ng-if="$ctrl.checkHasReplies($ctrl.message) && $ctrl.message.isExpanded">
+
+  <!-- Previous replies loader -->
+  <div class="message-loader"
+       ng-if="$ctrl.shouldShowPreviousLoader()"
+       on-visible="$ctrl.onPreviousLoaderVisible()"
+       is-scrolling="$ctrl.parentController.blade.isScrollingToMessage">
+  </div>
+
+  <!-- Previous replies skeleton -->
+  <message-skeleton
+      ng-if="$ctrl.isLoadingPrevious($ctrl.message.id)"
+      count="2">
+  </message-skeleton>
+
+  <!-- Replies list -->
+  <div class="message-replies-container"
+       ng-repeat="reply in $ctrl.getMessageReplies({message: $ctrl.message})">
+    <div class="message-branch">
+      <div class="message-branch__vertical" ng-if="!$last"></div>
+      <div class="message-branch__corner"></div>
+      <div class="message-branch__horizontal"></div>
+    </div>
+
+    <!-- Recursive message-tree -->
+    <message-tree
+      message="reply"
+      current-user="$ctrl.currentUser"
+      parent-controller="$ctrl.parentController"
+      on-delete="$ctrl.onDelete({message: reply})"
+      on-edit="$ctrl.onEdit({message: reply})"
+      on-mark-read="$ctrl.onMarkRead({message: reply})"
+      on-toggle-replies="$ctrl.onToggleReplies({message: reply})"
+      get-message-replies="$ctrl.getMessageReplies({message: reply})"
+      has-replies="$ctrl.hasReplies({message: reply})"
+      has-more-replies="$ctrl.hasMoreReplies({message: reply})"
+      load-more-replies="$ctrl.loadMoreReplies({message: reply})"
+      has-previous-replies="$ctrl.hasPreviousReplies"
+      load-previous-replies="$ctrl.loadPreviousReplies({message: reply})"
+      search-messages-loading="$ctrl.searchMessagesLoading"
+      send-reply="$ctrl.sendReply({message: reply, text: text})"
+      update-message="$ctrl.updateMessage({params: params})"
+      should-show-unread-dot="$ctrl.shouldShowUnreadDot({message: reply})"
+    >
+    </message-tree>
+  </div>
+
+  <!-- Next replies skeleton -->
+  <message-skeleton
+      ng-if="$ctrl.isLoadingMore($ctrl.message.id) && $ctrl.hasMoreReplies({message: $ctrl.message})"
+      count="2">
+  </message-skeleton>
+  <!-- Next replies loader -->
+  <div class="message-loader"
+       ng-if="!$ctrl.isLoadingMore($ctrl.message.id) && $ctrl.hasMoreReplies({message: $ctrl.message})"
+       on-visible="$ctrl.loadMoreReplies({message: $ctrl.message})"
+       is-scrolling="$ctrl.parentController.blade.isScrollingToMessage">
+  </div>
+</div>

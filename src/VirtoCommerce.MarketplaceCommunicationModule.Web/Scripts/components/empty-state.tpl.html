@@ -1,0 +1,10 @@
+<div class="empty-state">
+    <i class="empty-state__icon fas fa-comment"></i>
+    <div class="empty-state__text">
+        {{ 'marketplaceCommunication.blades.message-list.labels.no-messages' | translate }}
+    </div>
+    <button class="btn empty-state__button" ng-click="$ctrl.onStart()">
+        <span class="fa fa-plus"></span>
+        {{ 'marketplaceCommunication.blades.message-list.buttons.start-conversation' | translate }}
+    </button>
+</div>

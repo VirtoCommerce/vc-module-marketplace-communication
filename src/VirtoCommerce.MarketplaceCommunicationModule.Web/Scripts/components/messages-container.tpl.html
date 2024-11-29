@@ -1,0 +1,41 @@
+<div class="messages-container">
+
+    <div class="messages-container__loader"
+         ng-if="!$ctrl.isLoadingPrevious && $ctrl.hasPrevious"
+         on-visible="$ctrl.onLoadPrevious()"
+         is-scrolling="$ctrl.isScrollingToMessage">
+        {{ 'marketplaceCommunication.blades.message-list.labels.loading-previous' | translate }}
+    </div>
+
+    <message-skeleton ng-if="$ctrl.isLoadingPrevious" count="2"></message-skeleton>
+
+    <message-tree
+        ng-repeat="message in $ctrl.messages"
+        message="message"
+        current-user="$ctrl.currentUser"
+        parent-controller="$ctrl"
+        loading-states="$ctrl.threadLoadingStates"
+        on-delete="$ctrl.deleteMessage({message: message})"
+        on-edit="$ctrl.editMessage({message: message})"
+        on-mark-read="$ctrl.markAsRead({message: message})"
+        on-toggle-replies="$ctrl.toggleReplies({message: message})"
+        get-message-replies="$ctrl.getMessageReplies({message: message})"
+        has-replies="$ctrl.hasReplies({message: message})"
+        has-more-replies="$ctrl.hasMoreReplies({message: message})"
+        load-more-replies="$ctrl.loadMoreReplies({message: message})"
+        has-previous-replies="$ctrl.hasPreviousReplies({message: message})"
+        load-previous-replies="$ctrl.loadPreviousReplies({message: message})"
+        search-messages-loading="$ctrl.searchMessagesLoading"
+        should-show-unread-dot="$ctrl.shouldShowUnreadDot({message: message})"
+        send-reply="$ctrl.sendReply({message: message, text: text})"
+        update-message="$ctrl.handleUpdateMessage(params)">
+    </message-tree>
+
+    <message-skeleton ng-if="$ctrl.isLoadingMore" count="2"></message-skeleton>
+
+    <div class="messages-container__loader"
+         ng-if="!$ctrl.isLoadingMore && $ctrl.hasMore && $ctrl.messages.length < $ctrl.totalCount"
+         on-visible="$ctrl.onLoadMore()"
+         is-scrolling="$ctrl.isScrollingToMessage">
+    </div>
+</div>
