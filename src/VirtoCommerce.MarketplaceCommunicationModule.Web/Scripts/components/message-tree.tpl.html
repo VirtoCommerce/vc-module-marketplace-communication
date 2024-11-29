@@ -169,50 +169,49 @@
 <div class="message-replies"
      ng-if="$ctrl.checkHasReplies($ctrl.message) && $ctrl.message.isExpanded">
 
-  <!-- Previous replies loader -->
+    <!-- Previous replies loader -->
   <div class="message-loader"
        ng-if="$ctrl.shouldShowPreviousLoader()"
-       on-visible="$ctrl.onPreviousLoaderVisible()"
+         on-visible="$ctrl.onPreviousLoaderVisible()"
        is-scrolling="$ctrl.parentController.blade.isScrollingToMessage">
-  </div>
+    </div>
 
-  <!-- Previous replies skeleton -->
+    <!-- Previous replies skeleton -->
   <message-skeleton
       ng-if="$ctrl.isLoadingPrevious($ctrl.message.id)"
       count="2">
   </message-skeleton>
 
-  <!-- Replies list -->
-  <div class="message-replies-container"
-       ng-repeat="reply in $ctrl.getMessageReplies({message: $ctrl.message})">
-    <div class="message-branch">
-      <div class="message-branch__vertical" ng-if="!$last"></div>
-      <div class="message-branch__corner"></div>
-      <div class="message-branch__horizontal"></div>
-    </div>
-
-    <!-- Recursive message-tree -->
-    <message-tree
-      message="reply"
-      current-user="$ctrl.currentUser"
-      parent-controller="$ctrl.parentController"
-      on-delete="$ctrl.onDelete({message: reply})"
-      on-edit="$ctrl.onEdit({message: reply})"
-      on-mark-read="$ctrl.onMarkRead({message: reply})"
-      on-toggle-replies="$ctrl.onToggleReplies({message: reply})"
-      get-message-replies="$ctrl.getMessageReplies({message: reply})"
-      has-replies="$ctrl.hasReplies({message: reply})"
-      has-more-replies="$ctrl.hasMoreReplies({message: reply})"
-      load-more-replies="$ctrl.loadMoreReplies({message: reply})"
-      has-previous-replies="$ctrl.hasPreviousReplies"
-      load-previous-replies="$ctrl.loadPreviousReplies({message: reply})"
-      search-messages-loading="$ctrl.searchMessagesLoading"
-      send-reply="$ctrl.sendReply({message: reply, text: text})"
-      update-message="$ctrl.updateMessage({params: params})"
-      should-show-unread-dot="$ctrl.shouldShowUnreadDot({message: reply})"
-    >
-    </message-tree>
-  </div>
+    <!-- Replies list -->
+    <div class="message-replies-container"
+         ng-repeat="reply in $ctrl.getMessageReplies({message: $ctrl.message})">
+        <div class="message-branch-wrapper">
+            <div class="message-branch">
+                <div class="message-branch__line"></div>
+            </div>
+            <message-tree
+                style="width: 100%;"
+                message="reply"
+                current-user="$ctrl.currentUser"
+                parent-controller="$ctrl.parentController"
+                on-delete="$ctrl.onDelete({message: reply})"
+                on-edit="$ctrl.onEdit({message: reply})"
+                on-mark-read="$ctrl.onMarkRead({message: reply})"
+                on-toggle-replies="$ctrl.onToggleReplies({message: reply})"
+                get-message-replies="$ctrl.getMessageReplies({message: reply})"
+                has-replies="$ctrl.hasReplies({message: reply})"
+                has-more-replies="$ctrl.hasMoreReplies({message: reply})"
+                load-more-replies="$ctrl.loadMoreReplies({message: reply})"
+                has-previous-replies="$ctrl.hasPreviousReplies"
+                load-previous-replies="$ctrl.loadPreviousReplies({message: reply})"
+                search-messages-loading="$ctrl.searchMessagesLoading"
+                send-reply="$ctrl.sendReply({message: reply, text: text})"
+                update-message="$ctrl.updateMessage({params: params})"
+                should-show-unread-dot="$ctrl.shouldShowUnreadDot({message: reply})"
+            >
+            </message-tree>
+        </div>
+        </div>
 
   <!-- Next replies skeleton -->
   <message-skeleton
@@ -224,5 +223,5 @@
        ng-if="!$ctrl.isLoadingMore($ctrl.message.id) && $ctrl.hasMoreReplies({message: $ctrl.message})"
        on-visible="$ctrl.loadMoreReplies({message: $ctrl.message})"
        is-scrolling="$ctrl.parentController.blade.isScrollingToMessage">
-  </div>
+    </div>
 </div>
