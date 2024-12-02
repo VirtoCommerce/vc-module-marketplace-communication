@@ -345,7 +345,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             // - no recipient record exists
             // - message was sent by current user
             // - message is already read
-            if (!recipientRecord || message.senderId === $scope.currentUser.id) {
+            if (!recipientRecord) {
                 return;
             }
 
@@ -625,7 +625,11 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         };
 
         $scope.shouldShowUnreadDot = function(message) {
-            if (!message.recipients || message.senderId === $scope.currentUser.id) {
+            if (!message) {
+                return false;
+            }
+
+            if (!message.recipients) {
                 return false;
             }
 

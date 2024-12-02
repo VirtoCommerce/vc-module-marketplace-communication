@@ -6,8 +6,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('conver
     },
     controller: ['$scope', function($scope) {
         var $ctrl = this;
+
         
-        $scope.conversation = $ctrl.conversation;
-        $scope.onClick = $ctrl.onClick;
     }]
 });

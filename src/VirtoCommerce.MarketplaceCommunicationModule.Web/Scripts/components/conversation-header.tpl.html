@@ -6,7 +6,7 @@
                  ng-src="{{ $ctrl.conversation.iconUrl | thumbnail: '_64x64' }}">
         </i>
     </em>
-    <a class="conversation-header__link" ng-click="onClick()">
+    <a class="conversation-header__link" ng-click="$ctrl.onClick()">
         <label class="conversation-header__title">{{ $ctrl.conversation.name }}</label>
     </a>
 </div>

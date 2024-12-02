@@ -10,7 +10,7 @@
     <message-skeleton ng-if="$ctrl.isLoadingPrevious" count="2"></message-skeleton>
 
     <message-tree
-        ng-repeat="message in $ctrl.messages"
+        ng-repeat="message in $ctrl.messages track by message.id"
         message="message"
         current-user="$ctrl.currentUser"
         parent-controller="$ctrl"
@@ -26,8 +26,8 @@
         has-previous-replies="$ctrl.hasPreviousReplies({message: message})"
         load-previous-replies="$ctrl.loadPreviousReplies({message: message})"
         search-messages-loading="$ctrl.searchMessagesLoading"
-        should-show-unread-dot="$ctrl.shouldShowUnreadDot({message: message})"
-        send-reply="$ctrl.sendReply({message: message, text: text})"
+        on-should-show-unread-dot="$ctrl.shouldShowUnreadDot({message: message})"
+        on-send-reply="$ctrl.onSendReply({message: message, text: text})"
         update-message="$ctrl.handleUpdateMessage(params)">
     </message-tree>
 

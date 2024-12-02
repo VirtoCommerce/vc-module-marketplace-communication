@@ -184,7 +184,7 @@
 
     <!-- Replies list -->
     <div class="message-replies-container"
-         ng-repeat="reply in $ctrl.getMessageReplies({message: $ctrl.message})">
+         ng-repeat="reply in $ctrl.getMessageReplies({message: $ctrl.message}) track by reply.id">
         <div class="message-branch-wrapper">
             <div class="message-branch">
                 <div class="message-branch__line"></div>
@@ -194,20 +194,20 @@
                 message="reply"
                 current-user="$ctrl.currentUser"
                 parent-controller="$ctrl.parentController"
-                on-delete="$ctrl.onDelete({message: reply})"
-                on-edit="$ctrl.onEdit({message: reply})"
-                on-mark-read="$ctrl.onMarkRead({message: reply})"
-                on-toggle-replies="$ctrl.onToggleReplies({message: reply})"
-                get-message-replies="$ctrl.getMessageReplies({message: reply})"
-                has-replies="$ctrl.hasReplies({message: reply})"
-                has-more-replies="$ctrl.hasMoreReplies({message: reply})"
-                load-more-replies="$ctrl.loadMoreReplies({message: reply})"
+                on-delete="$ctrl.onDelete({message: message})"
+                on-edit="$ctrl.onEdit({message: message})"
+                on-mark-read="$ctrl.onMarkRead({message: message})"
+                on-toggle-replies="$ctrl.onToggleReplies({message: message})"
+                get-message-replies="$ctrl.getMessageReplies({message: message})"
+                has-replies="$ctrl.hasReplies({message: message})"
+                has-more-replies="$ctrl.hasMoreReplies({message: message})"
+                load-more-replies="$ctrl.loadMoreReplies({message: message})"
                 has-previous-replies="$ctrl.hasPreviousReplies"
-                load-previous-replies="$ctrl.loadPreviousReplies({message: reply})"
+                load-previous-replies="$ctrl.loadPreviousReplies({message: message})"
                 search-messages-loading="$ctrl.searchMessagesLoading"
-                send-reply="$ctrl.sendReply({message: reply, text: text})"
+                on-send-reply="$ctrl.onSendReply({message: message, text: text})"
                 update-message="$ctrl.updateMessage({params: params})"
-                should-show-unread-dot="$ctrl.shouldShowUnreadDot({message: reply})"
+                on-should-show-unread-dot="$ctrl.shouldShowUnreadDot(message)"
             >
             </message-tree>
         </div>

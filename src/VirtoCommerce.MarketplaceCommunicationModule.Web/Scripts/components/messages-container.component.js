@@ -29,7 +29,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
     controller: ['$scope', function($scope) {
         var $ctrl = this;
 
-        $ctrl.sendReply = function(message, text) {
+        $ctrl.onSendReply = function({message, text}) {
             return $ctrl.sendReply({
                 message: message,
                 text: text
@@ -88,6 +88,9 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
         };
 
         $ctrl.shouldShowUnreadDot = function(message) {
+            if (!message) {
+                return false;
+            }
             return $ctrl.shouldShowUnreadDot({message: message});
         };
     }]

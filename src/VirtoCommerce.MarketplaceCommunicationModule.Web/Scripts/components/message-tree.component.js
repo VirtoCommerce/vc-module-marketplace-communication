@@ -16,9 +16,9 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         hasPreviousReplies: '<',
         loadPreviousReplies: '&',
         loadingStates: '<',
-        shouldShowUnreadDot: '&',
+        onShouldShowUnreadDot: '&',
         maxLines: '<?',
-        sendReply: '&',
+        onSendReply: '&',
         updateMessage: '&'
     },
     templateUrl: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/components/message-tree.tpl.html',
@@ -75,7 +75,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 $ctrl.onToggleReplies({message: $ctrl.message});
             }
 
-            $ctrl.sendReply({
+            $ctrl.onSendReply({
                 message: $ctrl.message,
                 text: $ctrl.replyForm.text
             });
@@ -101,7 +101,9 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             $ctrl.editMode.isActive = false;
             $ctrl.editMode.text = '';
         };
+
         $ctrl.delayedMarkRead = function(message) {
+
             $timeout(function() {
                 $ctrl.onMarkRead({message: message});
             }, 2000);
@@ -171,6 +173,13 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     message: $ctrl.message
                 });
             }
+        };
+
+        $ctrl.shouldShowUnreadDot = function(message) {
+            if (!message) {
+                return false;
+            }
+            return $ctrl.onShouldShowUnreadDot({message: message});
         };
     }]
 });
