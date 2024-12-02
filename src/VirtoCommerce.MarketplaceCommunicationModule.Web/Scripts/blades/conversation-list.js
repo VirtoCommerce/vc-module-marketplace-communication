@@ -19,7 +19,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             $scope.hasMore = true;
             var filter = blade.filter = $scope.filter = {};
 
-            blade.refresh = function () {
+            blade.refresh = function (needRefreshChildBlade) {
                 blade.isLoading = true;
 
                 if ($scope.pageSettings.currentPage !== 1)
@@ -53,7 +53,9 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
                         if (blade.childBlade && blade.selectedItem) {
                             blade.childBlade.currentEntity = blade.selectedItem;
-                            blade.childBlade.refresh();
+                            if (needRefreshChildBlade) {
+                                blade.childBlade.refresh();
+                            };
                         }
                     });
                 });
@@ -64,7 +66,9 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             blade.toolbarCommands = [
                 {
                     name: "platform.commands.refresh", icon: 'fa fa-refresh',
-                    executeMethod: blade.refresh,
+                    executeMethod: function () {
+                        blade.refresh(true);
+                    },
                     canExecuteMethod: function () {
                         return true;
                     }
@@ -131,7 +135,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 if ($scope.pageSettings.currentPage > 1) {
                     $scope.pageSettings.currentPage = 1;
                 } else {
-                    blade.refresh();
+                    blade.refresh(true);
                 }
             };
 
