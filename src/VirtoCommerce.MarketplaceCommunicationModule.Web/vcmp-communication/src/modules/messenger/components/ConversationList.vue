@@ -40,18 +40,31 @@
       >
         <div class="conversation-list__header">
           <div class="conversation-list__author-info">
-            <VcImage
-              v-if="conversation.iconUrl"
-              :src="conversation.iconUrl"
-              rounded
-              size="s"
-              class="conversation-list__avatar"
-            />
-            <VcIcon
-              v-else
-              class="conversation-list__avatar"
-              icon="fas fa-comments"
-            />
+            <DefineTemplate>
+              <VcImage
+                v-if="conversation.iconUrl"
+                :src="conversation.iconUrl"
+                rounded
+                size="s"
+                class="conversation-list__avatar"
+              />
+              <VcIcon
+                v-else
+                class="conversation-list__avatar"
+                icon="fas fa-comments"
+              />
+            </DefineTemplate>
+
+            <VcBadge
+              v-if="conversation.unreadMessagesCount && conversation.unreadMessagesCount > 0"
+              :content="conversation.unreadMessagesCount"
+              class="conversation-list__badge"
+            >
+              <ReuseTemplate />
+            </VcBadge>
+
+            <ReuseTemplate v-else />
+
             <div class="conversation-list__author-wrapper">
               <div class="conversation-list__author-row">
                 <span class="conversation-list__author">{{ conversation.name }}</span>
@@ -113,6 +126,7 @@ import type { Conversation } from "./../../../api_client/virtocommerce.marketpla
 import { formatDate, dateAgo } from "../utils";
 import { useInfiniteScroll } from "../composables/useInfiniteScroll";
 import { ConversationListType } from "../typings";
+import { createReusableTemplate } from "@vueuse/core";
 
 const props = defineProps<{
   conversations: Conversation[];
@@ -126,6 +140,8 @@ const emit = defineEmits<{
   (e: "select", conversation: Conversation): void;
   (e: "load-more"): void;
 }>();
+
+const [DefineTemplate, ReuseTemplate] = createReusableTemplate();
 
 const containerRef = ref<HTMLElement | null>(null);
 const nextLoader = ref<HTMLElement | null>(null);
@@ -282,6 +298,12 @@ const getConversationType = (entityType?: string) => {
 
   &__loader-content {
     @apply tw-w-full;
+  }
+
+  &__badge {
+    .vc-badge__badge {
+      @apply tw-right-1 -tw-top-1 #{!important};
+    }
   }
 }
 </style>

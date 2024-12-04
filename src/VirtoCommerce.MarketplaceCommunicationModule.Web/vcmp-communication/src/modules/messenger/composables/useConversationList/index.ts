@@ -20,7 +20,7 @@ export function useConversationList() {
   const { action: getConversations, loading } = useAsync<{ sellerId: string | undefined }>(async (args) => {
     const command = new SearchConversationsQuery({
       sellerId: args?.sellerId,
-      responseGroup: "WithLastMessage",
+      responseGroup: "Full",
       skip: searchQuery.value.skip,
       take: searchQuery.value.take,
     });

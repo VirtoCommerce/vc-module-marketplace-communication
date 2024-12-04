@@ -402,7 +402,7 @@ defineExpose({
 <style lang="scss">
 :root {
   --messenger-form-border-color: var(--base-border-color, var(--neutrals-200));
-  --messenger-header-bg-color: var(--neutrals-50)
+  --messenger-header-bg-color: var(--neutrals-50);
 }
 
 .messenger {
