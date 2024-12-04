@@ -1,6 +1,6 @@
 <template>
   <VcBlade
-    :title="$t('ALL_MESSAGES.TITLE')"
+    :title="title"
     :expanded="expanded"
     :closable="closable"
     width="50%"
@@ -89,6 +89,8 @@ if (!currentSeller?.value) {
   throw new Error("Seller is not provided");
 }
 
+const title = computed(() => t("ALL_MESSAGES.TITLE"));
+
 watch(
   [() => props.param, () => conversations.value, useMounted()],
   async ([conversationId, conversations, mounted]) => {
@@ -123,6 +125,7 @@ function handleConversationSelect(conversation: Conversation, messageId?: string
     blade: resolveBladeByName("Messenger"),
     param: messageId,
     options: {
+      conversation,
       entityId: conversation.entityId,
       entityType: conversation.entityType,
     },
@@ -167,6 +170,7 @@ onMounted(async () => {
 });
 
 defineExpose({
+  title,
   refresh,
   expandAllReplies,
 });

@@ -6,6 +6,12 @@ export enum ConversationListType {
   "VirtoCommerce.MarketplaceVendorModule.Core.Domains.Offer" = "Offer",
 }
 
+export enum EntityToBlade {
+  "VirtoCommerce.OrdersModule.Core.Model.CustomerOrder" = "OrderDetails",
+  "VirtoCommerce.MarketplaceVendorModule.Core.Domains.SellerProduct" = "Product",
+  "VirtoCommerce.MarketplaceVendorModule.Core.Domains.Offer" = "Offer",
+}
+
 export interface MessagePushNotification extends PushNotification {
   content?: string;
   notifyType?: "MessagePushNotification";

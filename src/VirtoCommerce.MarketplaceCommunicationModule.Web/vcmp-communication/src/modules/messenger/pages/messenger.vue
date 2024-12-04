@@ -12,6 +12,22 @@
   >
     <div class="messenger__content">
       <div
+        v-if="options?.entityId && options?.entityType && options?.conversation"
+        class="messenger__header"
+      >
+        <div class="messenger__header-content">
+        <VcImage
+          size="m"
+          :src="options.conversation.iconUrl"
+        />
+        <VcLink
+          class="tw-text-lg tw-font-medium"
+          @click="goToEntity"
+          >{{ options.conversation.name }}</VcLink
+        >
+        </div>
+      </div>
+      <div
         ref="threadsInner"
         class="messenger__threads-container"
       >
@@ -127,19 +143,26 @@
 import { computed, ref, provide, onMounted, nextTick, inject, Ref } from "vue";
 import { useMessages } from "../composables";
 import NewMessageForm from "../components/new-message-form.vue";
-import { IParentCallArgs } from "@vc-shell/framework";
-import { Message, MessageRecipient, ISearchMessagesQuery } from "@vcmp-communication/api/marketplacecommunication";
+import { IParentCallArgs, useBladeNavigation } from "@vc-shell/framework";
+import {
+  Message,
+  MessageRecipient,
+  ISearchMessagesQuery,
+  Conversation,
+} from "@vcmp-communication/api/marketplacecommunication";
 import * as _ from "lodash-es";
 import MessageSkeleton from "../components/message-skeleton.vue";
 import MessageTree from "../components/message-tree.vue";
 import { useInfiniteScroll } from "../composables/useInfiniteScroll";
 import { useI18n } from "vue-i18n";
+import { EntityToBlade } from "../typings";
 
 export interface Props {
   expanded?: boolean;
   closable?: boolean;
   param?: string;
   options?: {
+    conversation?: Conversation;
     entityId?: string;
     entityType?: string;
   };
@@ -184,6 +207,8 @@ const {
 
 const { t } = useI18n();
 const rootMessages = computed(() => getRootMessages());
+
+const { openBlade, resolveBladeByName } = useBladeNavigation();
 
 const targetMessageId = ref<string | null>(null);
 
@@ -360,6 +385,15 @@ const { previousLoading, nextLoading } = useInfiniteScroll({
   isLoading: searchMessagesLoading,
 });
 
+function goToEntity() {
+  if (props.options?.entityId && props.options?.entityType) {
+    openBlade({
+      blade: resolveBladeByName(EntityToBlade[props.options.entityType as keyof typeof EntityToBlade]),
+      param: props.options.entityId,
+    });
+  }
+}
+
 defineExpose({
   title: computed(() => t("MESSENGER.TITLE")),
 });
@@ -368,11 +402,20 @@ defineExpose({
 <style lang="scss">
 :root {
   --messenger-form-border-color: var(--base-border-color, var(--neutrals-200));
+  --messenger-header-bg-color: var(--neutrals-50)
 }
 
 .messenger {
   &--mobile {
     @apply tw-w-full tw-h-full;
+  }
+
+  &__header {
+    @apply tw-flex tw-items-center tw-gap-2 tw-px-4 tw-pt-4 tw-pb-2;
+  }
+
+  &__header-content {
+    @apply tw-p-2 tw-bg-[--messenger-header-bg-color] tw-border tw-border-solid tw-border-[--messenger-form-border-color] tw-flex tw-items-center tw-gap-3 tw-flex-auto;
   }
 
   &__content {
