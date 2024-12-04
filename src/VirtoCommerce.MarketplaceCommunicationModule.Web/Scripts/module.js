@@ -37,11 +37,15 @@ angular.module(moduleName, [])
                 });
         }
     ])
-    .run(['platformWebApp.mainMenuService', '$state', 'platformWebApp.widgetService',
-        'platformWebApp.metaFormsService', 'virtoCommerce.orderModule.knownOperations', 'virtoCommerce.marketplaceCommunicationModule.entityTypesResolverService',
+    .run(['$state',
+        'platformWebApp.mainMenuService', 'platformWebApp.widgetService', 'platformWebApp.bladeNavigationService',
+        'platformWebApp.metaFormsService', 'virtoCommerce.orderModule.knownOperations',
+        'virtoCommerce.marketplaceCommunicationModule.entityTypesResolverService', 'platformWebApp.pushNotificationTemplateResolver',
         'virtoCommerce.marketplaceModule.webApi', 'virtoCommerce.orderModule.order_res_customerOrders',
-        function (mainMenuService, $state, widgetService,
-            metaFormsService, orderKnownOperations, entityTypesResolverService,
+        function ($state,
+            mainMenuService, widgetService, bladeNavigationService,
+            metaFormsService, orderKnownOperations,
+            entityTypesResolverService, pushNotificationTemplateResolver,
             marketplaceApi, ordersApi) {
 
             //Register module in main menu
@@ -123,6 +127,7 @@ angular.module(moduleName, [])
                 knownChildrenTypes: []
             });
 
+            // Conversation details metafields
             metaFormsService.registerMetaFields('Conversation',
                 [
                     {
@@ -137,6 +142,30 @@ angular.module(moduleName, [])
                     },
                 ]
             );
+
+            // Message notification template
+            pushNotificationTemplateResolver.register({
+                priority: 900,
+                satisfy: function (notify, place) {
+                    return (place === 'history' || place === 'header-notification')
+                        && notify.notifyType === 'MessagePushNotification';
+                },
+                template: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/notifications/message-notification.tpl.html',
+            //    action: function (notify) {
+            //        var blade = {
+            //            id: 'conversationList',
+            //            notification: notify,
+            //            controller: 'virtoCommerce.marketplaceCommunicationModule.conversationListController',
+            //            template: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/blades/conversation-list.tpl.html'
+            //        };
+            //        bladeNavigationService.showBlade(blade);
+                //    }
+                action: function (notify) {
+                    $state.go('workspace.communication'/*, notify*/);
+                }
+
+            });
+
 
         }
     ]);

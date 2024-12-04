@@ -26,6 +26,7 @@
 .conversation-header__title {
     font-size: 18px;
     font-weight: 500;
+    cursor: pointer;
 }
 
 .empty-state {

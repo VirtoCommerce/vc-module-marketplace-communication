@@ -235,6 +235,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     }
                 }).$promise.finally(function() {
                     blade.isLoading = false;
+                    blade.parentBlade.refresh(false);
                 });
             });
         };
@@ -352,6 +353,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             api.markRead({ messageId: message.id, recipientId: $scope.currentUser.id }, function() {
                 recipientRecord.readStatus = 'Read';
                 recipientRecord.readTimestamp = new Date().toISOString();
+                blade.parentBlade.refresh(false);
 
                 // Mark all child messages as read when marking root message
                 if (!message.threadId) {
@@ -619,7 +621,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     }
                 }).$promise.finally(function() {
                     blade.isLoading = false;
-                    // blade.parentBlade.refresh();
+                    blade.parentBlade.refresh(false);
                 });
             });
         };
@@ -697,6 +699,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                             }
                         }).finally(function() {
                             blade.isLoading = false;
+                            blade.parentBlade.refresh(false);
                         });
                     }
                 }
@@ -736,6 +739,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 }
             }).$promise.finally(function() {
                 blade.isLoading = false;
+                blade.parentBlade.refresh(false);
             });
         };
 
