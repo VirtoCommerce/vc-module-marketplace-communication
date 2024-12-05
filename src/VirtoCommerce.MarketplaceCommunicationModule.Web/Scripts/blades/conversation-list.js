@@ -18,9 +18,17 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             $scope.userName = '';
             $scope.hasMore = true;
             var filter = blade.filter = $scope.filter = {};
+            var notificationConversationId = undefined;
+            var notificationMessageId = undefined;
+            if (blade.notification) {
+                notificationConversationId = blade.notification.conversationId;
+                notificationMessageId = blade.notification.messageId;
+                blade.notification = null;
+            }
 
             blade.refresh = function (needRefreshChildBlade) {
                 blade.isLoading = true;
+                
 
                 if ($scope.pageSettings.currentPage !== 1)
                     $scope.pageSettings.currentPage = 1;
@@ -43,7 +51,10 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
                         if (data.results) {
                             $scope.listEntries = data.results;
-                            if ($scope.selectedNodeId) {
+                            if (notificationConversationId) {
+                                blade.selectedItem = $scope.listEntries.filter(x => x.id === notificationConversationId).find(o => true);
+                            }
+                            else if ($scope.selectedNodeId) {
                                 blade.selectedItem = $scope.listEntries.filter(x => x.id === $scope.selectedNodeId).find(o => true);
                             }
                         }
@@ -51,11 +62,16 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                         $scope.pageSettings.totalItems = data.totalCount;
                         $scope.hasMore = data.results.length === $scope.pageSettings.itemsPerPageCount;
 
-                        if (blade.childBlade && blade.selectedItem) {
-                            blade.childBlade.currentEntity = blade.selectedItem;
-                            if (needRefreshChildBlade) {
-                                blade.childBlade.refresh();
-                            };
+                        if (blade.childBlade) {
+                            if (blade.selectedItem) {
+                                blade.childBlade.currentEntity = blade.selectedItem;
+                                if (needRefreshChildBlade) {
+                                    blade.childBlade.refresh();
+                                };
+                            }
+                        }
+                        else if (notificationConversationId) {
+                            $scope.showDetails(blade.selectedItem, notificationMessageId);
                         }
                     });
                 });
@@ -76,7 +92,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 {
                     name: "platform.commands.add", icon: 'fas fa-plus',
                     executeMethod: function () {
-                        $scope.showDetails(undefined, true);
+                        $scope.showDetails(undefined);
                     },
                     canExecuteMethod: function () {
                         return false;
@@ -112,7 +128,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 $scope.showDetails(listItem);
             }
 
-            $scope.showDetails = function (listItem) {
+            $scope.showDetails = function (listItem, exactlyMessageId) {
                 var newBlade = {
                     id: 'conversationCommunication',
                     title: listItem.name,
@@ -120,6 +136,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     entityType: listItem.entityType,
                     conversationId: listItem.id,
                     conversation: listItem,
+                    exactlyMessageId: exactlyMessageId,
                     controller: 'virtoCommerce.marketplaceCommunicationModule.messageListController',
                     template: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/blades/message-list.tpl.html'
                 };

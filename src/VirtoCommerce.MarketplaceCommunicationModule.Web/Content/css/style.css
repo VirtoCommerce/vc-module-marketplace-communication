@@ -55,6 +55,22 @@
     margin-bottom: 20px;
 }
 
+.show-more-messages {
+  align-items: center;
+  display: flex;
+/*  flex-direction: column;
+  flex-grow: 1;*/
+  justify-content: center;
+  /*padding: 20px;*/
+  text-align: center;
+}
+
+.show-more-messages__title {
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
 .loading-skeleton {
     animation: pulse 1.5s infinite;
     background: #f0f0f0;

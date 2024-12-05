@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.MarketplaceCommunicationModule.Core;
-using VirtoCommerce.MarketplaceCommunicationModule.Core.Models;
+using VirtoCommerce.MarketplaceCommunicationModule.Core.Services;
 using VirtoCommerce.MarketplaceCommunicationModule.Data.Repositories;
 using VirtoCommerce.MarketplaceCommunicationModule.Web.Authorization;
 using VirtoCommerce.Platform.Core.Modularity;

@@ -45,6 +45,23 @@ public class VcmpMessageController : ControllerBase
     }
 
     [HttpGet]
+    [Route("getbyid")]
+    public async Task<ActionResult<Message>> GetMessageById([FromQuery] string messageId)
+    {
+        var query = AbstractTypeFactory<GetMessageQuery>.TryCreateInstance();
+        query.MessageId = messageId;
+
+        var authorizationResult = await _authorizationService.AuthorizeAsync(User, query, new SellerAuthorizationRequirement(Core.ModuleConstants.Security.Permissions.Read));
+        if (!authorizationResult.Succeeded)
+        {
+            return Forbid();
+        }
+        var result = await _mediator.Send(query);
+
+        return Ok(result);
+    }
+
+    [HttpGet]
     [Route("thread")]
     public async Task<ActionResult<IList<Message>>> GetThread([FromQuery] string threadId)
     {

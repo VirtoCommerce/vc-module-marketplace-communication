@@ -288,25 +288,45 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         // Helper function to load messages
         function loadMessages(criteria, reset) {
             blade.isLoading = true;
-
-            api.searchMessages(criteria, function(response) {
-                if (response && response.results) {
-                    if (reset) {
-                        blade.messages = response.results;
-                    } else {
-                        blade.messages = blade.messages.concat(response.results);
+            if (blade.exactlyMessageId) {
+                api.getMessage({ messageId: blade.exactlyMessageId }, function (message) {
+                    if (message) {
+                        blade.messages.push(message);
+                        if (message.threadId) {
+                            api.getThread({ threadId: message.threadId }, function (threadMessages) {
+                                blade.messages = blade.messages.concat(threadMessages);
+                            })
+                        }
                     }
+                }).$promise.finally(function () {
+                    blade.isLoading = false;
+                });
+            }
+            else {
+                api.searchMessages(criteria, function (response) {
+                    if (response && response.results) {
+                        if (reset) {
+                            blade.messages = response.results;
+                        } else {
+                            blade.messages = blade.messages.concat(response.results);
+                        }
 
-                    // Store total count
-                    blade.totalCount = response.totalCount;
-                    blade.hasMore = blade.messages.length < response.totalCount;
+                        // Store total count
+                        blade.totalCount = response.totalCount;
+                        blade.hasMore = blade.messages.length < response.totalCount;
 
-                    loadUserInfoForMessages(response.results);
-                }
-            }).$promise.finally(function() {
-                blade.isLoading = false;
-            });
+                        loadUserInfoForMessages(response.results);
+                    }
+                }).$promise.finally(function () {
+                    blade.isLoading = false;
+                });
+            }
         }
+
+        blade.showAllThreads = function () {
+            blade.exactlyMessageId = undefined;
+            blade.refresh();
+        };
 
         // Helper function to load user info
         function loadUserInfoForMessages(messages) {

@@ -24,7 +24,8 @@
           "show-more": "Show more",
           "show-less": "Show less",
           "enter-message": "Enter your message...",
-          "start-conversation": "Start new conversation..."
+          "start-conversation": "Start new conversation...",
+          "show-all-threads": "Show all threads"
         },
         "buttons": {
           "reply": "Reply",

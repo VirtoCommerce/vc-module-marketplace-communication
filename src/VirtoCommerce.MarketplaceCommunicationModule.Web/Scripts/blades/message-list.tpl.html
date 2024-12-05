@@ -8,6 +8,12 @@
               on-click="blade.openEntityDetails()"
             >
             </conversation-header>
+
+            <show-more-messages
+              ng-if="blade.exactlyMessageId"
+              on-click="blade.showAllThreads()"
+            >
+            </show-more-messages>
         </div>
 
         <div class="messages-layout__content">

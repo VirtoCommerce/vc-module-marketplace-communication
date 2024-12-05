@@ -15,21 +15,26 @@ angular.module(moduleName, [])
     .component('messages-container', require('./components/messages-container.component'))
     .component('message-composer', require('./components/message-composer.component'))
     .component('message-skeleton', require('./components/message-skeleton.component'))
+    .component('show-more-messages', require('./components/show-more-messages.component'))
 
     .config(['$stateProvider',
         function ($stateProvider) {
             $stateProvider
                 .state('workspace.communication', {
                     url: '/communication',
+                    params: {
+                        notification: null,
+                    },
                     templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
                     controller: [
-                        'platformWebApp.bladeNavigationService',
-                        function (bladeNavigationService) {
+                        '$stateParams', 'platformWebApp.bladeNavigationService',
+                        function ($stateParams, bladeNavigationService) {
                             var newBlade = {
                                 id: 'conversationList',
                                 controller: 'virtoCommerce.marketplaceCommunicationModule.conversationListController',
                                 template: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/blades/conversation-list.tpl.html',
                                 isClosingDisabled: true,
+                                notification: $stateParams.notification,
                             };
                             bladeNavigationService.showBlade(newBlade);
                         }
@@ -161,7 +166,19 @@ angular.module(moduleName, [])
             //        bladeNavigationService.showBlade(blade);
                 //    }
                 action: function (notify) {
-                    $state.go('workspace.communication'/*, notify*/);
+                    if ($state.current.name !== 'workspace.communication') {
+                        $state.go('workspace.communication', { notification: notify });
+                    }
+                    else {
+                        var blade = {
+                            id: 'conversationList',
+                            notification: notify,
+                            isClosingDisabled: true,
+                            controller: 'virtoCommerce.marketplaceCommunicationModule.conversationListController',
+                            template: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/blades/conversation-list.tpl.html'
+                        };
+                        bladeNavigationService.showBlade(blade);
+                    }
                 }
 
             });
