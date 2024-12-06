@@ -294,20 +294,29 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                         blade.messages.push(message);
                         if (message.threadId) {
                             api.getThread({ threadId: message.threadId }, function (threadMessages) {
-                                blade.messages = blade.messages.concat(threadMessages);
-                                //blade.isLoading = false;
+                                blade.messages = blade.messages.concat(threadMessages).reverse();
+                                blade.messages.forEach(x => {
+                                    if (x.threadId) {
+                                        blade.threadsMap[x.id] = blade.messages.find(y => y.id === x.threadId);
+                                    }
+                                });
+                                
+                                loadUserInfoForMessages(blade.messages);
+                                blade.isLoading = false;
                             })
                         }
-                    //    else {
-                    //        blade.isLoading = false;
-                    //    }
-                    //}
-                    //else {
-                    //    blade.isLoading = false;
+                        else {
+                            loadUserInfoForMessages(blade.messages);
+                            blade.isLoading = false;
+                        }
+                    }
+                    else {
+                        loadUserInfoForMessages(blade.messages);
+                        blade.isLoading = false;
                     }
                 }).$promise.finally(function () {
-                    loadUserInfoForMessages(blade.messages);
-                    blade.isLoading = false;
+                //    loadUserInfoForMessages(blade.messages);
+                //    blade.isLoading = false;
                 });
             }
             else {
@@ -333,6 +342,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
         blade.showAllThreads = function () {
             blade.exactlyMessageId = undefined;
+            blade.threadsMap = {};
             blade.refresh();
         };
 
