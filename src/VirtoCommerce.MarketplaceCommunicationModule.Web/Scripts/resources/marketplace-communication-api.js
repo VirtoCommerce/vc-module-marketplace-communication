@@ -22,7 +22,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             markRead: { method: 'POST', url: 'api/vcmp/message/markread' },
             sendReaction: { method: 'POST', url: 'api/vcmp/message/sendreaction' },
             getMessage: { method: 'GET', url: 'api/vcmp/message/getbyid' },
-            getThread: { method: 'GET', url: 'api/vcmp/message/thread' },
+            getThread: { method: 'GET', url: 'api/vcmp/message/thread', isArray: true },
             // communication users
             getUserInfos: { method: 'GET', url: 'api/vcmp/communicationuser/info', isArray: true },
             getOperator: { method: 'GET', url: 'api/vcmp/communicationuser/operator' },

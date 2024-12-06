@@ -289,16 +289,24 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         function loadMessages(criteria, reset) {
             blade.isLoading = true;
             if (blade.exactlyMessageId) {
-                api.getMessage({ messageId: blade.exactlyMessageId }, function (message) {
+                api.getMessage({ messageId: blade.exactlyMessageId, responseGroup: "WithSender" }, function (message) {
                     if (message) {
                         blade.messages.push(message);
                         if (message.threadId) {
                             api.getThread({ threadId: message.threadId }, function (threadMessages) {
                                 blade.messages = blade.messages.concat(threadMessages);
+                                //blade.isLoading = false;
                             })
                         }
+                    //    else {
+                    //        blade.isLoading = false;
+                    //    }
+                    //}
+                    //else {
+                    //    blade.isLoading = false;
                     }
                 }).$promise.finally(function () {
+                    loadUserInfoForMessages(blade.messages);
                     blade.isLoading = false;
                 });
             }
