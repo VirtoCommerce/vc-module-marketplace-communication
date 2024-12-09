@@ -291,27 +291,40 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             if (blade.exactlyMessageId) {
                 api.getMessage({ messageId: blade.exactlyMessageId, responseGroup: "WithSender" }, function (message) {
                     if (message) {
-                        blade.messages.push(message);
                         if (message.threadId) {
                             api.getThread({ threadId: message.threadId }, function (threadMessages) {
-                                blade.messages = blade.messages.concat(threadMessages).reverse();
-                                blade.messages.forEach(x => {
-                                    if (x.threadId) {
-                                        blade.threadsMap[x.id] = blade.messages.find(y => y.id === x.threadId);
+                                threadMessages.forEach(x => {
+                                    x.answersCount = 1;
+                                    x.isExpanded = true;
+                                })
+                                let extendedThreadMessages = threadMessages.reverse();
+                                extendedThreadMessages.push(message);
+                                extendedThreadMessages.forEach(x => {
+                                    let reply = extendedThreadMessages.find(y => y.threadId === x.id);
+                                    if (reply) {
+                                        blade.threadsMap[x.id] = [];
+                                        blade.threadsMap[x.id].push(reply);
+                                    }
+                                    else {
+                                        //blade.threadsMap[x.id] = [];
                                     }
                                 });
                                 
+                                let rootMessage = extendedThreadMessages.find(x => !x.threadId);
+                                if (rootMessage) {
+                                    blade.messages.push(rootMessage);
+                                }
                                 loadUserInfoForMessages(blade.messages);
                                 blade.isLoading = false;
                             })
                         }
                         else {
+                            blade.messages.push(message);
                             loadUserInfoForMessages(blade.messages);
                             blade.isLoading = false;
                         }
                     }
                     else {
-                        loadUserInfoForMessages(blade.messages);
                         blade.isLoading = false;
                     }
                 }).$promise.finally(function () {
