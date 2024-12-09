@@ -1,25 +1,22 @@
-using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.CustomerModule.Core.Model;
-using VirtoCommerce.CustomerModule.Core.Model.Search;
 using VirtoCommerce.CustomerModule.Core.Services;
 using VirtoCommerce.MarketplaceVendorModule.Core;
-using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketplaceCommunicationModule.Core.Services;
 public class PushNotificationOperatorIdProvider : IUserIdProvider
 {
-    private readonly IMemberSearchService _memberSearchService;
+    private readonly IMemberService _memberService;
     private readonly MarketplaceOptions _options;
 
     public PushNotificationOperatorIdProvider(
-        IMemberSearchService memberSearchService,
+        IMemberService memberService,
         IOptions<MarketplaceOptions> options
         )
     {
-        _memberSearchService = memberSearchService;
+        _memberService = memberService;
         _options = options.Value;
     }
 
@@ -35,11 +32,7 @@ public class PushNotificationOperatorIdProvider : IUserIdProvider
 
         if (userRole == "__manager")
         {
-            var membersSearchCriteria = AbstractTypeFactory<MembersSearchCriteria>.TryCreateInstance();
-            membersSearchCriteria.ObjectIds = [userMemberId];
-            membersSearchCriteria.MemberType = typeof(Employee).Name;
-
-            var member = _memberSearchService.SearchMembersAsync(membersSearchCriteria).GetAwaiter().GetResult().Results.FirstOrDefault();
+            var member = _memberService.GetByIdAsync(userMemberId).GetAwaiter().GetResult();
             if (member is Employee employee && employee.Organizations.Contains(_options.OperatorGroupId))
             {
                 return _options.OperatorGroupId;
