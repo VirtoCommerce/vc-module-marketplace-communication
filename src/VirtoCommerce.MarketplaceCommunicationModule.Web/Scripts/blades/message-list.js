@@ -299,14 +299,13 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                                 })
                                 let extendedThreadMessages = threadMessages.reverse();
                                 extendedThreadMessages.push(message);
+                                loadUserInfoForMessages(extendedThreadMessages);
+
                                 extendedThreadMessages.forEach(x => {
                                     let reply = extendedThreadMessages.find(y => y.threadId === x.id);
                                     if (reply) {
                                         blade.threadsMap[x.id] = [];
                                         blade.threadsMap[x.id].push(reply);
-                                    }
-                                    else {
-                                        //blade.threadsMap[x.id] = [];
                                     }
                                 });
                                 
@@ -314,7 +313,6 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                                 if (rootMessage) {
                                     blade.messages.push(rootMessage);
                                 }
-                                loadUserInfoForMessages(blade.messages);
                                 blade.isLoading = false;
                             })
                         }
