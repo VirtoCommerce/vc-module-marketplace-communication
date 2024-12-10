@@ -13,7 +13,7 @@ export default defineConfig({
     minify: false,
     lib: {
       entry: resolve(__dirname, "./index.ts"),
-      fileName: (format, name) => `${name}-${Date.now()}.js`,
+      fileName: (format, name) => `${name}.js?v=${Date.now()}`,
       formats: ["umd"],
       name: "VcShellDynamicModules",
     },
@@ -21,6 +21,9 @@ export default defineConfig({
     outDir: join(__dirname, "../../dist/packages/modules"),
     rollupOptions: {
       output: {
+        chunkFileNames: '[name]-[hash].js',
+        entryFileNames: '[name]-[hash].js',
+        assetFileNames: '[name]-[hash][extname]',
         globals: {
           vue: "Vue",
           "vue-router": "VueRouter",
