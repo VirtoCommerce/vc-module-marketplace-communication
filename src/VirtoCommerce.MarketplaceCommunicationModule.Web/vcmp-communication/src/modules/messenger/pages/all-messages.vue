@@ -364,7 +364,7 @@ defineExpose({
   }
 
   &__author-row {
-    @apply tw-flex tw-items-center tw-justify-between;
+    @apply tw-flex tw-items-center tw-justify-between tw-gap-2;
   }
 
   &__type {
