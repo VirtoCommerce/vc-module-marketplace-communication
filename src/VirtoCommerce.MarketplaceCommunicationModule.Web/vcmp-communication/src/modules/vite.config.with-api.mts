@@ -13,7 +13,7 @@ export default defineConfig({
     minify: false,
     lib: {
       entry: resolve(__dirname, "./index.ts"),
-      fileName: (format, name) => `${name}.js`,
+      fileName: (format, name) => `${name}-${Date.now()}.js`,
       formats: ["umd"],
       name: "VcShellDynamicModules",
     },
