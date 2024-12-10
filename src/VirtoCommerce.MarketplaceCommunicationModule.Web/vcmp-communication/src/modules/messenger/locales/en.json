@@ -9,6 +9,13 @@
       "COLUMNS": {
         "NAME": "Conversation name",
         "ICON_URL": "Img"
+      },
+      "EMPTY": {
+        "NO_ITEMS": "There are no conversations yet"
+      },
+      "NOT_FOUND": {
+        "EMPTY": "There are no conversations found",
+        "RESET": "Reset"
       }
     },
     "LIST": {

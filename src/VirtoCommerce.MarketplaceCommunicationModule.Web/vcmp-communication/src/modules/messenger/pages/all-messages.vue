@@ -83,6 +83,33 @@
           </div>
         </div>
       </template>
+
+      <template #empty>
+        <div class="tw-w-full tw-h-full tw-box-border tw-flex tw-flex-col tw-items-center tw-justify-center">
+          <VcIcon
+            icon="fas fa-comments"
+            class="tw-text-[color:var(--conversations-empty-grid-icon-color)]"
+            size="xxxl"
+          />
+          <div class="tw-m-4 tw-text-xl tw-font-medium">
+            {{ $t("ALL_MESSAGES.TABLE.EMPTY.NO_ITEMS") }}
+          </div>
+        </div>
+      </template>
+
+      <template #notfound>
+        <div class="tw-w-full tw-h-full tw-box-border tw-flex tw-flex-col tw-items-center tw-justify-center">
+          <VcIcon
+            icon="fas fa-comments"
+            class="tw-text-[color:var(--conversations-empty-grid-icon-color)]"
+            size="xxxl"
+          />
+          <div class="tw-m-4 tw-text-xl tw-font-medium">
+            {{ $t("ALL_MESSAGES.TABLE.NOT_FOUND.EMPTY") }}
+          </div>
+          <VcButton @click="reset">{{ $t("ALL_MESSAGES.TABLE.NOT_FOUND.RESET") }}</VcButton>
+        </div>
+      </template>
     </VcTable>
   </VcBlade>
 </template>
@@ -274,6 +301,14 @@ async function loadConversations(query: ISearchConversationsQuery) {
   }
 }
 
+async function reset() {
+  searchValue.value = "";
+  await loadConversations({
+    ...searchQuery.value,
+    keyword: "",
+  });
+}
+
 onMounted(async () => {
   await load();
 });
@@ -290,6 +325,7 @@ defineExpose({
   --conversations-avatar-size: 42px;
   --conversations-author-color: var(--neutrals-400);
   --conversations-date-color: var(--neutrals-500);
+  --conversations-empty-grid-icon-color: var(--empty-grid-icon-color, var(--secondary-500));
 }
 
 .conversations {
