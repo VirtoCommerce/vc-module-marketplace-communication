@@ -51,6 +51,7 @@ import { ref, computed, watch, inject, nextTick } from "vue";
 import { useI18n } from "vue-i18n";
 import { Message } from "@vcmp-communication/api/marketplacecommunication";
 import { loading as vLoading, VcTextarea, VcButton } from "@vc-shell/framework";
+import { useMagicKeys } from "@vueuse/core";
 
 const props = defineProps<{
   replyTo?: string;
@@ -82,12 +83,23 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const keys = useMagicKeys();
 
 const entityId = inject("entityId") as string;
 const entityType = inject("entityType") as string;
 
 const content = ref(props.isEdit ? props.message?.content || "" : "");
 const textareaRef = ref<InstanceType<typeof VcTextarea>>();
+
+// Magic keys
+const enter = keys["Enter"];
+
+watch(enter, (v) => {
+  if (v) {
+    send();
+  }
+});
+
 const isModified = computed(() => (props.isEdit ? content.value.trim() !== props.message?.content?.trim() : true));
 
 const submitButtonText = computed(() => {

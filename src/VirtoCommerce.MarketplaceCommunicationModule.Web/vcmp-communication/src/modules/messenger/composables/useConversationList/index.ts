@@ -1,53 +1,54 @@
-import { Ref, ref } from "vue";
+import { computed, ComputedRef, Ref, ref } from "vue";
 import {
   VcmpConversationClient,
-  Conversation,
   SearchConversationsQuery,
   ISearchConversationsQuery,
+  SearchConversationResult,
+  Conversation,
 } from "../../../../api_client/virtocommerce.marketplacecommunication";
 import { useApiClient, useAsync } from "@vc-shell/framework";
 
+export interface IUseConversationList {
+  conversations: ComputedRef<Conversation[]>;
+  totalCount: ComputedRef<number>;
+  pages: ComputedRef<number>;
+  currentPage: ComputedRef<number>;
+  loading: ComputedRef<boolean>;
+  searchQuery: Ref<ISearchConversationsQuery>;
+  getConversations: (args: ISearchConversationsQuery) => Promise<void>;
+}
+
 const { getApiClient: conversationClient } = useApiClient(VcmpConversationClient);
 
-export function useConversationList() {
-  const conversations = ref<Conversation[]>([]) as Ref<Conversation[]>;
+export function useConversationList(): IUseConversationList {
   const searchQuery = ref<ISearchConversationsQuery>({
     skip: 0,
     take: 20,
   });
-  const hasMore = ref(true);
+  const pageSize = 20;
+  const searchResult = ref<SearchConversationResult>();
 
-  const { action: getConversations, loading } = useAsync<{ sellerId: string | undefined }>(async (args) => {
+  const { action: getConversations, loading } = useAsync<ISearchConversationsQuery>(async (args) => {
+    searchQuery.value = {
+      ...searchQuery.value,
+      ...args,
+    };
+
     const command = new SearchConversationsQuery({
-      sellerId: args?.sellerId,
+      ...searchQuery.value,
       responseGroup: "Full",
-      skip: searchQuery.value.skip,
-      take: searchQuery.value.take,
     });
 
-    const searchResult = await (await conversationClient()).search(command);
-
-    if (searchQuery.value.skip === 0) {
-      conversations.value = searchResult.results || [];
-    } else {
-      conversations.value = [...conversations.value, ...(searchResult.results || [])];
-    }
-
-    hasMore.value = (searchResult.results?.length || 0) === searchQuery.value.take;
+    searchResult.value = await (await conversationClient()).search(command);
   });
 
-  const loadMore = async () => {
-    if (!loading.value && hasMore.value) {
-      searchQuery.value.skip! += searchQuery.value.take!;
-      await getConversations();
-    }
-  };
-
   return {
-    conversations,
-    loading,
+    conversations: computed(() => searchResult.value?.results ?? []),
+    totalCount: computed(() => searchResult.value?.totalCount ?? 0),
+    pages: computed(() => Math.ceil((searchResult.value?.totalCount ?? 1) / pageSize)),
+    currentPage: computed(() => (searchQuery.value?.skip || 0) / Math.max(1, pageSize) + 1),
+    loading: computed(() => loading.value),
+    searchQuery,
     getConversations,
-    loadMore,
-    hasMore,
   };
 }

@@ -7,8 +7,8 @@
     },
     "TABLE": {
       "COLUMNS": {
-        "NAME": "Name",
-        "LAST_MESSAGE": "Last message"
+        "NAME": "Conversation name",
+        "ICON_URL": "Img"
       }
     },
     "LIST": {
