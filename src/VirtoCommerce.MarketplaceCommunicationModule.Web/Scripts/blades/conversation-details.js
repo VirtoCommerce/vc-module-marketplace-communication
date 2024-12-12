@@ -10,11 +10,17 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             blade.headIcon = 'fas fa-comment';
             blade.title = 'marketplaceCommunication.blades.conversation-details.title';
 
+            function initialize(data) {
+                blade.currentEntity = angular.copy(data);
+                blade.origEntity = data;
+            }
+
             blade.refresh = function () {
                 blade.isLoading = true;
-                blade.currentEntity = blade.conversation;
-                blade.origEntity = angular.copy(blade.currentEntity);
-                blade.isLoading = false;
+                communicationApi.getConversationById({ conversationId: blade.conversationId }, function (data) {
+                    initialize(data);
+                    blade.isLoading = false;
+                });
             }
 
             blade.toolbarCommands = [
@@ -23,9 +29,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     executeMethod: function () {
                         $scope.saveChanges();
                     },
-                    canExecuteMethod: function () {
-                        return isDirty();
-                    }
+                    canExecuteMethod: isDirty
                 },
                 {
                     name: "platform.commands.reset", icon: 'fa fa-undo',
@@ -39,8 +43,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             $scope.saveChanges = function () {
                 communicationApi.updateConversation({ conversation: blade.currentEntity },
                     function (data) {
-                        blade.refresh();
-                        blade.parentBlade.refresh();
+                        blade.parentBlade.refresh(true);
                     },
                     function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
             };

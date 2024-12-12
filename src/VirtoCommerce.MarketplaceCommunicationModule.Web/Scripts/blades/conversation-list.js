@@ -101,6 +101,9 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             ];
 
             $scope.manageConversation = function (listItem) {
+                $scope.selectedNodeId = listItem.id;
+                blade.selectedItem = listItem;
+
                 var conversationTemplate = metaFormsService.getMetaFields('Conversation');
                 var newBlade = {
                     id: 'conversationManage',
@@ -108,7 +111,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     entityId: listItem.entityId,
                     entityType: listItem.entityType,
                     conversationId: listItem.id,
-                    conversation: listItem,
+                    //conversation: listItem,
                     controller: 'virtoCommerce.marketplaceCommunicationModule.conversationDetailsController',
                     template: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/blades/conversation-details.tpl.html',
                     metaFields: conversationTemplate
