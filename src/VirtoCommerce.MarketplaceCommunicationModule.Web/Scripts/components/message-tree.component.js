@@ -181,5 +181,16 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             }
             return $ctrl.onShouldShowUnreadDot({message: message});
         };
+
+        $ctrl.handleKeyPress = function(event, action) {
+            if (event.keyCode === 13 && !event.shiftKey) {
+                event.preventDefault();
+                if (action === 'reply') {
+                    $ctrl.submitReply();
+                } else if (action === 'edit') {
+                    $ctrl.submitEdit();
+                }
+            }
+        };
     }]
 });

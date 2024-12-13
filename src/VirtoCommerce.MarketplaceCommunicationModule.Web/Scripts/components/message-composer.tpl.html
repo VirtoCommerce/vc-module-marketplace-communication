@@ -9,6 +9,7 @@
         <textarea
             class="message-composer__input"
             ng-model="$ctrl.message"
+            ng-keypress="$ctrl.handleKeyPress($event)"
             placeholder="{{ 'marketplaceCommunication.blades.message-list.labels.enter-message' | translate }}"
             vc-focus="$ctrl.isExpanded">
         </textarea>

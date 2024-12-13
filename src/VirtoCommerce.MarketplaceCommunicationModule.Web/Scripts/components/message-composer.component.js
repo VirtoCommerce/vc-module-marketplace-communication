@@ -11,6 +11,15 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
     controller: ['$scope', function($scope) {
         var $ctrl = this;
 
+        $ctrl.handleKeyPress = function(event) {
+            if (event.keyCode === 13 && !event.shiftKey) {
+                event.preventDefault();
+                if ($ctrl.message && !$ctrl.isLoading) {
+                    $ctrl.onSend();
+                }
+            }
+        };
+
         $scope.isExpanded = $ctrl.isExpanded;
         $scope.message = $ctrl.message;
         $scope.isLoading = $ctrl.isLoading;

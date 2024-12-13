@@ -68,6 +68,7 @@
         ng-model="$ctrl.editMode.text"
         placeholder="{{ 'marketplaceCommunication.blades.message-list.labels.edit-message' | translate }}"
         vc-focus="$ctrl.editMode.isActive"
+        ng-keypress="$ctrl.handleKeyPress($event, 'edit')"
       ></textarea>
       <div>
         <button class="btn __cancel" ng-click="$ctrl.cancelEdit()">
@@ -144,6 +145,7 @@
         ng-model="$ctrl.replyForm.text"
         placeholder="{{ 'marketplaceCommunication.blades.message-list.labels.write-reply' | translate }}"
         vc-focus="$ctrl.replyForm.isVisible"
+        ng-keypress="$ctrl.handleKeyPress($event, 'reply')"
       ></textarea>
       <div>
         <button class="btn __cancel" ng-click="$ctrl.hideReplyForm()">

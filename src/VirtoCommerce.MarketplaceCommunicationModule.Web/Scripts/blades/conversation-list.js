@@ -1,10 +1,10 @@
 angular.module('virtoCommerce.marketplaceCommunicationModule')
-    .controller('virtoCommerce.marketplaceCommunicationModule.conversationListController', ['$scope', 
+    .controller('virtoCommerce.marketplaceCommunicationModule.conversationListController', ['$scope',
         'platformWebApp.bladeUtils', 'platformWebApp.bladeNavigationService',
         'platformWebApp.metaFormsService',
         'virtoCommerce.marketplaceCommunicationModule.webApi',
         'platformWebApp.uiGridHelper', 'platformWebApp.ui-grid.extension',
-        function ($scope, 
+        function ($scope,
             bladeUtils, bladeNavigationService,
             metaFormsService,
             communicationApi,
@@ -28,7 +28,6 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
             blade.refresh = function (needRefreshChildBlade) {
                 blade.isLoading = true;
-                
 
                 if ($scope.pageSettings.currentPage !== 1)
                     $scope.pageSettings.currentPage = 1;
