@@ -43,7 +43,7 @@ public class CreateConversationCommandHandler : ICommandHandler<CreateConversati
 
         userIds = userIds.Distinct().ToList();
 
-        var result = await _conversationService.CreateConversation(userIds, request.Name, request.IconUrl, request.EntityId, request.EntityType);
+        var result = await _conversationService.GetOrCreateConversation(userIds, request.Name, request.IconUrl, request.EntityId, request.EntityType);
 
         return result;
     }
