@@ -62,13 +62,17 @@ export interface IUseMessages {
   getThread: (id: string | undefined) => Promise<void>;
   seller: Ref<CommunicationUser | undefined>;
   loadedThread: Ref<Message[] | undefined>;
-  createConversation: (args: { sellerId: string; sellerName: string; userIds: string[] }) => Promise<Conversation>;
+  createConversation: (args: {
+    sellerId: string;
+    sellerName: string;
+    userIds: string[];
+    iconUrl?: string;
+  }) => Promise<Conversation>;
 }
 
 const { getApiClient: getCommunicationUserClient } = useApiClient(VcmpCommunicationUserClient);
 const { getApiClient: getMessagingClient } = useApiClient(VcmpMessageClient);
 const { getApiClient: getConversationClient } = useApiClient(VcmpConversationClient);
-
 
 const operator = ref<CommunicationUser>();
 
@@ -357,7 +361,12 @@ export const useMessages = (): IUseMessages => {
     }
   }
 
-  async function createConversation(args: { sellerId: string; sellerName: string; userIds: string[] }) {
+  async function createConversation(args: {
+    sellerId: string;
+    sellerName: string;
+    userIds: string[];
+    iconUrl?: string;
+  }) {
     const client = await getConversationClient();
     const command = new SearchConversationsQuery({
       ...args,
