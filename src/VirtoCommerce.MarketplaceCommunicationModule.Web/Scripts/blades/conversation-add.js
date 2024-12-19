@@ -14,7 +14,8 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                         controller: 'virtoCommerce.marketplaceCommunicationModule.entitySelectListController',
                         template: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/blades/entity-select-list.tpl.html'
                     };
-                    bladeNavigationService.showBlade(newBlade, blade);
+                    bladeNavigationService.closeBlade(blade);
+                    bladeNavigationService.showBlade(newBlade, blade.parentBlade);
                 };
 
                 blade.isLoading = false;
