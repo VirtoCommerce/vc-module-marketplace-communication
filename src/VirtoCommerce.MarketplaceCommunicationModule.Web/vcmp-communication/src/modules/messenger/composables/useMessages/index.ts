@@ -22,6 +22,9 @@ import {
   IGetUnreadCountQuery,
   IGetSellerCommunicationUserQuery,
   IMessage,
+  SearchConversationsQuery,
+  VcmpConversationClient,
+  Conversation,
 } from "@vcmp-communication/api/marketplacecommunication";
 
 export interface IUseMessages {
@@ -35,6 +38,7 @@ export interface IUseMessages {
     entityType: string;
     rootsOnly?: boolean;
     threadId?: string;
+    conversationId?: string;
   }) => Promise<Message | undefined>;
   unreadCount: ComputedRef<number>;
   searchMessages: (query: ISearchMessagesQuery) => Promise<void>;
@@ -58,10 +62,14 @@ export interface IUseMessages {
   getThread: (id: string | undefined) => Promise<void>;
   seller: Ref<CommunicationUser | undefined>;
   loadedThread: Ref<Message[] | undefined>;
+  createConversation: (args: { sellerId: string; sellerName: string; userIds: string[] }) => Promise<Conversation>;
 }
 
 const { getApiClient: getCommunicationUserClient } = useApiClient(VcmpCommunicationUserClient);
 const { getApiClient: getMessagingClient } = useApiClient(VcmpMessageClient);
+const { getApiClient: getConversationClient } = useApiClient(VcmpConversationClient);
+
+
 const operator = ref<CommunicationUser>();
 
 export const useMessages = (): IUseMessages => {
@@ -113,6 +121,7 @@ export const useMessages = (): IUseMessages => {
       entityType: string;
       rootsOnly?: boolean;
       threadId?: string;
+      conversationId?: string;
     },
     Message | undefined
   >(async (message) => {
@@ -128,6 +137,7 @@ export const useMessages = (): IUseMessages => {
         entityId: message?.entityId,
         entityType: message?.entityType,
         senderId: undefined,
+        conversationId: message?.conversationId,
         recipientId: operator.value?.id,
       }),
     });
@@ -184,8 +194,10 @@ export const useMessages = (): IUseMessages => {
   });
 
   const { action: getOperator } = useAsync(async () => {
-    const client = await getCommunicationUserClient();
-    operator.value = await client.getOperator();
+    if (!operator.value) {
+      const client = await getCommunicationUserClient();
+      operator.value = await client.getOperator();
+    }
   });
 
   const { action: markAsRead } = useAsync<IMarkMessageAsReadCommand>(async (args) => {
@@ -344,6 +356,16 @@ export const useMessages = (): IUseMessages => {
     }
   }
 
+  async function createConversation(args: { sellerId: string; sellerName: string; userIds: string[] }) {
+    const client = await getConversationClient();
+    const command = new SearchConversationsQuery({
+      ...args,
+    });
+    const conversation = await client.createConversation(command);
+
+    return conversation;
+  }
+
   return {
     messages,
     sendMessage,
@@ -375,5 +397,6 @@ export const useMessages = (): IUseMessages => {
     getUnreadCount,
     seller,
     loadedThread,
+    createConversation,
   };
 };

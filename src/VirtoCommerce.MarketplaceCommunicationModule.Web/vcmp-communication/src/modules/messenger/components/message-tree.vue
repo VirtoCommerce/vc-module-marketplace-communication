@@ -223,6 +223,7 @@ async function searchNestedMessages(threadId: string) {
     entityId: entityId,
     entityType: entityType,
     responseGroup: "Full",
+    conversationId: props.message.conversationId,
   });
 }
 
@@ -258,6 +259,7 @@ const sendReplyMessage = async (content: {
     sellerId,
     sellerName,
     threadId: props.message.id,
+    conversationId: props.message.conversationId,
   });
 
   setActiveForm(null, null);

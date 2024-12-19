@@ -16,15 +16,15 @@
         class="messenger__header"
       >
         <div class="messenger__header-content">
-        <VcImage
-          size="m"
-          :src="options.conversation.iconUrl"
-        />
-        <VcLink
-          class="tw-text-lg tw-font-medium"
-          @click="goToEntity"
-          >{{ options.conversation.name }}</VcLink
-        >
+          <VcImage
+            size="m"
+            :src="options.conversation.iconUrl"
+          />
+          <VcLink
+            class="tw-text-lg tw-font-medium"
+            @click="goToEntity"
+            >{{ options.conversation.name }}</VcLink
+          >
         </div>
       </div>
       <div
@@ -126,7 +126,6 @@
       </div>
       <div class="messenger__form-container">
         <NewMessageForm
-          v-if="options?.entityId"
           class="messenger__new-message-form"
           :is-expanded="activeForm.type === 'main'"
           :loading="sendMessageLoading"
@@ -150,7 +149,6 @@ import {
   ISearchMessagesQuery,
   Conversation,
 } from "@vcmp-communication/api/marketplacecommunication";
-import * as _ from "lodash-es";
 import MessageSkeleton from "../components/message-skeleton.vue";
 import MessageTree from "../components/message-tree.vue";
 import { useInfiniteScroll } from "../composables/useInfiniteScroll";
@@ -203,6 +201,7 @@ const {
   seller,
   getThread,
   loadedThread,
+  createConversation,
 } = useMessages();
 
 const { t } = useI18n();
@@ -318,12 +317,20 @@ async function sendRootMessage(args: {
   entityId: string;
   entityType: string;
 }) {
-  if (props.options?.entityId) {
+  try {
+    // create conversation if it doesn't exist
+    const conversation = await createConversation({
+      sellerId: currentSeller.value?.id,
+      sellerName: currentSeller.value?.name,
+      userIds: [operator.value?.id ?? ""],
+    });
+
     const newMessage = await sendMessage({
       ...args,
       sellerId: currentSeller.value?.id,
       sellerName: currentSeller.value?.name,
       rootsOnly: true,
+      conversationId: conversation?.id ?? undefined,
     });
 
     updateParent();
@@ -343,6 +350,8 @@ async function sendRootMessage(args: {
         }
       });
     }
+  } catch (error) {
+    console.error(error);
   }
 }
 
@@ -353,6 +362,7 @@ async function search(query?: ISearchMessagesQuery) {
     entityType: props.options?.entityType,
     rootsOnly: true,
     responseGroup: "Full",
+    conversationId: props.options?.conversation?.id,
   });
 }
 
@@ -363,9 +373,10 @@ onMounted(async () => {
 
     return;
   }
-  if (props.options?.entityId && props.options?.entityType) {
-    await search();
 
+  await search();
+
+  if (props.options?.entityId && props.options?.entityType) {
     await getSeller({
       entityId: props.options?.entityId,
       entityType: props.options?.entityType,

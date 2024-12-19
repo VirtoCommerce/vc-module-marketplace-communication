@@ -3,7 +3,8 @@
     "MENU_TITLE": "Communication",
     "TITLE": "Communication",
     "TOOLBAR": {
-      "REFRESH": "Refresh"
+      "REFRESH": "Refresh",
+      "OPERATOR_CHAT": "Operator chat"
     },
     "TABLE": {
       "COLUMNS": {

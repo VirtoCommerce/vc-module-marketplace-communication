@@ -44,7 +44,10 @@
             <div class="conversations__author-wrapper">
               <div class="conversations__author-row">
                 <span class="conversations__author">{{ item.name }}</span>
-                <div class="conversations__type-wrapper">
+                <div
+                  v-if="item.entityType"
+                  class="conversations__type-wrapper"
+                >
                   <span class="conversations__type conversations__type--entity">
                     {{ getConversationType(item.entityType) }}
                   </span>
@@ -116,7 +119,7 @@
 
 <script setup lang="ts">
 import { computed, ComputedRef, inject, onMounted, Ref, ref, watch } from "vue";
-import { useConversationList } from "../composables";
+import { useConversationList, useMessages } from "../composables";
 import {
   IBladeToolbar,
   IParentCallArgs,
@@ -179,6 +182,8 @@ const selectedConversation = ref<Conversation | null | undefined>(null) as Ref<C
 
 const { conversations, loading, getConversations, totalCount, pages, currentPage, searchQuery } = useConversationList();
 
+const { createConversation, getOperator, operator } = useMessages();
+
 const currentSeller = inject<ComputedRef<{ id: string; name: string }>>("currentSeller");
 const isReady = ref(false);
 const searchValue = ref();
@@ -237,6 +242,28 @@ const bladeToolbar = computed<IBladeToolbar[]>(() => [
     icon: "fas fa-sync-alt",
     title: t("ALL_MESSAGES.TOOLBAR.REFRESH"),
     clickHandler: reload,
+  },
+  {
+    id: "operator-chat",
+    icon: "fas fa-comment",
+    title: t("ALL_MESSAGES.TOOLBAR.OPERATOR_CHAT"),
+    clickHandler: async () => {
+      try {
+        const conversation = await createConversation({
+          sellerId: currentSeller.value?.id,
+          sellerName: currentSeller.value?.name,
+          userIds: [operator.value?.id ?? ""],
+        });
+        await openBlade({
+          blade: resolveBladeByName("Messenger"),
+          options: {
+            conversation,
+          },
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    },
   },
 ]);
 
@@ -311,6 +338,7 @@ async function reset() {
 
 onMounted(async () => {
   await load();
+  await getOperator();
 });
 
 defineExpose({
