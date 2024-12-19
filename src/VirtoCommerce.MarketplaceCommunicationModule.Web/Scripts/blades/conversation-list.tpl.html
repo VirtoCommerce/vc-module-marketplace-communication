@@ -58,8 +58,11 @@
 
 <script type="text/ng-template" id="conversation-icon.cell.html">
   <div class="ui-grid-cell-contents">
-    <div class="product-img">
-      <img ng-if="COL_FIELD" class="list-icon" ng-src="{{ COL_FIELD }}">
+    <div ng-if="COL_FIELD" class="product-img">
+      <img class="list-icon" ng-src="{{ COL_FIELD }}">
+    </div>
+    <div ng-if="!COL_FIELD" class="product-img">
+      <i class="table-ico fas fa-comment"></i>
     </div>
   </div>
 </script>
