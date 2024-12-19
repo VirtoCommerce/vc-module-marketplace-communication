@@ -26,10 +26,12 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             // communication users
             getUserInfos: { method: 'GET', url: 'api/vcmp/communicationuser/info', isArray: true },
             getOperator: { method: 'GET', url: 'api/vcmp/communicationuser/operator' },
+            getOrCreateUser: { method: 'GET', url: 'api/vcmp/communicationuser/getorcreate' },
             getSellerUser: { method: 'POST', url: 'api/vcmp/communicationuser/seller' },
             // conversation
             searchConversations: { method: 'POST', url: 'api/vcmp/conversation/search' },
             getConversationById: { method: 'GET', url: 'api/vcmp/conversation/getbyid' },
-            updateConversation: { method: 'POST', url: 'api/vcmp/conversation/update' }
+            updateConversation: { method: 'POST', url: 'api/vcmp/conversation/update' },
+            getOrCreateConversation: { method: 'POST', url: 'api/vcmp/conversation/new' }
         });
     }]);

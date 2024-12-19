@@ -85,17 +85,47 @@ angular.module(moduleName, [])
             };
             widgetService.registerWidget(offerCommunicationWidget, 'offerDetailsWidgetContainer');
 
+            // Seller entityType resolver
+            var sellerMetaFields = metaFormsService.getMetaFields('SellerDetails');
+            entityTypesResolverService.registerType({
+                entityType: 'VirtoCommerce.MarketplaceVendorModule.Core.Domains.Seller',
+                entityIdFieldName: 'sellerId',
+                entityImageFieldName: 'logo',
+                sellerIdFieldName: 'id',
+                detailBlade: {
+                    id: 'sellerDetails',
+                    headIcon: 'fas fa-store',
+                    controller: 'virtoCommerce.marketplaceModule.sellerDetailsController',
+                    template: 'Modules/$(VirtoCommerce.MarketplaceVendor)/Scripts/blades/seller-details.tpl.html',
+                    metaFields: sellerMetaFields
+                },
+                searchEntities: function (searchCriteria, setEntitiesCallback) {
+                    marketplaceApi.searchSellers(searchCriteria, (data) => {
+                        setEntitiesCallback(data);
+                    });
+                },
+                knownChildrenTypes: []
+            });
+
             // SellerProduct entityType resolver
             var sellerProductMetaFields = metaFormsService.getMetaFields('SellerProductDetails');
             entityTypesResolverService.registerType({
                 entityType: 'VirtoCommerce.MarketplaceVendorModule.Core.Domains.SellerProduct',
                 entityIdFieldName: 'sellerProductId',
+                entityImageFieldName: 'imgSrc',
+                entityInfoFieldName: 'sellerName',
+                sellerIdFieldName: 'sellerId',
                 detailBlade: {
                     id: 'sellerProductDetails',
                     headIcon: 'fas fa-folder',
                     controller: 'virtoCommerce.marketplaceModule.sellerProductDetailsController',
                     template: 'Modules/$(VirtoCommerce.MarketplaceVendor)/Scripts/blades/seller-product-details.tpl.html',
                     metaFields: sellerProductMetaFields
+                },
+                searchEntities: function (searchCriteria, setEntitiesCallback) {
+                    marketplaceApi.listitemssearch(searchCriteria, (data) => {
+                        setEntitiesCallback(data);
+                    });
                 },
                 knownChildrenTypes: []
             });
@@ -106,27 +136,47 @@ angular.module(moduleName, [])
             entityTypesResolverService.registerType({
                 entityType: 'VirtoCommerce.MarketplaceVendorModule.Core.Domains.Offer',
                 entityIdFieldName: 'offerId',
+                entityImageFieldName: 'imgSrc',
+                entityInfoFieldName: 'sellerName',
+                sellerIdFieldName: 'sellerId',
                 detailBlade: {
                     id: 'offerDetails',
-                    headIcon: 'fas fa-store',
+                    headIcon: 'fa fa-usd',
                     controller: 'virtoCommerce.marketplaceModule.offerDetailsController',
                     template: 'Modules/$(VirtoCommerce.MarketplaceVendor)/Scripts/blades/offer-details.tpl.html',
                     metaFieldsReadonly: offerMetaFieldsReadonly,
                     metaFieldsEditable: offerMetaFieldsEditable
+                },
+                searchEntities: function (searchCriteria, setEntitiesCallback) {
+                    marketplaceApi.searchOffers(searchCriteria, (data) => {
+                        setEntitiesCallback(data);
+                    });
                 },
                 knownChildrenTypes: []
             });
 
             // Order entityType resolver
             var orderTemplate = orderKnownOperations.getOperation('CustomerOrder');
+            var orderDetailBlade = orderTemplate ? orderTemplate.detailBlade : {};
+            orderDetailBlade = angular.extend(orderDetailBlade, { headIcon: "fa fa-file-text" });
             entityTypesResolverService.registerType({
                 entityType: 'VirtoCommerce.OrdersModule.Core.Model.CustomerOrder',
                 entityIdFieldName: 'currentEntityId',
                 entityFieldName: 'customerOrder',
-                detailBlade: orderTemplate ? orderTemplate.detailBlade : {},
+                entityNameFieldName: 'number',
+                entityInfoFieldName: 'employeeName',
+                sellerIdFieldName: 'employeeId',
+                detailBlade: orderDetailBlade,
                 getEntity: function (entityId, setEntityCallback) {
                     ordersApi.get({ id: entityId }, (data) => {
                         setEntityCallback(data);
+                    });
+                },
+                searchEntities: function (searchCriteria, setEntitiesCallback) {
+                    searchCriteria.hasParentOperation = true;
+                    ordersApi.search(searchCriteria, (data) => {
+                        data.results.forEach(x => x.iconUrl = x.items[0].imageUrl)
+                        setEntitiesCallback(data);
                     });
                 },
                 knownChildrenTypes: []

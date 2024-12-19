@@ -55,6 +55,9 @@
         "labels": {
           "name": "Conversation name"
         },
+        "commands": {
+          "new-chat": "New chat"
+        },
         "menu": {
           "manage": "Manage"
         }
@@ -64,6 +67,15 @@
         "labels": {
           "name": "Name",
           "icon": "Conversation icon"
+        }
+      },
+      "conversation-add": {
+        "title": "Choose what you would like to talk about..."
+      },
+      "entity-select-list": {
+        "title": "Subject of conversation",
+        "labels": {
+          "name": "Name"
         }
       }
     },
@@ -81,9 +93,22 @@
       }
     },
     "entity-types": {
-      "VirtoCommerce.MarketplaceVendorModule.Core.Domains.SellerProduct": "Product",
-      "VirtoCommerce.MarketplaceVendorModule.Core.Domains.Offer": "Offer",
-      "VirtoCommerce.OrdersModule.Core.Model.CustomerOrder": "Order"
+      "VirtoCommerce.MarketplaceVendorModule.Core.Domains.Seller": {
+        "name": "Seller",
+        "description": "Start new chat with vendor"
+      },
+      "VirtoCommerce.MarketplaceVendorModule.Core.Domains.SellerProduct": {
+        "name": "Product",
+        "description": "New conversation about vendor's product"
+      },
+      "VirtoCommerce.MarketplaceVendorModule.Core.Domains.Offer": {
+        "name": "Offer",
+        "description": "New conversation about vendor's offer"
+      },
+      "VirtoCommerce.OrdersModule.Core.Model.CustomerOrder": {
+        "name": "Order",
+        "description": "New conversation about vendor's order"
+      }
     }
   },
   "settings": {

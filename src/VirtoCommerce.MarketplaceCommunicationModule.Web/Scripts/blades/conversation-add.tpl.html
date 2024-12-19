@@ -1,0 +1,13 @@
+<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <ul class="list __items">
+                <li class="list-item" ng-mouseup="addConversation(data.entityType)" ng-repeat="data in availableTypes" va-permission="seller:message:send">
+                    <i class="list-ico {{ data.detailBlade.headIcon }}" style="text-align:center"></i>
+                    <span class="list-t">{{ 'marketplaceCommunication.entity-types.' + data.entityType + '.name' | translate}}</span>
+                    <span class="list-descr">{{ 'marketplaceCommunication.entity-types.' + data.entityType + '.description' | translate}}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

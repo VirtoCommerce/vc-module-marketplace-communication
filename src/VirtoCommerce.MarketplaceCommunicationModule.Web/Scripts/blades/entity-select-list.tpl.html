@@ -13,7 +13,7 @@
 <div class="blade-content __medium-wide">
   <div class="blade-inner">
     <div class="inner-block" ng-init="setGridOptions({
-                useExternalSorting: false,
+                useExternalSorting: true,
                 enableGridMenu: false,
                 showTreeRowHeader: false,
                 data: 'listEntries',
@@ -21,25 +21,19 @@
                 rowHeight: 60,
                 infiniteScrollRowsFromEnd: 10,
                 columnDefs: [
-                        { name: 'actions', displayName: '', enableColumnResizing: false, enableSorting: false, width: 30, cellTemplate: 'item-list-actions.cell.html', pinnedLeft:true },
                         {
                             name: 'iconUrl', displayName: '',
                             enableColumnResizing: false, enableSorting: false, width: 60,
-                            cellTemplate: 'conversation-icon.cell.html'
+                            cellTemplate: 'entity-icon.cell.html'
                         },
                         {
-                            name: 'name', displayName: 'marketplaceCommunication.blades.conversation-list.labels.name',
-                            enableColumnResizing: false, enableSorting: false,
-                            cellTemplate: 'conversation-name.cell.html'
+                            name: 'name', displayName: 'marketplaceCommunication.blades.entity-select-list.labels.name',
+                            enableColumnResizing: false,
+                            cellTemplate: 'entity-name.cell.html'
                         },
                  ]})">
       <div class="table-wrapper" ng-if="listEntries.length > 0">
-        <div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-height ui-grid-infinite-scroll></div>
-        <ul class="menu __context" role="menu" id="cil_menu_{{blade.level}}">
-          <li class="menu-item" ng-click='manageConversation(contextMenuEntity)'>
-            <i class="menu-ico fas fa-edit"></i>{{ 'marketplaceCommunication.blades.conversation-list.menu.manage' | translate }}
-          </li>
-        </ul>
+        <div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-save-state ui-grid-height ui-grid-infinite-scroll></div>
       </div>
       <div class="note" ng-if="!listEntries.length">{{ 'platform.list.no-data' | translate }}</div>
     </div>
@@ -50,13 +44,7 @@
   <div ng-click='grid.appScope.selectItem($event, row.entity)' ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" ui-grid-one-bind-id-grid="rowRenderIndex + '-' + col.uid + '-cell'" class="ui-grid-cell" ng-class="{'ui-grid-row-header-cell': col.isRowHeader, '__hovered': grid.appScope.contextMenuEntity === row.entity, '__selected': row.entity.id===grid.appScope.selectedNodeId }" role="{{col.isRowHeader ? 'rowheader' : 'gridcell' }}" ui-grid-cell context-menu="grid.appScope.contextMenuEntity = row.entity" data-target="cil_menu_{{grid.appScope.blade.level}}"></div>
 </script>
 
-<script type="text/ng-template" id="item-list-actions.cell.html">
-  <div class="ui-grid-actions" left-click-menu="grid.appScope.contextMenuEntity = row.entity" data-target="cil_menu_{{grid.appScope.blade.level}}">
-    <i class="fa fa-ellipsis-v"></i>
-  </div>
-</script>
-
-<script type="text/ng-template" id="conversation-icon.cell.html">
+<script type="text/ng-template" id="entity-icon.cell.html">
   <div class="ui-grid-cell-contents">
     <div class="product-img">
       <img ng-if="COL_FIELD" class="list-icon" ng-src="{{ COL_FIELD }}">
@@ -64,17 +52,12 @@
   </div>
 </script>
 
-<script type="text/ng-template" id="conversation-name.cell.html">
+<script type="text/ng-template" id="entity-name.cell.html">
   <div class="ui-grid-cell-contents">
     <div class="inner-contents">
       <span class="list-name">{{ row.entity.name }}</span>
-      <span class="list-name" ng-if="row.entity.entityType"> ({{ 'marketplaceCommunication.entity-types.' + row.entity.entityType + '.name' | translate }})</span>
-      <span class="table-date" am-time-ago="row.entity.lastMessageTimestamp"></span>
-      <span class="vc-badge" ng-if="row.entity.unreadMessagesCount > 0">{{ row.entity.unreadMessagesCount }}</span>
       <br>
-      <span class="table-date" ng-if="row.entity.lastMessage.sender.userName == userName">You:</span>
-      <span class="table-date" ng-if="row.entity.lastMessage.sender.userName != userName">{{ row.entity.lastMessage.sender.userName }}:</span>
-      <span class="list-descr">{{ row.entity.lastMessage.content }}</span>
+      <span class="table-date">{{ row.entity.info }}</span>
     </div>
   </div>
 </script>

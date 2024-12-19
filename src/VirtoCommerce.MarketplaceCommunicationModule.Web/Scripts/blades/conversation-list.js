@@ -89,12 +89,13 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     }
                 },
                 {
-                    name: "platform.commands.add", icon: 'fas fa-plus',
+                    name: "marketplaceCommunication.blades.conversation-list.commands.new-chat",
+                    icon: 'fas fa-plus',
                     executeMethod: function () {
-                        $scope.showDetails(undefined);
+                        $scope.startNew();
                     },
                     canExecuteMethod: function () {
-                        return false;
+                        return true;
                     }
                 }
             ];
@@ -146,8 +147,14 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 bladeNavigationService.showBlade(newBlade, blade);
             }
 
-            $scope.getEntityType = function (entityType) {
-                return "marketplaceCommunication." + entityType;
+            $scope.startNew = function () {
+                var newBlade = {
+                    id: 'conversationAdd',
+                    controller: 'virtoCommerce.marketplaceCommunicationModule.conversationAddController',
+                    template: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/blades/conversation-add.tpl.html'
+                };
+                blade.childBlade = newBlade;
+                bladeNavigationService.showBlade(newBlade, blade);
             }
 
             filter.criteriaChanged = function () {

@@ -10,7 +10,7 @@
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
     <PackageReference Include="VirtoCommerce.MarketplaceVendorModule.Core" Version="3.825.0" />
-    <PackageReference Include="VirtoCommerce.CommunicationModule.Core" Version="3.802.0-alpha.30" />
+    <PackageReference Include="VirtoCommerce.CommunicationModule.Core" Version="3.802.0-alpha.32" />
     <PackageReference Include="VirtoCommerce.Platform.Core" Version="3.825.0" />
   </ItemGroup>
 </Project>

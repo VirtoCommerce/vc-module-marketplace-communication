@@ -51,6 +51,20 @@ public class VcmpCommunicationUserController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet]
+    [Route("getorcreate")]
+    [Authorize(Core.ModuleConstants.Security.Permissions.Read)]
+    public async Task<ActionResult<CommunicationUser>> GetOrCreateCommunicationUser([FromQuery] string userId, [FromQuery] string userType)
+    {
+        var query = AbstractTypeFactory<GetOrCreateCommunicationUserQuery>.TryCreateInstance();
+        query.UserId = userId;
+        query.UserType = userType;
+
+        var result = await _mediator.Send(query);
+
+        return Ok(result);
+    }
+
     [HttpPost]
     [Route("seller")]
     [Authorize(Core.ModuleConstants.Security.Permissions.Read)]
