@@ -148,6 +148,9 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             }
 
             $scope.startNew = function () {
+                $scope.selectedNodeId = undefined;
+                blade.selectedItem = undefined;
+
                 var newBlade = {
                     id: 'conversationAdd',
                     controller: 'virtoCommerce.marketplaceCommunicationModule.conversationAddController',

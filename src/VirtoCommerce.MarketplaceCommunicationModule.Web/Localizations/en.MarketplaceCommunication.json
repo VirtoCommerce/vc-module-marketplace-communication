@@ -70,10 +70,10 @@
         }
       },
       "conversation-add": {
-        "title": "Choose what you would like to talk about..."
+        "title": "Select conversation intent"
       },
       "entity-select-list": {
-        "title": "Subject of conversation",
+        "title": "Search and select",
         "labels": {
           "name": "Name"
         }
@@ -94,20 +94,20 @@
     },
     "entity-types": {
       "VirtoCommerce.MarketplaceVendorModule.Core.Domains.Seller": {
-        "name": "Seller",
-        "description": "Start new chat with vendor"
+        "name": "Vendor",
+        "description": "Start or continue chat with a vendor"
       },
       "VirtoCommerce.MarketplaceVendorModule.Core.Domains.SellerProduct": {
         "name": "Product",
-        "description": "New conversation about vendor's product"
+        "description": "Start or continue chat about a product"
       },
       "VirtoCommerce.MarketplaceVendorModule.Core.Domains.Offer": {
         "name": "Offer",
-        "description": "New conversation about vendor's offer"
+        "description": "Start or continue chat about an offer"
       },
       "VirtoCommerce.OrdersModule.Core.Model.CustomerOrder": {
         "name": "Order",
-        "description": "New conversation about vendor's order"
+        "description": "Start or continue chat about an order"
       }
     }
   },

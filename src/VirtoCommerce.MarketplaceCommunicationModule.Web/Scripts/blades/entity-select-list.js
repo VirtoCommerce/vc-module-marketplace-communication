@@ -105,8 +105,8 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                                     controller: 'virtoCommerce.marketplaceCommunicationModule.messageListController',
                                     template: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/blades/message-list.tpl.html'
                                 };
-                                blade.childBlade = newBlade;
-                                bladeNavigationService.showBlade(newBlade, blade);
+                                bladeNavigationService.closeBlade(blade);
+                                bladeNavigationService.showBlade(newBlade, blade.parentBlade);
                             })
                         });
                     }
