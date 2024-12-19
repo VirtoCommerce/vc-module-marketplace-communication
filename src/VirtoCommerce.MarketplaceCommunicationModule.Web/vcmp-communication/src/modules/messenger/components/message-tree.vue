@@ -49,7 +49,7 @@
           </div>
         </div>
 
-        <div v-if="childMessages.length > 0 && searchMessagesLoading">
+        <div v-if="childMessages?.length > 0 && searchMessagesLoading">
           <div
             v-for="n in 10"
             :key="n"
@@ -62,7 +62,7 @@
         </div>
         <template v-else>
           <div
-            v-for="(childMessage, index) in childMessages"
+            v-for="(childMessage, index) in childMessages ?? []"
             :key="childMessage.id"
             class="message-tree__reply-branch"
           >
@@ -185,8 +185,9 @@ watch(
 
 const childMessages = computed(() => {
   return (
-    (messages.value?.length ? messages.value : props.message.answers)?.filter((m) => m.threadId === props.message.id) ||
-    []
+    (messages.value?.length ? messages.value : props.message.answers)?.filter(
+      (m) => m?.threadId === props.message.id,
+    ) || []
   );
 });
 

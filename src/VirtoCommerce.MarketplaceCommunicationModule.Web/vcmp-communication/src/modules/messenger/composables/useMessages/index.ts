@@ -148,6 +148,7 @@ export const useMessages = (): IUseMessages => {
       ...searchQuery.value,
       take: 10,
       sort: "createdDate:desc",
+      conversationId: message?.conversationId,
       responseGroup: "Full",
       entityId: message?.entityId,
       entityType: message?.entityType,
