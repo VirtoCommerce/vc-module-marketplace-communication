@@ -68,6 +68,7 @@ export interface IUseMessages {
     userIds: string[];
     iconUrl?: string;
   }) => Promise<Conversation>;
+  getConversation: (entityId: string, entityType: string) => Promise<Conversation>;
 }
 
 const { getApiClient: getCommunicationUserClient } = useApiClient(VcmpCommunicationUserClient);
@@ -376,6 +377,11 @@ export const useMessages = (): IUseMessages => {
     return conversation;
   }
 
+  async function getConversation(entityId: string, entityType: string) {
+    const client = await getConversationClient();
+    return await client.getByEntity(entityId, entityType);
+  }
+
   return {
     messages,
     sendMessage,
@@ -408,5 +414,6 @@ export const useMessages = (): IUseMessages => {
     seller,
     loadedThread,
     createConversation,
+    getConversation,
   };
 };

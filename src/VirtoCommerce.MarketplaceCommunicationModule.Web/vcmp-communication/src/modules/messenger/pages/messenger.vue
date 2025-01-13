@@ -202,6 +202,7 @@ const {
   getThread,
   loadedThread,
   createConversation,
+  getConversation,
 } = useMessages();
 
 const { t } = useI18n();
@@ -357,13 +358,20 @@ async function sendRootMessage(args: {
 }
 
 async function search(query?: ISearchMessagesQuery) {
+  let conversationId = props.options?.conversation?.id ?? undefined;
+
+  if (!props.options?.conversation?.id && props.options?.entityId && props.options?.entityType) {
+    const conversation = await getConversation(props.options?.entityId, props.options?.entityType);
+    conversationId = conversation.id;
+  }
+
   await searchMessages({
     ...(query ?? {}),
     entityId: props.options?.entityId,
     entityType: props.options?.entityType,
     rootsOnly: true,
     responseGroup: "Full",
-    conversationId: props.options?.conversation?.id,
+    conversationId: conversationId,
   });
 }
 
