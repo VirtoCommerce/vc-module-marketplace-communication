@@ -25,6 +25,7 @@ import {
   SearchConversationsQuery,
   VcmpConversationClient,
   Conversation,
+  CreateConversationCommand,
 } from "@vcmp-communication/api/marketplacecommunication";
 
 export interface IUseMessages {
@@ -67,6 +68,8 @@ export interface IUseMessages {
     sellerName: string;
     userIds: string[];
     iconUrl?: string;
+    entityId?: string;
+    entityType?: string;
   }) => Promise<Conversation>;
   getConversation: (entityId: string, entityType: string) => Promise<Conversation>;
 }
@@ -367,9 +370,11 @@ export const useMessages = (): IUseMessages => {
     sellerName: string;
     userIds: string[];
     iconUrl?: string;
+    entityId?: string;
+    entityType?: string;
   }) {
     const client = await getConversationClient();
-    const command = new SearchConversationsQuery({
+    const command = new CreateConversationCommand({
       ...args,
     });
     const conversation = await client.createConversation(command);

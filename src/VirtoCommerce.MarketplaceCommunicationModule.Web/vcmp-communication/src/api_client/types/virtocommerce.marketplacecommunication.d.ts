@@ -24,6 +24,13 @@ export declare class VcmpCommunicationUserClient extends AuthApiBase {
     getOperator(): Promise<CommunicationUser>;
     protected processGetOperator(response: Response): Promise<CommunicationUser>;
     /**
+     * @param userId (optional)
+     * @param userType (optional)
+     * @return OK
+     */
+    getOrCreateCommunicationUser(userId?: string | undefined, userType?: string | undefined): Promise<CommunicationUser>;
+    protected processGetOrCreateCommunicationUser(response: Response): Promise<CommunicationUser>;
+    /**
      * @param body (optional)
      * @return OK
      */
@@ -60,8 +67,14 @@ export declare class VcmpConversationClient extends AuthApiBase {
      * @param body (optional)
      * @return OK
      */
-    createConversation(body?: SearchConversationsQuery | undefined): Promise<Conversation>;
+    createConversation(body?: CreateConversationCommand | undefined): Promise<Conversation>;
     protected processCreateConversation(response: Response): Promise<Conversation>;
+    /**
+     * @param body (optional)
+     * @return OK
+     */
+    updateConversation(body?: UpdateConversationCommand | undefined): Promise<Conversation>;
+    protected processUpdateConversation(response: Response): Promise<Conversation>;
 }
 export declare class VcmpMessageClient extends AuthApiBase {
     private http;
@@ -76,6 +89,12 @@ export declare class VcmpMessageClient extends AuthApiBase {
      */
     search(body?: SearchMessagesQuery | undefined): Promise<SearchMessageResult>;
     protected processSearch(response: Response): Promise<SearchMessageResult>;
+    /**
+     * @param messageId (optional)
+     * @return OK
+     */
+    getMessageById(messageId?: string | undefined): Promise<Message>;
+    protected processGetMessageById(response: Response): Promise<Message>;
     /**
      * @param threadId (optional)
      * @return OK
@@ -202,6 +221,28 @@ export interface IConversationUser {
     createdBy?: string | undefined;
     modifiedBy?: string | undefined;
     id?: string | undefined;
+}
+export declare class CreateConversationCommand implements ICreateConversationCommand {
+    userIds: string[];
+    name?: string | undefined;
+    iconUrl?: string | undefined;
+    entityId?: string | undefined;
+    entityType?: string | undefined;
+    sellerId?: string | undefined;
+    sellerName?: string | undefined;
+    constructor(data?: ICreateConversationCommand);
+    init(_data?: any): void;
+    static fromJS(data: any): CreateConversationCommand;
+    toJSON(data?: any): any;
+}
+export interface ICreateConversationCommand {
+    userIds: string[];
+    name?: string | undefined;
+    iconUrl?: string | undefined;
+    entityId?: string | undefined;
+    entityType?: string | undefined;
+    sellerId?: string | undefined;
+    sellerName?: string | undefined;
 }
 export declare class DeleteMessageCommand implements IDeleteMessageCommand {
     sellerId?: string | undefined;
@@ -554,6 +595,16 @@ export declare class SortInfo implements ISortInfo {
 export interface ISortInfo {
     sortColumn?: string | undefined;
     sortDirection?: SortInfoSortDirection;
+}
+export declare class UpdateConversationCommand implements IUpdateConversationCommand {
+    conversation: Conversation;
+    constructor(data?: IUpdateConversationCommand);
+    init(_data?: any): void;
+    static fromJS(data: any): UpdateConversationCommand;
+    toJSON(data?: any): any;
+}
+export interface IUpdateConversationCommand {
+    conversation: Conversation;
 }
 export declare class UpdateMessageCommand implements IUpdateMessageCommand {
     sellerId?: string | undefined;

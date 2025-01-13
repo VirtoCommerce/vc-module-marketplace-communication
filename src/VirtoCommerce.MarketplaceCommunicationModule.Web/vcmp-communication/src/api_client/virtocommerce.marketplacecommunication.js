@@ -167,6 +167,66 @@ export class VcmpCommunicationUserClient extends AuthApiBase {
         return Promise.resolve(null);
     }
     /**
+     * @param userId (optional)
+     * @param userType (optional)
+     * @return OK
+     */
+    getOrCreateCommunicationUser(userId, userType) {
+        let url_ = this.baseUrl + "/api/vcmp/communicationuser/getorcreate?";
+        if (userId === null)
+            throw new Error("The parameter 'userId' cannot be null.");
+        else if (userId !== undefined)
+            url_ += "userId=" + encodeURIComponent("" + userId) + "&";
+        if (userType === null)
+            throw new Error("The parameter 'userType' cannot be null.");
+        else if (userType !== undefined)
+            url_ += "userType=" + encodeURIComponent("" + userType) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+        let options_ = {
+            method: "GET",
+            headers: {
+                "Accept": "text/plain"
+            }
+        };
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response) => {
+            return this.processGetOrCreateCommunicationUser(_response);
+        });
+    }
+    processGetOrCreateCommunicationUser(response) {
+        const status = response.status;
+        let _headers = {};
+        if (response.headers && response.headers.forEach) {
+            response.headers.forEach((v, k) => _headers[k] = v);
+        }
+        ;
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+                let result200 = null;
+                let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = CommunicationUser.fromJS(resultData200);
+                return result200;
+            });
+        }
+        else if (status === 401) {
+            return response.text().then((_responseText) => {
+                return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        }
+        else if (status === 403) {
+            return response.text().then((_responseText) => {
+                return throwException("Forbidden", status, _responseText, _headers);
+            });
+        }
+        else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+                return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve(null);
+    }
+    /**
      * @param body (optional)
      * @return OK
      */
@@ -428,6 +488,50 @@ export class VcmpConversationClient extends AuthApiBase {
         }
         return Promise.resolve(null);
     }
+    /**
+     * @param body (optional)
+     * @return OK
+     */
+    updateConversation(body) {
+        let url_ = this.baseUrl + "/api/vcmp/conversation/update";
+        url_ = url_.replace(/[?&]$/, "");
+        const content_ = JSON.stringify(body);
+        let options_ = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json-patch+json",
+                "Accept": "text/plain"
+            }
+        };
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response) => {
+            return this.processUpdateConversation(_response);
+        });
+    }
+    processUpdateConversation(response) {
+        const status = response.status;
+        let _headers = {};
+        if (response.headers && response.headers.forEach) {
+            response.headers.forEach((v, k) => _headers[k] = v);
+        }
+        ;
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+                let result200 = null;
+                let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = Conversation.fromJS(resultData200);
+                return result200;
+            });
+        }
+        else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+                return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve(null);
+    }
 }
 export class VcmpMessageClient extends AuthApiBase {
     constructor(baseUrl, http) {
@@ -487,6 +591,51 @@ export class VcmpMessageClient extends AuthApiBase {
                 let result200 = null;
                 let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
                 result200 = SearchMessageResult.fromJS(resultData200);
+                return result200;
+            });
+        }
+        else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+                return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve(null);
+    }
+    /**
+     * @param messageId (optional)
+     * @return OK
+     */
+    getMessageById(messageId) {
+        let url_ = this.baseUrl + "/api/vcmp/message/getbyid?";
+        if (messageId === null)
+            throw new Error("The parameter 'messageId' cannot be null.");
+        else if (messageId !== undefined)
+            url_ += "messageId=" + encodeURIComponent("" + messageId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+        let options_ = {
+            method: "GET",
+            headers: {
+                "Accept": "text/plain"
+            }
+        };
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response) => {
+            return this.processGetMessageById(_response);
+        });
+    }
+    processGetMessageById(response) {
+        const status = response.status;
+        let _headers = {};
+        if (response.headers && response.headers.forEach) {
+            response.headers.forEach((v, k) => _headers[k] = v);
+        }
+        ;
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+                let result200 = null;
+                let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = Message.fromJS(resultData200);
                 return result200;
             });
         }
@@ -1111,6 +1260,97 @@ export class ConversationUser {
         data["createdBy"] = this.createdBy;
         data["modifiedBy"] = this.modifiedBy;
         data["id"] = this.id;
+        return data;
+    }
+}
+export class CreateConversationCommand {
+    constructor(data) {
+        Object.defineProperty(this, "userIds", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "name", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "iconUrl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "entityId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "entityType", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "sellerId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "sellerName", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    this[property] = data[property];
+            }
+        }
+        if (!data) {
+            this.userIds = [];
+        }
+    }
+    init(_data) {
+        if (_data) {
+            if (Array.isArray(_data["userIds"])) {
+                this.userIds = [];
+                for (let item of _data["userIds"])
+                    this.userIds.push(item);
+            }
+            this.name = _data["name"];
+            this.iconUrl = _data["iconUrl"];
+            this.entityId = _data["entityId"];
+            this.entityType = _data["entityType"];
+            this.sellerId = _data["sellerId"];
+            this.sellerName = _data["sellerName"];
+        }
+    }
+    static fromJS(data) {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateConversationCommand();
+        result.init(data);
+        return result;
+    }
+    toJSON(data) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.userIds)) {
+            data["userIds"] = [];
+            for (let item of this.userIds)
+                data["userIds"].push(item);
+        }
+        data["name"] = this.name;
+        data["iconUrl"] = this.iconUrl;
+        data["entityId"] = this.entityId;
+        data["entityType"] = this.entityType;
+        data["sellerId"] = this.sellerId;
+        data["sellerName"] = this.sellerName;
         return data;
     }
 }
@@ -2498,6 +2738,41 @@ export class SortInfo {
         data = typeof data === 'object' ? data : {};
         data["sortColumn"] = this.sortColumn;
         data["sortDirection"] = this.sortDirection;
+        return data;
+    }
+}
+export class UpdateConversationCommand {
+    constructor(data) {
+        Object.defineProperty(this, "conversation", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    this[property] = data[property];
+            }
+        }
+        if (!data) {
+            this.conversation = new Conversation();
+        }
+    }
+    init(_data) {
+        if (_data) {
+            this.conversation = _data["conversation"] ? Conversation.fromJS(_data["conversation"]) : new Conversation();
+        }
+    }
+    static fromJS(data) {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateConversationCommand();
+        result.init(data);
+        return result;
+    }
+    toJSON(data) {
+        data = typeof data === 'object' ? data : {};
+        data["conversation"] = this.conversation ? this.conversation.toJSON() : undefined;
         return data;
     }
 }

@@ -325,6 +325,8 @@ async function sendRootMessage(args: {
       sellerName: currentSeller.value?.name,
       userIds: [operator.value?.id ?? ""],
       iconUrl: props.options?.conversation?.iconUrl,
+      entityId: props.options?.entityId,
+      entityType: props.options?.entityType,
     });
 
     const newMessage = await sendMessage({
