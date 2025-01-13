@@ -64,6 +64,13 @@ angular.module(moduleName, [])
             };
             mainMenuService.addMenuItem(menuItem);
 
+            // Seller details: communication widget
+            var sellerCommunicationWidget = {
+                controller: 'virtoCommerce.marketplaceCommunicationModule.sellerCommunicationWidgetController',
+                template: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/widgets/seller-communication-widget.tpl.html'
+            };
+            widgetService.registerWidget(sellerCommunicationWidget, 'sellerDetails');
+
             // Seller product details: communication widget
             var productCommunicationWidget = {
                 controller: 'virtoCommerce.marketplaceCommunicationModule.productCommunicationWidgetController',
