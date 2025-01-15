@@ -41,6 +41,11 @@ public class UpdateMessageCommandHandler : ICommandHandler<UpdateMessageCommand>
         }
 
         message.Content = request.Content;
+        if (!request.Attachments.IsNullOrEmpty())
+        {
+            message.Attachments = request.Attachments;
+        }
+
         await _messageService.UpdateMessage(message);
 
         return Unit.Value;

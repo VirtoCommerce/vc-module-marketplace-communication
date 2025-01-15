@@ -94,6 +94,7 @@ public class SendMessageCommandHandler : ICommandHandler<SendMessageCommand>
         message.Content = request.Message.Content;
         message.ConversationId = conversationId;
         message.ThreadId = request.Message.ReplyTo;
+        message.Attachments = request.Message.Attachments;
 
         var messageRecipient = AbstractTypeFactory<MessageRecipient>.TryCreateInstance();
         messageRecipient.RecipientId = request.Message.RecipientId;

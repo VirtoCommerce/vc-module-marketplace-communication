@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using VirtoCommerce.CommunicationModule.Core.Models;
 using VirtoCommerce.MarketplaceVendorModule.Core.Common;
 using VirtoCommerce.MarketplaceVendorModule.Core.Domains;
 
@@ -13,4 +15,6 @@ public class UpdateMessageCommand : ICommand, IHasSellerId
 
     [Required]
     public string Content { get; set; }
+
+    public IList<MessageAttachment> Attachments { get; set; }
 }

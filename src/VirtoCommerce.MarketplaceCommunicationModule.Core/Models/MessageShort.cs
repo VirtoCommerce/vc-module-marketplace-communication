@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using VirtoCommerce.CommunicationModule.Core.Models;
+
 namespace VirtoCommerce.MarketplaceCommunicationModule.Core.Models;
 public class MessageShort
 {
@@ -8,4 +11,5 @@ public class MessageShort
     public string EntityType { get; set; }
     public string Content { get; set; }
     public string ReplyTo { get; set; }
+    public IList<MessageAttachment> Attachments { get; set; }
 }
