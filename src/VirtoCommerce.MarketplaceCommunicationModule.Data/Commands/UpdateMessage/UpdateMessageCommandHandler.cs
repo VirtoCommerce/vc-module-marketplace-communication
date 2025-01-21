@@ -41,7 +41,7 @@ public class UpdateMessageCommandHandler : ICommandHandler<UpdateMessageCommand>
         }
 
         message.Content = request.Content;
-        if (!request.Attachments.IsNullOrEmpty())
+        if (request.Attachments != null)
         {
             message.Attachments = request.Attachments;
         }
