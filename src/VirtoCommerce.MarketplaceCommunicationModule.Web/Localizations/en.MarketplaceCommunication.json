@@ -114,14 +114,14 @@
     }
   },
   "settings": {
-    "MarketplaceCommunicationModule": {
-      "MarketplaceCommunicationModuleEnabled": {
-        "title": "MarketplaceCommunicationModule Enabled",
-        "description": "MarketplaceCommunicationModule Enabled setting"
+    "MarketplaceCommunication": {
+      "AttachmentCountLimit": {
+        "title": "Message attachments count limit",
+        "description": "Per message"
       },
-      "MarketplaceCommunicationModulePassword": {
-        "title": "MarketplaceCommunicationModule Password",
-        "description": "MarketplaceCommunicationModule Password setting"
+      "AttachmentSizeLimit": {
+        "title": "Message attachments size limit",
+        "description": "Per message, MB"
       }
     }
   }

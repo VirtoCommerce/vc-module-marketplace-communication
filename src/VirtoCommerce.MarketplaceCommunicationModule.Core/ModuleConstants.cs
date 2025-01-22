@@ -96,28 +96,28 @@ public static class ModuleConstants
     {
         public static class General
         {
-            public static SettingDescriptor MarketplaceCommunicationModuleEnabled { get; } = new()
+            public static SettingDescriptor AttachmentCountLimit { get; } = new()
             {
-                Name = "MarketplaceCommunicationModule.MarketplaceCommunicationModuleEnabled",
-                GroupName = "MarketplaceCommunicationModule|General",
-                ValueType = SettingValueType.Boolean,
-                DefaultValue = false,
+                Name = "MarketplaceCommunication.AttachmentCountLimit",
+                GroupName = "Marketplace Communication|General",
+                ValueType = SettingValueType.Integer,
+                DefaultValue = 5
             };
 
-            public static SettingDescriptor MarketplaceCommunicationModulePassword { get; } = new()
+            public static SettingDescriptor AttachmentSizeLimit { get; } = new()
             {
-                Name = "MarketplaceCommunicationModule.MarketplaceCommunicationModulePassword",
-                GroupName = "MarketplaceCommunicationModule|Advanced",
-                ValueType = SettingValueType.SecureString,
-                DefaultValue = "qwerty",
+                Name = "MarketplaceCommunication.AttachmentSizeLimit",
+                GroupName = "Marketplace Communication|General",
+                ValueType = SettingValueType.Integer,
+                DefaultValue = 1
             };
 
             public static IEnumerable<SettingDescriptor> AllGeneralSettings
             {
                 get
                 {
-                    yield return MarketplaceCommunicationModuleEnabled;
-                    yield return MarketplaceCommunicationModulePassword;
+                    yield return AttachmentCountLimit;
+                    yield return AttachmentSizeLimit;
                 }
             }
         }
