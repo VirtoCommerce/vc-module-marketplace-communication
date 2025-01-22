@@ -42,12 +42,14 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         // Create object to store form data
         $scope.replyForm = {
             text: '',
-            replyingTo: null
+            replyingTo: null,
+            attachments: []
         };
 
         // Form for root message
         $scope.mainForm = {
-            text: ''
+            text: '',
+            attachments: []
         };
 
         // Add pagination state
@@ -96,6 +98,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         $scope.cancelMessage = function() {
             messageFormsService.closeAllForms();
             $scope.mainForm.text = '';
+            $scope.mainForm.attachments = [];
             $scope.isFormExpanded = false;
             if (!$scope.$$phase) {
                 $scope.$apply();
@@ -173,7 +176,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         }
 
 
-        $scope.sendReply = function(parentMessage, replyText) {
+        $scope.sendReply = function(parentMessage, replyText, attachments) {
             if (!replyText || !replyText.trim()) {
                 return;
             }
@@ -189,7 +192,8 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     conversationId: blade.conversationId,
                     replyTo: parentMessage.id,
                     senderId: $scope.currentUser.id,
-                    recipientId: parentMessage.senderId
+                    recipientId: parentMessage.senderId,
+                    attachments: attachments
                 }
             };
 
@@ -308,7 +312,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                                         blade.threadsMap[x.id].push(reply);
                                     }
                                 });
-                                
+
                                 let rootMessage = extendedThreadMessages.find(x => !x.threadId);
                                 if (rootMessage) {
                                     blade.messages.push(rootMessage);
@@ -630,11 +634,10 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     conversationId: blade.conversationId,
                     senderId: $scope.currentUser.id,
                     recipientId: $scope.messageRecipientId,
-                    rootsOnly: true
+                    rootsOnly: true,
+                    attachments: $scope.mainForm.attachments
                 }
             };
-
-
 
             api.sendMessage(command, function() {
                 $scope.cancelMessage();
@@ -768,22 +771,26 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
             var command = {
                 messageId: params.message.id,
-                content: params.newContent.trim()
+                content: params.newContent.trim(),
+                attachments: params.attachments
             };
 
             api.updateMessage(command, function(response) {
                 params.message.content = params.newContent.trim();
+                params.message.attachments = params.attachments;
 
                 if (!params.message.threadId) {
                     var index = blade.messages.findIndex(m => m.id === params.message.id);
                     if (index !== -1) {
                         blade.messages[index].content = params.newContent.trim();
+                        blade.messages[index].attachments = params.attachments;
                     }
                 } else {
                     var threadMessages = blade.threadsMap[params.message.threadId] || [];
                     var replyIndex = threadMessages.findIndex(m => m.id === params.message.id);
                     if (replyIndex !== -1) {
                         threadMessages[replyIndex].content = params.newContent.trim();
+                        threadMessages[replyIndex].attachments = params.attachments;
                     }
                 }
             }).$promise.finally(function() {
@@ -826,6 +833,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         }, function(newFormId) {
             if (newFormId !== 'root' && $scope.isFormExpanded) {
                 $scope.mainForm.text = '';
+                $scope.mainForm.attachments = [];
                 $scope.isFormExpanded = false;
             }
         });

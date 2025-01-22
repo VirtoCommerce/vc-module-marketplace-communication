@@ -1795,6 +1795,12 @@ export class MessageAttachment {
             writable: true,
             value: void 0
         });
+        Object.defineProperty(this, "fileName", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         Object.defineProperty(this, "fileType", {
             enumerable: true,
             configurable: true,
@@ -1848,6 +1854,7 @@ export class MessageAttachment {
         if (_data) {
             this.messageId = _data["messageId"];
             this.attachmentUrl = _data["attachmentUrl"];
+            this.fileName = _data["fileName"];
             this.fileType = _data["fileType"];
             this.fileSize = _data["fileSize"];
             this.createdDate = _data["createdDate"] ? new Date(_data["createdDate"].toString()) : undefined;
@@ -1867,6 +1874,7 @@ export class MessageAttachment {
         data = typeof data === 'object' ? data : {};
         data["messageId"] = this.messageId;
         data["attachmentUrl"] = this.attachmentUrl;
+        data["fileName"] = this.fileName;
         data["fileType"] = this.fileType;
         data["fileSize"] = this.fileSize;
         data["createdDate"] = this.createdDate ? this.createdDate.toISOString() : undefined;
@@ -2105,6 +2113,12 @@ export class MessageShort {
             writable: true,
             value: void 0
         });
+        Object.defineProperty(this, "attachments", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -2121,6 +2135,11 @@ export class MessageShort {
             this.entityType = _data["entityType"];
             this.content = _data["content"];
             this.replyTo = _data["replyTo"];
+            if (Array.isArray(_data["attachments"])) {
+                this.attachments = [];
+                for (let item of _data["attachments"])
+                    this.attachments.push(MessageAttachment.fromJS(item));
+            }
         }
     }
     static fromJS(data) {
@@ -2138,6 +2157,11 @@ export class MessageShort {
         data["entityType"] = this.entityType;
         data["content"] = this.content;
         data["replyTo"] = this.replyTo;
+        if (Array.isArray(this.attachments)) {
+            data["attachments"] = [];
+            for (let item of this.attachments)
+                data["attachments"].push(item.toJSON());
+        }
         return data;
     }
 }
@@ -2802,6 +2826,12 @@ export class UpdateMessageCommand {
             writable: true,
             value: void 0
         });
+        Object.defineProperty(this, "attachments", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -2815,6 +2845,11 @@ export class UpdateMessageCommand {
             this.sellerName = _data["sellerName"];
             this.messageId = _data["messageId"];
             this.content = _data["content"];
+            if (Array.isArray(_data["attachments"])) {
+                this.attachments = [];
+                for (let item of _data["attachments"])
+                    this.attachments.push(MessageAttachment.fromJS(item));
+            }
         }
     }
     static fromJS(data) {
@@ -2829,6 +2864,11 @@ export class UpdateMessageCommand {
         data["sellerName"] = this.sellerName;
         data["messageId"] = this.messageId;
         data["content"] = this.content;
+        if (Array.isArray(this.attachments)) {
+            data["attachments"] = [];
+            for (let item of this.attachments)
+                data["attachments"].push(item.toJSON());
+        }
         return data;
     }
 }

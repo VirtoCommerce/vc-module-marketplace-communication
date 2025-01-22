@@ -1,0 +1,35 @@
+<div class="message-assets" ng-if="$ctrl.assets.length">
+    <div class="message-assets__list">
+        <div class="message-assets__item"
+             ng-repeat="asset in $ctrl.getVisibleAssets()">
+            <div class="message-assets__preview">
+                <img ng-if="$ctrl.isImage(asset.fileName)"
+                     ng-src="{{$ctrl.createThumbnailLink(asset.attachmentUrl)}}"
+                     class="message-assets__image"
+                     alt="{{asset.fileName}}">
+                <i ng-if="!$ctrl.isImage(asset.fileName)"
+                   class="fa message-assets__icon"
+                   ng-class="$ctrl.getFileIcon(asset.fileName)">
+                </i>
+            </div>
+            <a ng-href="{{asset.attachmentUrl}}"
+               target="_blank"
+               class="message-assets__name">
+                {{$ctrl.truncateFileName(asset.fileName)}}
+            </a>
+            <button class="btn message-assets__remove"
+                    ng-if="$ctrl.isEditing"
+                    ng-click="$ctrl.onRemove({asset: asset})">
+                <i class="fa fa-times message-assets__remove-icon"></i>
+            </button>
+        </div>
+    </div>
+
+    <button class="btn message-assets__toggle"
+            ng-if="$ctrl.hasHiddenAssets()"
+            ng-click="$ctrl.toggleAssetsList()">
+        {{ $ctrl.isAssetsExpanded ?
+           ('marketplaceCommunication.blades.message-list.labels.show-less' | translate) :
+           ('marketplaceCommunication.blades.message-list.labels.show-more' | translate:{count: $ctrl.getHiddenAssetsCount()}) }}
+    </button>
+</div>

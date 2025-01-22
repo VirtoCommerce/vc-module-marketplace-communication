@@ -353,6 +353,7 @@ export interface IMessage {
 export declare class MessageAttachment implements IMessageAttachment {
     messageId?: string | undefined;
     attachmentUrl?: string | undefined;
+    fileName?: string | undefined;
     fileType?: string | undefined;
     fileSize?: number;
     createdDate?: Date;
@@ -368,6 +369,7 @@ export declare class MessageAttachment implements IMessageAttachment {
 export interface IMessageAttachment {
     messageId?: string | undefined;
     attachmentUrl?: string | undefined;
+    fileName?: string | undefined;
     fileType?: string | undefined;
     fileSize?: number;
     createdDate?: Date;
@@ -434,6 +436,7 @@ export declare class MessageShort implements IMessageShort {
     entityType?: string | undefined;
     content?: string | undefined;
     replyTo?: string | undefined;
+    attachments?: MessageAttachment[] | undefined;
     constructor(data?: IMessageShort);
     init(_data?: any): void;
     static fromJS(data: any): MessageShort;
@@ -447,6 +450,7 @@ export interface IMessageShort {
     entityType?: string | undefined;
     content?: string | undefined;
     replyTo?: string | undefined;
+    attachments?: MessageAttachment[] | undefined;
 }
 export declare class SearchConversationResult implements ISearchConversationResult {
     totalCount?: number;
@@ -611,6 +615,7 @@ export declare class UpdateMessageCommand implements IUpdateMessageCommand {
     sellerName?: string | undefined;
     messageId: string;
     content: string;
+    attachments?: MessageAttachment[] | undefined;
     constructor(data?: IUpdateMessageCommand);
     init(_data?: any): void;
     static fromJS(data: any): UpdateMessageCommand;
@@ -621,6 +626,7 @@ export interface IUpdateMessageCommand {
     sellerName?: string | undefined;
     messageId: string;
     content: string;
+    attachments?: MessageAttachment[] | undefined;
 }
 export declare enum SortInfoSortDirection {
     Ascending = "Ascending",

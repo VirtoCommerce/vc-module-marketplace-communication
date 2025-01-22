@@ -18,4 +18,19 @@ const dateAgo = (date: Date | undefined) => {
   return moment(date).fromNow();
 };
 
-export { formatDate, dateAgo };
+const truncateFileName = (fileName: string | undefined, maxLength = 20) => {
+  if (!fileName) return "";
+
+  const lastDotIndex = fileName.lastIndexOf(".");
+  if (lastDotIndex === -1) return fileName;
+
+  const name = fileName.slice(0, lastDotIndex);
+  const extension = fileName.slice(lastDotIndex);
+
+  if (fileName.length <= maxLength) return fileName;
+
+  const truncatedLength = maxLength - extension.length - 1;
+  return `${name.slice(0, truncatedLength)}...${extension}`;
+};
+
+export { formatDate, dateAgo, truncateFileName };

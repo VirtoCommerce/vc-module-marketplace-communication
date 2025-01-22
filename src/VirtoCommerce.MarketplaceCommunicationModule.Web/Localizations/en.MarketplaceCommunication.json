@@ -25,7 +25,9 @@
           "show-less": "Show less",
           "enter-message": "Enter your message...",
           "start-conversation": "Start new conversation...",
-          "show-all-threads": "Show all threads"
+          "show-all-threads": "Show all threads",
+          "drop-files": "Drop files here to attach",
+          "attach-files": "Attach files"
         },
         "buttons": {
           "reply": "Reply",

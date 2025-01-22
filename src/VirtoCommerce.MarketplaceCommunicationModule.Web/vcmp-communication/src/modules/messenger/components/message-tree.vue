@@ -117,6 +117,7 @@ import {
   CommunicationUser,
   IDeleteMessageCommand,
   Message,
+  MessageAttachment,
   MessageRecipient,
 } from "@vcmp-communication/api/marketplacecommunication";
 import { useMessages } from "../composables/useMessages";
@@ -163,7 +164,11 @@ const entityId = inject("entityId") as string;
 const entityType = inject("entityType") as string;
 const sellerId = inject("sellerId") as string;
 const sellerName = inject("sellerName") as string;
-const updateMessage = inject("updateMessage") as (args: { content: string; messageId: string }) => Promise<void>;
+const updateMessage = inject("updateMessage") as (args: {
+  content: string;
+  messageId: string;
+  attachments: MessageAttachment[];
+}) => Promise<void>;
 const removeMessage = inject("removeMessage") as (args: IDeleteMessageCommand) => Promise<void>;
 const setActiveForm = inject("setActiveForm") as (
   formType: "main" | "reply" | "edit" | null,
@@ -301,7 +306,7 @@ const checkIfTarget = () => {
   }
 };
 
-const update = async (args: { content: string; messageId: string }) => {
+const update = async (args: { content: string; messageId: string; attachments: MessageAttachment[] }) => {
   await updateMessage(args);
 
   setActiveForm(null, null);
@@ -309,6 +314,7 @@ const update = async (args: { content: string; messageId: string }) => {
   emit("update-parent-message", {
     ...props.message,
     content: args.content,
+    attachments: args.attachments,
   } as Message);
 };
 
@@ -474,7 +480,6 @@ const { previousLoading, nextLoading, cleanup } = useInfiniteScroll({
     @apply tw-text-center tw-py-2 tw-text-sm tw-text-gray-500;
   }
 
-  // Добавляем новое правило для отмены after у последнего элемента перед load-more
   .message-tree__load-more {
     & ~ .message-tree__reply-branch:last-child::after {
       display: none;

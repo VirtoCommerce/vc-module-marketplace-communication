@@ -47,7 +47,7 @@
               load-previous-replies="loadPreviousReplies(message)"
               search-messages-loading="searchMessagesLoading"
               should-show-unread-dot="shouldShowUnreadDot(message)"
-              send-reply="sendReply(message, text)"
+              send-reply="sendReply(message, text, attachments)"
               update-message="updateMessage(params)"
             >
             </messages-container>
@@ -56,7 +56,7 @@
         <div class="messages-layout__footer">
             <message-composer
               is-expanded="isFormExpanded"
-              message="mainForm.text"
+              message="mainForm"
               is-loading="blade.isLoading"
               on-send="sendRootMessage()"
               on-cancel="cancelMessage()"

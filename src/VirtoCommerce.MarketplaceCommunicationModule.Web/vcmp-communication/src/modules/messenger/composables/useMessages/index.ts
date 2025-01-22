@@ -26,6 +26,7 @@ import {
   VcmpConversationClient,
   Conversation,
   CreateConversationCommand,
+  MessageAttachment,
 } from "@vcmp-communication/api/marketplacecommunication";
 
 export interface IUseMessages {
@@ -40,6 +41,7 @@ export interface IUseMessages {
     rootsOnly?: boolean;
     threadId?: string;
     conversationId?: string;
+    attachments?: MessageAttachment[];
   }) => Promise<Message | undefined>;
   unreadCount: ComputedRef<number>;
   searchMessages: (query: ISearchMessagesQuery) => Promise<void>;
@@ -130,6 +132,7 @@ export const useMessages = (): IUseMessages => {
       rootsOnly?: boolean;
       threadId?: string;
       conversationId?: string;
+      attachments?: MessageAttachment[];
     },
     Message | undefined
   >(async (message) => {
@@ -147,6 +150,7 @@ export const useMessages = (): IUseMessages => {
         senderId: undefined,
         conversationId: message?.conversationId,
         recipientId: operator.value?.id,
+        attachments: message?.attachments,
       }),
     });
     await client.sendMessage(command);

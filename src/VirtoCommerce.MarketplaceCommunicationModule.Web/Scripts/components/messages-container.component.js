@@ -29,10 +29,11 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
     controller: ['$scope', function($scope) {
         var $ctrl = this;
 
-        $ctrl.onSendReply = function({message, text}) {
+        $ctrl.onSendReply = function({message, text, attachments}) {
             return $ctrl.sendReply({
                 message: message,
-                text: text
+                text: text,
+                attachments: attachments
             });
         };
 

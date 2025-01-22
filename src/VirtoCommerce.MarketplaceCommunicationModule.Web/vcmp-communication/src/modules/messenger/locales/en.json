@@ -26,6 +26,17 @@
   },
   "MESSENGER": {
     "TITLE": "Communication",
+    "ATTACH_FILES": "Attach files",
+    "COPY_IMAGE_LINK": "Copy image link",
+    "DROP_FILES": "Drop files here",
+    "UPLOADING_FILES": "Uploading files...",
+    "SHOW_MORE": "Show more",
+    "SHOW_LESS": "Show less",
+    "PAGES": {
+      "ALERTS": {
+        "DELETE_CONFIRMATION_ASSET": "Are you sure you want to delete {count} file(s)?"
+      }
+    },
     "EXPAND_ALL_REPLIES": "Show all threads",
     "REPLY": "Reply",
     "ADD_COMMENT": "Send",
@@ -92,8 +103,6 @@
     "HIDE_REPLIES": "Hide replies",
     "DELETE_MESSAGE": "Delete",
     "DELETE_CONFIRMATION": "Are you sure you want to delete this message?",
-    "SHOW_MORE": "Show more",
-    "SHOW_LESS": "Show less",
     "UNREAD_MESSAGES": "Unread messages"
   }
 }

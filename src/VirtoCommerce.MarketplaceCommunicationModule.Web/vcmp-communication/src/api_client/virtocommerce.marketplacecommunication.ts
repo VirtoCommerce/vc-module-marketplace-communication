@@ -1523,6 +1523,7 @@ export interface IMessage {
 export class MessageAttachment implements IMessageAttachment {
     messageId?: string | undefined;
     attachmentUrl?: string | undefined;
+    fileName?: string | undefined;
     fileType?: string | undefined;
     fileSize?: number;
     createdDate?: Date;
@@ -1544,6 +1545,7 @@ export class MessageAttachment implements IMessageAttachment {
         if (_data) {
             this.messageId = _data["messageId"];
             this.attachmentUrl = _data["attachmentUrl"];
+            this.fileName = _data["fileName"];
             this.fileType = _data["fileType"];
             this.fileSize = _data["fileSize"];
             this.createdDate = _data["createdDate"] ? new Date(_data["createdDate"].toString()) : <any>undefined;
@@ -1565,6 +1567,7 @@ export class MessageAttachment implements IMessageAttachment {
         data = typeof data === 'object' ? data : {};
         data["messageId"] = this.messageId;
         data["attachmentUrl"] = this.attachmentUrl;
+        data["fileName"] = this.fileName;
         data["fileType"] = this.fileType;
         data["fileSize"] = this.fileSize;
         data["createdDate"] = this.createdDate ? this.createdDate.toISOString() : <any>undefined;
@@ -1579,6 +1582,7 @@ export class MessageAttachment implements IMessageAttachment {
 export interface IMessageAttachment {
     messageId?: string | undefined;
     attachmentUrl?: string | undefined;
+    fileName?: string | undefined;
     fileType?: string | undefined;
     fileSize?: number;
     createdDate?: Date;
@@ -1728,6 +1732,7 @@ export class MessageShort implements IMessageShort {
     entityType?: string | undefined;
     content?: string | undefined;
     replyTo?: string | undefined;
+    attachments?: MessageAttachment[] | undefined;
 
     constructor(data?: IMessageShort) {
         if (data) {
@@ -1747,6 +1752,11 @@ export class MessageShort implements IMessageShort {
             this.entityType = _data["entityType"];
             this.content = _data["content"];
             this.replyTo = _data["replyTo"];
+            if (Array.isArray(_data["attachments"])) {
+                this.attachments = [] as any;
+                for (let item of _data["attachments"])
+                    this.attachments!.push(MessageAttachment.fromJS(item));
+            }
         }
     }
 
@@ -1766,6 +1776,11 @@ export class MessageShort implements IMessageShort {
         data["entityType"] = this.entityType;
         data["content"] = this.content;
         data["replyTo"] = this.replyTo;
+        if (Array.isArray(this.attachments)) {
+            data["attachments"] = [];
+            for (let item of this.attachments)
+                data["attachments"].push(item.toJSON());
+        }
         return data;
     }
 }
@@ -1778,6 +1793,7 @@ export interface IMessageShort {
     entityType?: string | undefined;
     content?: string | undefined;
     replyTo?: string | undefined;
+    attachments?: MessageAttachment[] | undefined;
 }
 
 export class SearchConversationResult implements ISearchConversationResult {
@@ -2304,6 +2320,7 @@ export class UpdateMessageCommand implements IUpdateMessageCommand {
     sellerName?: string | undefined;
     messageId!: string;
     content!: string;
+    attachments?: MessageAttachment[] | undefined;
 
     constructor(data?: IUpdateMessageCommand) {
         if (data) {
@@ -2320,6 +2337,11 @@ export class UpdateMessageCommand implements IUpdateMessageCommand {
             this.sellerName = _data["sellerName"];
             this.messageId = _data["messageId"];
             this.content = _data["content"];
+            if (Array.isArray(_data["attachments"])) {
+                this.attachments = [] as any;
+                for (let item of _data["attachments"])
+                    this.attachments!.push(MessageAttachment.fromJS(item));
+            }
         }
     }
 
@@ -2336,6 +2358,11 @@ export class UpdateMessageCommand implements IUpdateMessageCommand {
         data["sellerName"] = this.sellerName;
         data["messageId"] = this.messageId;
         data["content"] = this.content;
+        if (Array.isArray(this.attachments)) {
+            data["attachments"] = [];
+            for (let item of this.attachments)
+                data["attachments"].push(item.toJSON());
+        }
         return data;
     }
 }
@@ -2345,6 +2372,7 @@ export interface IUpdateMessageCommand {
     sellerName?: string | undefined;
     messageId: string;
     content: string;
+    attachments?: MessageAttachment[] | undefined;
 }
 
 export enum SortInfoSortDirection {

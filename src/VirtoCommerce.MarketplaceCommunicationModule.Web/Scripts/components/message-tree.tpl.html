@@ -59,33 +59,22 @@
           translate }}
         </span>
       </div>
+
+      <message-assets
+          assets="$ctrl.message.attachments"
+          is-editing="false">
+      </message-assets>
     </div>
 
     <!-- Edit form -->
     <div class="message-edit-form" ng-if="$ctrl.editMode.isActive">
-      <textarea
-        class="message-edit-textarea"
-        ng-model="$ctrl.editMode.text"
-        placeholder="{{ 'marketplaceCommunication.blades.message-list.labels.edit-message' | translate }}"
-        vc-focus="$ctrl.editMode.isActive"
-        ng-keypress="$ctrl.handleKeyPress($event, 'edit')"
-      ></textarea>
-      <div>
-        <button class="btn __cancel" ng-click="$ctrl.cancelEdit()">
-          <span class="fa fa-times message-icon"></span>
-          {{ 'marketplaceCommunication.blades.message-list.buttons.cancel' |
-          translate }}
-        </button>
-        <button
-          class="btn"
-          ng-click="$ctrl.submitEdit()"
-          ng-disabled="!$ctrl.editMode.text"
-        >
-          <span class="fa fa-paper-plane message-icon"></span>
-          {{ 'marketplaceCommunication.blades.message-list.buttons.save' |
-          translate }}
-        </button>
-      </div>
+      <message-composer
+        is-expanded="true"
+        message="$ctrl.editMode"
+        is-loading="$ctrl.isLoading"
+        on-send="$ctrl.submitEdit()"
+        on-cancel="$ctrl.cancelEdit()">
+      </message-composer>
     </div>
 
     <!-- Actions -->
@@ -140,29 +129,13 @@
 
     <!-- Reply form -->
     <div class="message-reply-form" ng-if="$ctrl.replyForm.isVisible">
-      <textarea
-        class="message-edit-textarea"
-        ng-model="$ctrl.replyForm.text"
-        placeholder="{{ 'marketplaceCommunication.blades.message-list.labels.write-reply' | translate }}"
-        vc-focus="$ctrl.replyForm.isVisible"
-        ng-keypress="$ctrl.handleKeyPress($event, 'reply')"
-      ></textarea>
-      <div>
-        <button class="btn __cancel" ng-click="$ctrl.hideReplyForm()">
-          <span class="fa fa-times message-icon"></span>
-          {{ 'marketplaceCommunication.blades.message-list.buttons.cancel' |
-          translate }}
-        </button>
-        <button
-          class="btn"
-          ng-click="$ctrl.submitReply()"
-          ng-disabled="!$ctrl.replyForm.text"
-        >
-          <span class="fa fa-paper-plane message-icon"></span>
-          {{ 'marketplaceCommunication.blades.message-list.buttons.send' |
-          translate }}
-        </button>
-      </div>
+      <message-composer
+        is-expanded="true"
+        message="$ctrl.replyForm"
+        is-loading="$ctrl.isLoading"
+        on-send="$ctrl.submitReply()"
+        on-cancel="$ctrl.hideReplyForm()">
+      </message-composer>
     </div>
   </div>
 </div>
@@ -207,7 +180,7 @@
                 has-previous-replies="$ctrl.hasPreviousReplies"
                 load-previous-replies="$ctrl.loadPreviousReplies({message: message})"
                 search-messages-loading="$ctrl.searchMessagesLoading"
-                on-send-reply="$ctrl.onSendReply({message: message, text: text})"
+                on-send-reply="$ctrl.onSendReply({message: message, text: text, attachments: attachments})"
                 update-message="$ctrl.updateMessage({params: params})"
                 on-should-show-unread-dot="$ctrl.shouldShowUnreadDot(message)"
             >

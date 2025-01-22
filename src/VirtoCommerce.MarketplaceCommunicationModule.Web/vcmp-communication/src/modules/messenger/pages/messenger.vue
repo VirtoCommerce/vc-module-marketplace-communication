@@ -92,7 +92,7 @@
           </template>
 
           <div
-            v-if="!rootMessages.length"
+            v-if="!searchMessagesLoading && !rootMessages.length"
             class="tw-w-full tw-h-full tw-box-border tw-flex tw-flex-col tw-items-center tw-justify-center"
           >
             <VcIcon
@@ -132,6 +132,7 @@
           @send="sendRootMessage"
           @collapse="setActiveForm(null, null)"
           @expand="expandMainForm"
+          @emit-assets="emitAssets"
         />
       </div>
     </div>
@@ -148,6 +149,7 @@ import {
   MessageRecipient,
   ISearchMessagesQuery,
   Conversation,
+  MessageAttachment,
 } from "@vcmp-communication/api/marketplacecommunication";
 import MessageSkeleton from "../components/message-skeleton.vue";
 import MessageTree from "../components/message-tree.vue";
@@ -238,6 +240,7 @@ provide("sellerId", currentSeller?.value?.id);
 provide("sellerName", currentSeller?.value?.name);
 provide("operator", operator);
 provide("seller", seller);
+provide("conversation", props.options?.conversation);
 
 function expandAllReplies() {
   emit("parent:call", {
@@ -303,7 +306,7 @@ async function remove(args: { messageIds: string[]; withReplies: boolean }) {
   updateParent();
 }
 
-async function update(args: { content: string; messageId: string }) {
+async function update(args: { content: string; messageId: string; attachments: MessageAttachment[] }) {
   await updateMessage(args);
 
   updateParent();
@@ -317,6 +320,7 @@ async function sendRootMessage(args: {
   replyTo: string | undefined;
   entityId: string;
   entityType: string;
+  attachments: MessageAttachment[];
 }) {
   try {
     // create conversation if it doesn't exist
@@ -375,6 +379,10 @@ async function search(query?: ISearchMessagesQuery) {
     responseGroup: "Full",
     conversationId: conversationId,
   });
+}
+
+function emitAssets(args: { assets: MessageAttachment[] }) {
+
 }
 
 onMounted(async () => {

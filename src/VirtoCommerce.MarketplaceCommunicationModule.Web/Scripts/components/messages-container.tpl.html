@@ -27,7 +27,7 @@
         load-previous-replies="$ctrl.loadPreviousReplies({message: message})"
         search-messages-loading="$ctrl.searchMessagesLoading"
         on-should-show-unread-dot="$ctrl.shouldShowUnreadDot({message: message})"
-        on-send-reply="$ctrl.onSendReply({message: message, text: text})"
+        on-send-reply="$ctrl.onSendReply({message: message, text: text, attachments: attachments})"
         update-message="$ctrl.handleUpdateMessage(params)">
     </message-tree>
 

@@ -16,6 +16,7 @@ angular.module(moduleName, [])
     .component('message-composer', require('./components/message-composer.component'))
     .component('message-skeleton', require('./components/message-skeleton.component'))
     .component('show-more-messages', require('./components/show-more-messages.component'))
+    .component('message-assets', require('./components/message-assets.component'))
 
     .config(['$stateProvider',
         function ($stateProvider) {

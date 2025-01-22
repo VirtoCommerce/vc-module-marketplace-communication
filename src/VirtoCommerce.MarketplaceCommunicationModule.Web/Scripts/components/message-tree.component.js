@@ -28,16 +28,19 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
         $ctrl.replyForm = {
             text: '',
-            isVisible: false
+            isVisible: false,
+            attachments: []
         };
 
         $ctrl.editMode = {
             isActive: false,
-            text: ''
+            text: '',
+            attachments: []
         };
 
         $ctrl.startEdit = function() {
             $ctrl.editMode.text = $ctrl.message.content;
+            $ctrl.editMode.attachments = angular.copy($ctrl.message.attachments || []);
             $ctrl.editMode.isActive = true;
 
             messageFormsService.openForm('edit-' + $ctrl.message.id);
@@ -46,6 +49,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         $ctrl.cancelEdit = function() {
             $ctrl.editMode.isActive = false;
             $ctrl.editMode.text = '';
+            $ctrl.editMode.attachments = [];
         };
 
         $ctrl.showReplyForm = function() {
@@ -59,6 +63,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             }
             $ctrl.replyForm.isVisible = false;
             $ctrl.replyForm.text = '';
+            $ctrl.replyForm.attachments = [];
         };
 
         $ctrl.checkHasReplies = function(message) {
@@ -71,13 +76,12 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         $ctrl.submitReply = function() {
             if (!$ctrl.replyForm.text || !$ctrl.replyForm.text.trim()) return;
 
-            if ($ctrl.checkHasReplies($ctrl.message) && !$ctrl.message.isExpanded) {
-                $ctrl.onToggleReplies({message: $ctrl.message});
-            }
+            $ctrl.isLoading = true;
 
             $ctrl.onSendReply({
                 message: $ctrl.message,
-                text: $ctrl.replyForm.text
+                text: $ctrl.replyForm.text,
+                attachments: $ctrl.replyForm.attachments
             });
             $ctrl.hideReplyForm();
         };
@@ -91,7 +95,8 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
             var updateParams = {
                 message: $ctrl.message,
-                newContent: $ctrl.editMode.text
+                newContent: $ctrl.editMode.text,
+                attachments: $ctrl.editMode.attachments
             };
 
             $ctrl.updateMessage({
@@ -153,11 +158,13 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 if ($ctrl.editMode.isActive && activeForm !== 'edit-' + $ctrl.message.id) {
                     $ctrl.editMode.isActive = false;
                     $ctrl.editMode.text = '';
+                    $ctrl.editMode.attachments = [];
                 }
 
                 if ($ctrl.replyForm.isVisible && activeForm !== 'reply-' + $ctrl.message.id) {
                     $ctrl.replyForm.isVisible = false;
                     $ctrl.replyForm.text = '';
+                    $ctrl.replyForm.attachments = [];
                 }
             }
         });

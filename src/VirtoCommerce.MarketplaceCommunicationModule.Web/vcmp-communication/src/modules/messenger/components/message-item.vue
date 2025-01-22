@@ -41,15 +41,18 @@
           </div>
         </div>
       </div>
-      <div class="message-item__content-wrapper">
+      <div
+        v-if="!isEditFormVisible"
+        class="message-item__content-wrapper"
+      >
         <div
-          v-if="!isEditFormVisible"
           ref="contentRef"
           class="message-item__content"
           :class="{ 'message-item__content--collapsed': !isExpanded }"
         >
           {{ message.content }}
         </div>
+
         <div
           v-if="isContentTruncated"
           class="message-item__content-overlay"
@@ -67,6 +70,20 @@
           >
             {{ isExpanded ? $t("MESSENGER.SHOW_LESS") : $t("MESSENGER.SHOW_MORE") }}
           </VcButton>
+        </div>
+        <div
+          v-if="message.attachments?.length"
+          class="message-item__assets"
+        >
+          <div class="message-item__assets-list">
+            <AssetItem
+              v-for="asset in message.attachments"
+              :key="asset.id"
+              :asset="asset"
+              class="message-item__asset"
+              @preview="openImagePreview"
+            />
+          </div>
         </div>
       </div>
       <div
@@ -136,10 +153,10 @@ import { computed, inject, ref, onMounted, Ref, nextTick, watch, onUnmounted, on
 import { useI18n } from "vue-i18n";
 import NewMessageForm from "./new-message-form.vue";
 import { usePopup, VcButton } from "@vc-shell/framework";
-import moment from "moment";
-import { CommunicationUser, Message } from "@vcmp-communication/api/marketplacecommunication";
-import { useElementVisibility, useIntersectionObserver } from "@vueuse/core";
+import { CommunicationUser, Message, MessageAttachment } from "@vcmp-communication/api/marketplacecommunication";
+import { useElementVisibility } from "@vueuse/core";
 import { formatDate, dateAgo } from "../utils";
+import { ImagePreviewPopup, AssetItem } from "./";
 
 export interface Props {
   message: Message;
@@ -154,7 +171,7 @@ export interface Emits {
     e: "send-reply-message",
     args: { content: string; replyTo: string | undefined; entityId: string; entityType: string },
   ): void;
-  (e: "update-message", args: { content: string; messageId: string }): void;
+  (e: "update-message", args: { content: string; messageId: string; attachments: MessageAttachment[] }): void;
   (e: "remove-message", args: { messageIds: string[]; withReplies: boolean }): void;
   (e: "toggle-replies", value: boolean): void;
   (e: "mark-read", args: { messageId: string; recipientId: string }): void;
@@ -165,6 +182,32 @@ const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 const { t } = useI18n();
+
+const decodeFileUrl = (url: string | undefined) => {
+  if (!url) return "";
+  try {
+    return decodeURIComponent(url);
+  } catch {
+    return url;
+  }
+};
+
+const activeAsset = ref<MessageAttachment | null>(null);
+
+const { open: openPopup, close: closePopup } = usePopup({
+  component: ImagePreviewPopup,
+  emits: {
+    onClose: () => {
+      activeAsset.value = null;
+      closePopup();
+    },
+  },
+  props: {
+    src: computed(() => decodeFileUrl(activeAsset.value?.attachmentUrl)),
+    alt: computed(() => activeAsset.value?.fileName),
+  },
+});
+
 const { showConfirmation } = usePopup();
 const currentSeller = inject("currentSeller") as Ref<{ id: string }>;
 
@@ -194,7 +237,7 @@ const sendReplyMessage = (args: {
   emit("send-reply-message", args);
 };
 
-const updateMessage = (args: { content: string; messageId: string }) => {
+const updateMessage = (args: { content: string; messageId: string; attachments: MessageAttachment[] }) => {
   emit("update-message", args);
 };
 
@@ -242,6 +285,11 @@ const checkContentTruncation = () => {
     const currentHeight = element.scrollHeight;
     isContentTruncated.value = currentHeight > maxHeight;
   }
+};
+
+const openImagePreview = (asset: MessageAttachment) => {
+  activeAsset.value = asset;
+  openPopup();
 };
 
 onMounted(() => {
@@ -495,6 +543,20 @@ watch(
 
   &__unread-indicator {
     @apply tw-w-2 tw-h-2 tw-rounded-full tw-bg-[color:var(--danger-500)];
+  }
+
+  &__assets {
+    @apply tw-mt-2;
+  }
+
+  &__assets-list {
+    @apply tw-flex tw-flex-wrap tw-gap-3;
+  }
+
+  &__asset {
+    @apply tw-rounded-lg tw-overflow-hidden;
+    @apply tw-transition-all;
+    @apply tw-no-underline;
   }
 }
 
