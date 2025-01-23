@@ -109,7 +109,7 @@ public static class ModuleConstants
                 Name = "MarketplaceCommunication.AttachmentSizeLimit",
                 GroupName = "Marketplace Communication|General",
                 ValueType = SettingValueType.Integer,
-                DefaultValue = 1
+                DefaultValue = 10
             };
 
             public static IEnumerable<SettingDescriptor> AllGeneralSettings
