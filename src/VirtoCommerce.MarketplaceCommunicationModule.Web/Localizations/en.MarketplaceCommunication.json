@@ -116,12 +116,12 @@
   "settings": {
     "MarketplaceCommunication": {
       "AttachmentCountLimit": {
-        "title": "Message attachments count limit",
-        "description": "Per message"
+        "title": "Message attachments count limit per message",
+        "description": ""
       },
       "AttachmentSizeLimit": {
-        "title": "Message attachments size limit",
-        "description": "Per message, MB"
+        "title": "Message attachments size limit per message, MB",
+        "description": ""
       }
     }
   }
