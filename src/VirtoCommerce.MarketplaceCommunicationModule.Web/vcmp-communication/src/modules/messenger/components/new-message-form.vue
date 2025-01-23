@@ -36,6 +36,7 @@
               ref="fileInputRef"
               type="file"
               multiple
+              :accept="allowedFileTypes"
               class="tw-hidden"
               @change="handleFileSelect"
             />
@@ -133,6 +134,7 @@ import {
 import { loading as vLoading, VcTextarea, VcButton, useAssets, usePopup } from "@vc-shell/framework";
 import { useMagicKeys } from "@vueuse/core";
 import { AssetItem } from "./";
+import { getAllowedFileTypes } from "../constants";
 
 const props = defineProps<{
   replyTo?: string;
@@ -182,6 +184,8 @@ const textareaRef = ref<InstanceType<typeof VcTextarea>>();
 const fileInputRef = ref<HTMLInputElement>();
 const isDragging = ref(false);
 const isUploading = ref(false);
+
+const allowedFileTypes = getAllowedFileTypes();
 let dragCounter = 0;
 
 // Magic keys
@@ -242,6 +246,7 @@ const send = () => {
       }
     }
   }
+  assets.value = [];
 };
 
 const cancel = () => {

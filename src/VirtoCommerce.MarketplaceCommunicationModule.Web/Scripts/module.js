@@ -6,6 +6,21 @@ if (AppDependencies !== undefined) {
 }
 
 angular.module(moduleName, [])
+    .constant('marketplaceCommunicationConstants', {
+        ALLOWED_FILE_TYPES: {
+            // Images
+            images: '.jpg,.jpeg,.png,.gif,.webp,.svg,.bmp,.ico,.tif,.tiff,.jfif,.jpe,.dib,.wdp,.wbmp,.xbm,.xpm',
+
+            // Documents
+            documents: '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.odt,.ods,.odp,.csv,.xps,' +
+                      '.vsd,.vsdx,.vst,.vstx,.vssx,.vssm,.vsdm,.vstm,.docm,.dotx,.dotm,.xlsm,.xltx,' +
+                      '.xltm,.xlsb,.ppsx,.ppsm,.potx,.potm,.pptm,.pub'
+        },
+
+        getAllowedFileTypes: function() {
+            return Object.values(this.ALLOWED_FILE_TYPES).join(',');
+        }
+    })
     .directive('onVisible', require('./directives/onVisible'))
     .directive('vcFocus', require('./directives/vcFocus'))
 

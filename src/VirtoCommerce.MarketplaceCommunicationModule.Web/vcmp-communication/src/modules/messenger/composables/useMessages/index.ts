@@ -78,6 +78,8 @@ export interface IUseMessages {
   getConversation: (entityId: string, entityType: string) => Promise<Conversation>;
   settings: ComputedRef<MarketplaceCommunicationSettings | undefined>;
   getSettings: () => Promise<void>;
+  getSettingsLoading: Ref<boolean>;
+  getOperatorLoading: Ref<boolean>;
 }
 
 const { getApiClient: getCommunicationUserClient } = useApiClient(VcmpCommunicationUserClient);
@@ -211,7 +213,7 @@ export const useMessages = (): IUseMessages => {
     await client.deleteMessage(command);
   });
 
-  const { action: getOperator } = useAsync(async () => {
+  const { action: getOperator, loading: getOperatorLoading } = useAsync(async () => {
     if (!operator.value) {
       const client = await getCommunicationUserClient();
       operator.value = await client.getOperator();
@@ -228,7 +230,7 @@ export const useMessages = (): IUseMessages => {
     seller.value = await client.getSeller(new GetSellerCommunicationUserQuery(query));
   });
 
-  const { action: getSettings } = useAsync(async () => {
+  const { action: getSettings, loading: getSettingsLoading } = useAsync(async () => {
     const client = await getCommunicationSettingsClient();
     settings.value = await client.getCommunicationSettings();
   });
@@ -436,5 +438,7 @@ export const useMessages = (): IUseMessages => {
     getConversation,
     settings: computed(() => settings.value),
     getSettings,
+    getOperatorLoading: computed(() => getOperatorLoading.value),
+    getSettingsLoading: computed(() => getSettingsLoading.value),
   };
 };

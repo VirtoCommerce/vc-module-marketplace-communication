@@ -69,7 +69,7 @@
         </template>
 
         <template v-else>
-          <template v-if="searchMessagesLoading">
+          <template v-if="isLoading">
             <MessageSkeleton
               v-for="n in 10"
               :key="'skeleton-top-' + n"
@@ -92,7 +92,7 @@
           </template>
 
           <div
-            v-if="!searchMessagesLoading && !rootMessages.length"
+            v-if="!isLoading && !rootMessages.length"
             class="tw-w-full tw-h-full tw-box-border tw-flex tw-flex-col tw-items-center tw-justify-center"
           >
             <VcIcon
@@ -132,7 +132,6 @@
           @send="sendRootMessage"
           @collapse="setActiveForm(null, null)"
           @expand="expandMainForm"
-          @emit-assets="emitAssets"
         />
       </div>
     </div>
@@ -143,7 +142,7 @@
 import { computed, ref, provide, onMounted, nextTick, inject, Ref } from "vue";
 import { useMessages } from "../composables";
 import NewMessageForm from "../components/new-message-form.vue";
-import { IParentCallArgs, useBladeNavigation } from "@vc-shell/framework";
+import { IParentCallArgs, useBladeNavigation, useLoading } from "@vc-shell/framework";
 import {
   Message,
   MessageRecipient,
@@ -207,6 +206,8 @@ const {
   getConversation,
   getSettings,
   settings,
+  getSettingsLoading,
+  getOperatorLoading,
 } = useMessages();
 
 const { t } = useI18n();
@@ -384,10 +385,6 @@ async function search(query?: ISearchMessagesQuery) {
   });
 }
 
-function emitAssets(args: { assets: MessageAttachment[] }) {
-
-}
-
 onMounted(async () => {
   await getOperator();
   await getSettings();
@@ -427,6 +424,8 @@ function goToEntity() {
     });
   }
 }
+
+const isLoading = useLoading(getOperatorLoading, getSettingsLoading, searchMessagesLoading);
 
 defineExpose({
   title: computed(() => t("MESSENGER.TITLE")),

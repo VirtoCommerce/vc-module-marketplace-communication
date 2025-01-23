@@ -12,8 +12,8 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
         entityType: '=',
         settings: '<'
     },
-    controller: ['$scope', 'FileUploader', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'virtoCommerce.marketplaceCommunicationModule.webApi',
-    function($scope, FileUploader, bladeNavigationService, dialogService, webApi) {
+    controller: ['$scope', 'FileUploader', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'marketplaceCommunicationConstants',
+    function($scope, FileUploader, bladeNavigationService, dialogService, constants) {
         var $ctrl = this;
         var uploader;
 
@@ -25,7 +25,10 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
                 $ctrl.message.attachments = [];
             }
 
-                initializeUploader();
+            // Get allowed file types
+            $scope.allowedFileTypes = constants.getAllowedFileTypes();
+
+            initializeUploader();
         };
 
         $ctrl.$onChanges = function(changes) {
