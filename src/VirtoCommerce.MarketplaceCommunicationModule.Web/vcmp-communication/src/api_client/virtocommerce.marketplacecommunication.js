@@ -30,6 +30,81 @@ export class AuthApiBase {
         return Promise.resolve(options);
     }
 }
+export class VcmpCommunicationClient extends AuthApiBase {
+    constructor(baseUrl, http) {
+        super();
+        Object.defineProperty(this, "http", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "baseUrl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "jsonParseReviver", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        this.http = http ? http : window;
+        this.baseUrl = this.getBaseUrl("", baseUrl);
+    }
+    /**
+     * @return OK
+     */
+    getCommunicationSettings() {
+        let url_ = this.baseUrl + "/api/vcmp/communication/settings";
+        url_ = url_.replace(/[?&]$/, "");
+        let options_ = {
+            method: "GET",
+            headers: {
+                "Accept": "text/plain"
+            }
+        };
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response) => {
+            return this.processGetCommunicationSettings(_response);
+        });
+    }
+    processGetCommunicationSettings(response) {
+        const status = response.status;
+        let _headers = {};
+        if (response.headers && response.headers.forEach) {
+            response.headers.forEach((v, k) => _headers[k] = v);
+        }
+        ;
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+                let result200 = null;
+                let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = MarketplaceCommunicationSettings.fromJS(resultData200);
+                return result200;
+            });
+        }
+        else if (status === 401) {
+            return response.text().then((_responseText) => {
+                return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        }
+        else if (status === 403) {
+            return response.text().then((_responseText) => {
+                return throwException("Forbidden", status, _responseText, _headers);
+            });
+        }
+        else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+                return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve(null);
+    }
+}
 export class VcmpCommunicationUserClient extends AuthApiBase {
     constructor(baseUrl, http) {
         super();
@@ -1578,6 +1653,46 @@ export class MarkMessageAsReadCommand {
         data["messageId"] = this.messageId;
         data["recipientId"] = this.recipientId;
         data["notRead"] = this.notRead;
+        return data;
+    }
+}
+export class MarketplaceCommunicationSettings {
+    constructor(data) {
+        Object.defineProperty(this, "attachmentCountLimit", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "attachmentSizeLimit", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    this[property] = data[property];
+            }
+        }
+    }
+    init(_data) {
+        if (_data) {
+            this.attachmentCountLimit = _data["attachmentCountLimit"];
+            this.attachmentSizeLimit = _data["attachmentSizeLimit"];
+        }
+    }
+    static fromJS(data) {
+        data = typeof data === 'object' ? data : {};
+        let result = new MarketplaceCommunicationSettings();
+        result.init(data);
+        return result;
+    }
+    toJSON(data) {
+        data = typeof data === 'object' ? data : {};
+        data["attachmentCountLimit"] = this.attachmentCountLimit;
+        data["attachmentSizeLimit"] = this.attachmentSizeLimit;
         return data;
     }
 }

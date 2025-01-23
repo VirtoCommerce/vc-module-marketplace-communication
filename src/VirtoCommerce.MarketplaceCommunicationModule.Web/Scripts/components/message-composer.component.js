@@ -6,23 +6,105 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
         isLoading: '=',
         onSend: '&',
         onCancel: '&',
-        onExpand: '&'
+        onExpand: '&',
+        conversationId: '=',
+        entityId: '=',
+        entityType: '=',
+        settings: '<'
     },
-    controller: ['$scope', 'FileUploader', 'platformWebApp.bladeNavigationService',
-    function($scope, FileUploader, bladeNavigationService) {
+    controller: ['$scope', 'FileUploader', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'virtoCommerce.marketplaceCommunicationModule.webApi',
+    function($scope, FileUploader, bladeNavigationService, dialogService, webApi) {
         var $ctrl = this;
+        var uploader;
 
-        // Asset management
-        $ctrl.isAssetsExpanded = false;
+        $ctrl.$onInit = function() {
+            if (!$ctrl.message) {
+                $ctrl.message = { text: '', attachments: [] };
+            }
+            if (!$ctrl.message.attachments) {
+                $ctrl.message.attachments = [];
+            }
+
+                initializeUploader();
+        };
+
+        $ctrl.$onChanges = function(changes) {
+            if (changes.settings && changes.settings.currentValue) {
+                if (!uploader) {
+                    initializeUploader();
+                }
+            }
+            if ((changes.conversationId || changes.entityId || changes.entityType) && uploader) {
+                updateUploaderUrl();
+            }
+        };
+
+        function getUploaderUrl() {
+            var baseUrl = 'api/assets?folderUrl=messenger';
+            if ($ctrl.entityId && $ctrl.entityType) {
+                return baseUrl + '/' + $ctrl.entityType + '/' + $ctrl.entityId;
+            } else if ($ctrl.conversationId) {
+                return baseUrl + '/' + $ctrl.conversationId;
+            }
+            return baseUrl;
+        }
+
+        function updateUploaderUrl() {
+            uploader.url = getUploaderUrl();
+        }
 
         function initializeUploader() {
-            var uploader = $scope.uploader = new FileUploader({
+            uploader = $scope.uploader = new FileUploader({
                 scope: $scope,
                 headers: { Accept: 'application/json' },
                 method: 'POST',
                 autoUpload: true,
                 removeAfterUpload: true,
-                url: 'api/assets?folderUrl=messenger/' + ($ctrl.message ? ($ctrl.message.entityId && $ctrl.message.entityType ? `${$ctrl.message.entityType}/${$ctrl.message.entityId}` : $ctrl.message.conversationId ? `${$ctrl.message.conversationId}` : '') : '')
+                url: getUploaderUrl()
+            });
+
+            uploader.filters.push({
+                name: 'attachmentCountLimit',
+                fn: function(item) {
+                    var totalCount = $ctrl.message.attachments.length + uploader.queue.length;
+                    if (totalCount >= $ctrl.settings.attachmentCountLimit) {
+                        var dialog = {
+                            id: "attachmentCountLimitExceeded",
+                            title: "marketplaceCommunication.dialogs.attachment-count-limit.title",
+                            message: "marketplaceCommunication.dialogs.attachment-count-limit.message",
+                            messageValues: { limit: $ctrl.settings.attachmentCountLimit }
+                        };
+                        dialogService.showNotificationDialog(dialog);
+                        return false;
+                    }
+                    return true;
+                }
+            });
+
+            uploader.filters.push({
+                name: 'attachmentSizeLimit',
+                fn: function(item) {
+                    var totalSize = $ctrl.message.attachments.reduce((sum, asset) => sum + (asset.fileSize || 0), 0);
+                    totalSize += uploader.queue.reduce((sum, queuedItem) => sum + queuedItem.file.size, 0);
+                    totalSize += item.size;
+
+                    var totalSizeMB = totalSize / (1024 * 1024);
+
+                    if (totalSizeMB > $ctrl.settings.attachmentSizeLimit) {
+                        var dialog = {
+                            id: "attachmentSizeLimitExceeded",
+                            title: "marketplaceCommunication.dialogs.attachment-size-limit.title",
+                            message: "marketplaceCommunication.dialogs.attachment-size-limit.message",
+                            messageValues: {
+                                limit: $ctrl.settings.attachmentSizeLimit,
+                                size: totalSizeMB.toFixed(2)
+                            }
+                        };
+                        dialogService.showNotificationDialog(dialog);
+                        return false;
+                    }
+                    return true;
+                }
             });
 
             uploader.onSuccessItem = function (fileItem, assets, status, headers) {
@@ -31,10 +113,10 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
                         attachmentUrl: asset.url,
                         fileName: asset.name,
                         fileType: asset.name?.toLowerCase().split(".").pop(),
-                        fileSize: asset.fileSize,
+                        fileSize: asset.size,
                     });
                 });
-
+                $scope.$apply();
             };
 
             uploader.onAfterAddingAll = function (addedItems) {
@@ -135,8 +217,5 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
                 fileThumbnails.find((thumb) => thumb.extensions.some((ext) => ext === $ctrl.getExtension(name)))?.image || "fas fa-file"
               );
         };
-
-        // Initialize uploader on component init
-        initializeUploader();
     }]
 });

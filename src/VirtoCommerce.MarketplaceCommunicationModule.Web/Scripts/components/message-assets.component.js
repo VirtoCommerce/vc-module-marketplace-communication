@@ -10,6 +10,8 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
 
         $ctrl.isAssetsExpanded = false;
 
+        $ctrl.MAX_ASSETS_COUNT = 5;
+
         $ctrl.isImage = function(name) {
             if (!name) return false;
             const imageExtensions = new Set(["png", "jpg", "jpeg", "svg", "gif", ".webp"]);
@@ -72,18 +74,18 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
         };
 
         $ctrl.getVisibleAssets = function() {
-            if ($ctrl.isAssetsExpanded || $ctrl.assets.length <= 3) {
+            if ($ctrl.isEditing || $ctrl.isAssetsExpanded || $ctrl.assets.length <= $ctrl.MAX_ASSETS_COUNT) {
                 return $ctrl.assets;
             }
-            return $ctrl.assets.slice(0, 3);
+            return $ctrl.assets.slice(0, $ctrl.MAX_ASSETS_COUNT);
         };
 
         $ctrl.hasHiddenAssets = function() {
-            return $ctrl.assets.length > 3;
+            return !$ctrl.isEditing ? $ctrl.assets.length > $ctrl.MAX_ASSETS_COUNT : false;
         };
 
         $ctrl.getHiddenAssetsCount = function() {
-            return $ctrl.assets.length - 3;
+            return $ctrl.assets.length - $ctrl.MAX_ASSETS_COUNT;
         };
 
         $ctrl.toggleAssetsList = function() {

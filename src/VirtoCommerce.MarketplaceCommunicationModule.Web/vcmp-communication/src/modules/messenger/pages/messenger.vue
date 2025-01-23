@@ -205,6 +205,8 @@ const {
   loadedThread,
   createConversation,
   getConversation,
+  getSettings,
+  settings,
 } = useMessages();
 
 const { t } = useI18n();
@@ -241,6 +243,7 @@ provide("sellerName", currentSeller?.value?.name);
 provide("operator", operator);
 provide("seller", seller);
 provide("conversation", props.options?.conversation);
+provide("settings", settings);
 
 function expandAllReplies() {
   emit("parent:call", {
@@ -387,6 +390,7 @@ function emitAssets(args: { assets: MessageAttachment[] }) {
 
 onMounted(async () => {
   await getOperator();
+  await getSettings();
   if (props.param) {
     await getThread(props.param);
 

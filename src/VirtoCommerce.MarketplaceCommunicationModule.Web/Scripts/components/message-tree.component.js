@@ -19,7 +19,8 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         onShouldShowUnreadDot: '&',
         maxLines: '<?',
         onSendReply: '&',
-        updateMessage: '&'
+        updateMessage: '&',
+        settings: '<'
     },
     templateUrl: 'Modules/$(VirtoCommerce.MarketplaceCommunication)/Scripts/components/message-tree.tpl.html',
     controller: ['$scope', '$element', '$timeout', 'messageFormsService',

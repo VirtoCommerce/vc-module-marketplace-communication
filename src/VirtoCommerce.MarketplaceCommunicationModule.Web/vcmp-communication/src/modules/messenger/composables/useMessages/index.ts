@@ -27,6 +27,8 @@ import {
   Conversation,
   CreateConversationCommand,
   MessageAttachment,
+  VcmpCommunicationClient,
+  MarketplaceCommunicationSettings,
 } from "@vcmp-communication/api/marketplacecommunication";
 
 export interface IUseMessages {
@@ -74,12 +76,14 @@ export interface IUseMessages {
     entityType?: string;
   }) => Promise<Conversation>;
   getConversation: (entityId: string, entityType: string) => Promise<Conversation>;
+  settings: ComputedRef<MarketplaceCommunicationSettings | undefined>;
+  getSettings: () => Promise<void>;
 }
 
 const { getApiClient: getCommunicationUserClient } = useApiClient(VcmpCommunicationUserClient);
 const { getApiClient: getMessagingClient } = useApiClient(VcmpMessageClient);
 const { getApiClient: getConversationClient } = useApiClient(VcmpConversationClient);
-
+const { getApiClient: getCommunicationSettingsClient } = useApiClient(VcmpCommunicationClient);
 const operator = ref<CommunicationUser>();
 
 export const useMessages = (): IUseMessages => {
@@ -93,6 +97,7 @@ export const useMessages = (): IUseMessages => {
     }),
   );
   const loadedThread = ref<Message[] | undefined>([]);
+  const settings = ref<MarketplaceCommunicationSettings>();
 
   const seller = ref<CommunicationUser>();
 
@@ -221,6 +226,11 @@ export const useMessages = (): IUseMessages => {
   const { action: getSeller } = useAsync<IGetSellerCommunicationUserQuery>(async (query) => {
     const client = await getCommunicationUserClient();
     seller.value = await client.getSeller(new GetSellerCommunicationUserQuery(query));
+  });
+
+  const { action: getSettings } = useAsync(async () => {
+    const client = await getCommunicationSettingsClient();
+    settings.value = await client.getCommunicationSettings();
   });
 
   const unreadCount = computed(
@@ -424,5 +434,7 @@ export const useMessages = (): IUseMessages => {
     loadedThread,
     createConversation,
     getConversation,
+    settings: computed(() => settings.value),
+    getSettings,
   };
 };

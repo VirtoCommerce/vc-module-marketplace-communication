@@ -103,6 +103,8 @@
     "HIDE_REPLIES": "Hide replies",
     "DELETE_MESSAGE": "Delete",
     "DELETE_CONFIRMATION": "Are you sure you want to delete this message?",
-    "UNREAD_MESSAGES": "Unread messages"
+    "UNREAD_MESSAGES": "Unread messages",
+    "ERROR_FILE_COUNT_LIMIT": "Maximum number of {limit} files exceeded.",
+    "ERROR_FILE_SIZE_LIMIT": "Total files size {limit}MB exceeded."
   }
 }

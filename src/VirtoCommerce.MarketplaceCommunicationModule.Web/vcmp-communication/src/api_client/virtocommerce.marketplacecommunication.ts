@@ -30,6 +30,65 @@ export class AuthApiBase {
   }
 }
 
+export class VcmpCommunicationClient extends AuthApiBase {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super();
+        this.http = http ? http : window as any;
+        this.baseUrl = this.getBaseUrl("", baseUrl);
+    }
+
+    /**
+     * @return OK
+     */
+    getCommunicationSettings(): Promise<MarketplaceCommunicationSettings> {
+        let url_ = this.baseUrl + "/api/vcmp/communication/settings";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "text/plain"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetCommunicationSettings(_response);
+        });
+    }
+
+    protected processGetCommunicationSettings(response: Response): Promise<MarketplaceCommunicationSettings> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = MarketplaceCommunicationSettings.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<MarketplaceCommunicationSettings>(null as any);
+    }
+}
+
 export class VcmpCommunicationUserClient extends AuthApiBase {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
@@ -1382,6 +1441,46 @@ export interface IMarkMessageAsReadCommand {
     messageId: string;
     recipientId?: string | undefined;
     notRead?: boolean;
+}
+
+export class MarketplaceCommunicationSettings implements IMarketplaceCommunicationSettings {
+    attachmentCountLimit?: number;
+    attachmentSizeLimit?: number;
+
+    constructor(data?: IMarketplaceCommunicationSettings) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.attachmentCountLimit = _data["attachmentCountLimit"];
+            this.attachmentSizeLimit = _data["attachmentSizeLimit"];
+        }
+    }
+
+    static fromJS(data: any): MarketplaceCommunicationSettings {
+        data = typeof data === 'object' ? data : {};
+        let result = new MarketplaceCommunicationSettings();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["attachmentCountLimit"] = this.attachmentCountLimit;
+        data["attachmentSizeLimit"] = this.attachmentSizeLimit;
+        return data;
+    }
+}
+
+export interface IMarketplaceCommunicationSettings {
+    attachmentCountLimit?: number;
+    attachmentSizeLimit?: number;
 }
 
 export class Message implements IMessage {

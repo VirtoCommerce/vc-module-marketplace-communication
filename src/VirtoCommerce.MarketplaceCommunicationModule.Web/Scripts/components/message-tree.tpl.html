@@ -72,8 +72,12 @@
         is-expanded="true"
         message="$ctrl.editMode"
         is-loading="$ctrl.isLoading"
+        conversation-id="$ctrl.message.conversationId"
+        entity-id="$ctrl.message.entityId"
+        entity-type="$ctrl.message.entityType"
         on-send="$ctrl.submitEdit()"
-        on-cancel="$ctrl.cancelEdit()">
+        on-cancel="$ctrl.cancelEdit()"
+        settings="$ctrl.settings">
       </message-composer>
     </div>
 
@@ -134,7 +138,8 @@
         message="$ctrl.replyForm"
         is-loading="$ctrl.isLoading"
         on-send="$ctrl.submitReply()"
-        on-cancel="$ctrl.hideReplyForm()">
+        on-cancel="$ctrl.hideReplyForm()"
+        settings="$ctrl.settings">
       </message-composer>
     </div>
   </div>
@@ -183,6 +188,7 @@
                 on-send-reply="$ctrl.onSendReply({message: message, text: text, attachments: attachments})"
                 update-message="$ctrl.updateMessage({params: params})"
                 on-should-show-unread-dot="$ctrl.shouldShowUnreadDot(message)"
+                settings="$ctrl.settings">
             >
             </message-tree>
         </div>

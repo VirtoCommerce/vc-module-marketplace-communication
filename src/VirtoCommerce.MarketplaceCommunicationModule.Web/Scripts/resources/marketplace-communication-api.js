@@ -5,8 +5,8 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             searchMessages: { method: 'POST', url: 'api/vcmp/message/search' },
             sendMessage: { method: 'POST', url: 'api/vcmp/message/new' },
             updateMessage: { method: 'POST', url: 'api/vcmp/message/update' },
-            deleteMessage: { 
-                method: 'DELETE', 
+            deleteMessage: {
+                method: 'DELETE',
                 url: 'api/vcmp/message',
                 transformRequest: function(data) {
                     return angular.toJson({
@@ -32,6 +32,8 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             searchConversations: { method: 'POST', url: 'api/vcmp/conversation/search' },
             getConversationById: { method: 'GET', url: 'api/vcmp/conversation/getbyid' },
             updateConversation: { method: 'POST', url: 'api/vcmp/conversation/update' },
-            getOrCreateConversation: { method: 'POST', url: 'api/vcmp/conversation/new' }
+            getOrCreateConversation: { method: 'POST', url: 'api/vcmp/conversation/new' },
+            // settings
+            getCommunicationSettings: { method: 'GET', url: '/api/vcmp/communication/settings' }
         });
     }]);

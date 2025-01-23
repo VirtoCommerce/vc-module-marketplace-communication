@@ -24,7 +24,8 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
         searchMessagesLoading: '=',
         shouldShowUnreadDot: '&',
         sendReply: '&',
-        updateMessage: '&'
+        updateMessage: '&',
+        settings: '<'
     },
     controller: ['$scope', function($scope) {
         var $ctrl = this;

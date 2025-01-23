@@ -28,7 +28,8 @@
         search-messages-loading="$ctrl.searchMessagesLoading"
         on-should-show-unread-dot="$ctrl.shouldShowUnreadDot({message: message})"
         on-send-reply="$ctrl.onSendReply({message: message, text: text, attachments: attachments})"
-        update-message="$ctrl.handleUpdateMessage(params)">
+        update-message="$ctrl.handleUpdateMessage(params)"
+        settings="$ctrl.settings">
     </message-tree>
 
     <message-skeleton ng-if="$ctrl.isLoadingMore" count="2"></message-skeleton>

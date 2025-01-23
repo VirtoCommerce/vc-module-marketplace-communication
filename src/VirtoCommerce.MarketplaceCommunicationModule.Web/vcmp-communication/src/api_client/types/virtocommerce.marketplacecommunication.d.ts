@@ -5,6 +5,19 @@ export declare class AuthApiBase {
     setAuthToken(token: string): void;
     protected transformOptions(options: any): Promise<any>;
 }
+export declare class VcmpCommunicationClient extends AuthApiBase {
+    private http;
+    private baseUrl;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined;
+    constructor(baseUrl?: string, http?: {
+        fetch(url: RequestInfo, init?: RequestInit): Promise<Response>;
+    });
+    /**
+     * @return OK
+     */
+    getCommunicationSettings(): Promise<MarketplaceCommunicationSettings>;
+    protected processGetCommunicationSettings(response: Response): Promise<MarketplaceCommunicationSettings>;
+}
 export declare class VcmpCommunicationUserClient extends AuthApiBase {
     private http;
     private baseUrl;
@@ -305,6 +318,18 @@ export interface IMarkMessageAsReadCommand {
     messageId: string;
     recipientId?: string | undefined;
     notRead?: boolean;
+}
+export declare class MarketplaceCommunicationSettings implements IMarketplaceCommunicationSettings {
+    attachmentCountLimit?: number;
+    attachmentSizeLimit?: number;
+    constructor(data?: IMarketplaceCommunicationSettings);
+    init(_data?: any): void;
+    static fromJS(data: any): MarketplaceCommunicationSettings;
+    toJSON(data?: any): any;
+}
+export interface IMarketplaceCommunicationSettings {
+    attachmentCountLimit?: number;
+    attachmentSizeLimit?: number;
 }
 export declare class Message implements IMessage {
     senderId?: string | undefined;

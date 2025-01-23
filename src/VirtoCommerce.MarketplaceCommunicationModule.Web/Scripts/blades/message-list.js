@@ -87,6 +87,8 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         // Initialize the form object if it doesn't exist
         $scope.mainForm = $scope.mainForm || {};
 
+        $scope.communicationSettings = null;
+
         $scope.expandForm = function() {
             messageFormsService.openForm('root');
             $scope.isFormExpanded = true;
@@ -109,6 +111,10 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             blade.threadHasMore = {};
             blade.threadHasPrevious = {};
             blade.threadPagesMap = {};
+
+            api.getCommunicationSettings(function(response) {
+                $scope.communicationSettings = response;
+            });
 
             // Ensure threadHasPrevious is initialized for all messages
             blade.messages?.forEach(message => {

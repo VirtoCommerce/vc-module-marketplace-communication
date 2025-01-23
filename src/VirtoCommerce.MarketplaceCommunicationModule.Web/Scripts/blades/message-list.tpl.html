@@ -49,6 +49,7 @@
               should-show-unread-dot="shouldShowUnreadDot(message)"
               send-reply="sendReply(message, text, attachments)"
               update-message="updateMessage(params)"
+              settings="communicationSettings"
             >
             </messages-container>
         </div>
@@ -58,6 +59,10 @@
               is-expanded="isFormExpanded"
               message="mainForm"
               is-loading="blade.isLoading"
+              conversation-id="blade.conversationId"
+              entity-id="blade.entityId"
+              entity-type="blade.entityType"
+              settings="communicationSettings"
               on-send="sendRootMessage()"
               on-cancel="cancelMessage()"
               on-expand="expandForm()"

@@ -77,13 +77,27 @@
         >
           <div class="message-item__assets-list">
             <AssetItem
-              v-for="asset in message.attachments"
+              v-for="asset in visibleAssets"
               :key="asset.id"
               :asset="asset"
               class="message-item__asset"
               @preview="openImagePreview"
             />
           </div>
+          <VcButton
+            v-if="hasHiddenAssets"
+            type="button"
+            text
+            small
+            class="new-message-form__assets-toggle"
+            @click="toggleAssetsList"
+          >
+            {{
+              isAssetsExpanded
+                ? $t("MESSENGER.SHOW_LESS")
+                : $t("MESSENGER.SHOW_MORE", { count: (props.message.attachments?.length ?? 0) - MAX_ASSETS_COUNT })
+            }}
+          </VcButton>
         </div>
       </div>
       <div
@@ -183,6 +197,8 @@ const emit = defineEmits<Emits>();
 
 const { t } = useI18n();
 
+const MAX_ASSETS_COUNT = 5;
+
 const decodeFileUrl = (url: string | undefined) => {
   if (!url) return "";
   try {
@@ -228,6 +244,13 @@ const isReplyFormVisible = computed(
 );
 const isEditFormVisible = computed(() => activeForm.value.type === "edit" && activeForm.value.id === props.message.id);
 
+const visibleAssets = computed(() => {
+  if (isAssetsExpanded.value || (props.message.attachments?.length ?? 0) <= MAX_ASSETS_COUNT) {
+    return props.message.attachments;
+  }
+  return props.message.attachments?.slice(0, MAX_ASSETS_COUNT);
+});
+
 const sendReplyMessage = (args: {
   content: string;
   replyTo: string | undefined;
@@ -269,6 +292,7 @@ const isHighlighted = ref(false);
 const isExpanded = ref(false);
 const contentRef = ref<HTMLElement | null>(null);
 const isContentTruncated = ref(false);
+const isAssetsExpanded = ref(false);
 
 const toggleExpand = () => {
   isExpanded.value = !isExpanded.value;
@@ -323,6 +347,14 @@ onUnmounted(() => {
     resizeObserver.disconnect();
   }
 });
+
+const hasHiddenAssets = computed(() => {
+  return (props.message.attachments?.length ?? 0) > MAX_ASSETS_COUNT;
+});
+
+const toggleAssetsList = () => {
+  isAssetsExpanded.value = !isAssetsExpanded.value;
+};
 
 const canManageMessage = computed(() => {
   return currentSeller.value.id === props.message?.sender?.userId && props.message?.answersCount === 0;

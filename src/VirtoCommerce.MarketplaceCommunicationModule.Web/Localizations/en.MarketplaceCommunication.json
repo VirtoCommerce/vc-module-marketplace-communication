@@ -92,6 +92,14 @@
       "unknown-entity-type": {
         "title": "Error resolve Entity Type",
         "message": "Cannot resolve an unknown type: '{{entityType}}'"
+      },
+      "attachment-count-limit": {
+        "title": "Attachment limit exceeded",
+        "message": "You can't add more than {{limit}} attachments to a message"
+      },
+      "attachment-size-limit": {
+        "title": "Attachment size limit exceeded",
+        "message": "Total size of attachments ({{size}} MB) exceeds the limit of {{limit}} MB"
       }
     },
     "entity-types": {

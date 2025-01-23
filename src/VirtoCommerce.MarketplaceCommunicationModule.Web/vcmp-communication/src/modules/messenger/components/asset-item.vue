@@ -6,7 +6,7 @@
     <div class="asset-item__icon-wrapper">
       <div
         v-if="isImage(asset.fileName)"
-        class="asset-item asset-item--image"
+        class="asset-item--image"
       >
         <img
           crossorigin="anonymous"
@@ -19,6 +19,7 @@
         v-else
         :icon="getFileThumbnail(asset.fileType)"
         class="asset-item__icon"
+        size="xl"
       />
     </div>
     <div class="asset-item__info">
@@ -28,12 +29,12 @@
       >
         {{ truncateFileName(asset.fileName) }}
       </span>
-      <!-- <span
+      <span
         v-if="showSize"
         class="asset-item__size"
       >
         {{ readableSize(asset.fileSize) }}
-      </span> -->
+      </span>
     </div>
     <div class="asset-item__actions">
       <slot name="actions" />
@@ -44,7 +45,7 @@
 <script setup lang="ts">
 import { MessageAttachment } from "@vcmp-communication/api/marketplacecommunication";
 import { VcIcon } from "@vc-shell/framework";
-import { isImage, getFileThumbnail, createThumbnailLink } from "../fileUtils";
+import { isImage, getFileThumbnail, createThumbnailLink, readableSize } from "../fileUtils";
 import { truncateFileName } from "../utils";
 import { computed } from "vue";
 
@@ -59,13 +60,15 @@ const emit = defineEmits<{
 
 const openFileBindings = computed(() => {
   return isImage(props.asset.fileName)
-    ? { class: "asset-item asset-item--image", onClick: () => emit("preview", props.asset) }
+    ? {
+        class: "asset-item asset-item--image",
+        onClick: () => emit("preview", props.asset),
+      }
     : {
         href: props.asset.attachmentUrl,
         class: "asset-item asset-item--file",
         target: "_blank",
-        rel: "noopener",
-        download: true,
+        download: props.asset.fileName,
       };
 });
 </script>
@@ -75,34 +78,33 @@ const openFileBindings = computed(() => {
   @apply tw-rounded-lg tw-overflow-hidden;
   @apply tw-transition-all;
   @apply tw-no-underline;
+  @apply tw-py-1 tw-px-2;
   @apply tw-cursor-pointer;
-  @apply tw-pr-2;
 
   &--image {
-    @apply tw-flex tw-items-center tw-gap-3;
+    @apply tw-flex tw-items-center tw-gap-2;
     @apply tw-bg-[color:var(--neutrals-50)];
     @apply tw-relative;
     @apply hover:tw-bg-[color:var(--neutrals-100)];
-    @apply hover:tw-shadow-sm;
+    @apply hover:tw-shadow-sm tw-rounded-[4px] tw-overflow-hidden;
   }
 
   &--file {
-    @apply tw-flex tw-items-center tw-gap-3;
+    @apply tw-flex tw-items-center tw-gap-2;
     @apply tw-bg-[color:var(--neutrals-50)];
     @apply tw-border tw-border-[color:var(--neutrals-200)];
-    @apply tw-p-1;
     @apply hover:tw-bg-[color:var(--neutrals-100)];
     @apply hover:tw-shadow-sm;
   }
 
   &__thumb {
-    @apply tw-w-24 tw-h-24;
+    @apply tw-w-8 tw-h-8;
     @apply tw-object-cover;
   }
 
   &__icon-wrapper {
     @apply tw-flex tw-items-center tw-justify-center;
-    @apply tw-w-12 tw-h-12;
+    @apply tw-w-8 tw-h-8;
     @apply tw-rounded;
     @apply tw-bg-[color:var(--primary-50)];
   }
@@ -117,7 +119,7 @@ const openFileBindings = computed(() => {
 
   &__name {
     @apply tw-max-w-[180px] tw-truncate;
-    @apply tw-text-sm tw-font-medium;
+    @apply tw-text-sm;
     @apply tw-text-[color:var(--base-text-color)];
   }
 

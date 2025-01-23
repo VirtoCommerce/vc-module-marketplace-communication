@@ -56,7 +56,7 @@
             >
               <div class="new-message-form__assets-list">
                 <AssetItem
-                  v-for="asset in visibleAssets"
+                  v-for="asset in assets"
                   :key="asset.id"
                   :asset="asset"
                   :show-size="true"
@@ -84,18 +84,6 @@
                   </span>
                 </div>
               </div>
-              <VcButton
-                v-if="hasHiddenAssets"
-                type="button"
-                text
-                small
-                class="new-message-form__assets-toggle"
-                @click="toggleAssetsList"
-              >
-                {{
-                  isAssetsExpanded ? $t("MESSENGER.SHOW_LESS") : $t("MESSENGER.SHOW_MORE", { count: assets.length - 3 })
-                }}
-              </VcButton>
             </div>
           </div>
           <div
@@ -121,7 +109,7 @@
         <VcButton
           type="submit"
           icon="fas fa-paper-plane"
-          :disabled="!content.trim() || !isModified"
+          :disabled="!content.trim() || !isModified || assetsLoading"
           small
           class="new-message-form__submit"
           @click="send"
@@ -134,9 +122,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, inject, nextTick } from "vue";
+import { ref, computed, watch, inject, nextTick, Ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { Conversation, Message, MessageAttachment } from "@vcmp-communication/api/marketplacecommunication";
+import {
+  Conversation,
+  MarketplaceCommunicationSettings,
+  Message,
+  MessageAttachment,
+} from "@vcmp-communication/api/marketplacecommunication";
 import { loading as vLoading, VcTextarea, VcButton, useAssets, usePopup } from "@vc-shell/framework";
 import { useMagicKeys } from "@vueuse/core";
 import { AssetItem } from "./";
@@ -176,11 +169,12 @@ const { t } = useI18n();
 const keys = useMagicKeys();
 
 const { edit, upload, remove, loading: assetsLoading } = useAssets();
-const { showConfirmation } = usePopup();
+const { showConfirmation, showError } = usePopup();
 
 const entityId = inject("entityId") as string;
 const entityType = inject("entityType") as string;
 const conversation = inject("conversation") as Conversation;
+const settings = inject("settings") as Ref<MarketplaceCommunicationSettings>;
 const assets = ref<MessageAttachment[]>(props.replyTo ? [] : props.message?.attachments || []);
 
 const content = ref(props.isEdit ? props.message?.content || "" : "");
@@ -290,7 +284,7 @@ const assetsHandler = {
             attachmentUrl: x.url,
             fileName: x.name,
             fileType: x.name?.toLowerCase().split(".").pop(),
-            fileSize: x.fileSize,
+            fileSize: x.size,
           }),
       );
 
@@ -318,21 +312,6 @@ const assetsHandler = {
   },
 };
 
-const isAssetsExpanded = ref(false);
-
-const visibleAssets = computed(() => {
-  if (isAssetsExpanded.value || assets.value.length <= 3) {
-    return assets.value;
-  }
-  return assets.value.slice(0, 3);
-});
-
-const hasHiddenAssets = computed(() => assets.value.length > 3);
-
-const toggleAssetsList = () => {
-  isAssetsExpanded.value = !isAssetsExpanded.value;
-};
-
 const removeAsset = async (asset: MessageAttachment) => {
   await assetsHandler.remove([asset]);
 };
@@ -351,12 +330,61 @@ const handleDragLeave = () => {
   }
 };
 
+const validateFileUpload = (files: FileList): { valid: boolean; error?: string } => {
+  const totalFiles = assets.value.length + files.length;
+  if (totalFiles > (settings.value?.attachmentCountLimit ?? 0)) {
+    return {
+      valid: false,
+      error: t("MESSENGER.ERROR_FILE_COUNT_LIMIT", { limit: settings.value?.attachmentCountLimit }),
+    };
+  }
+
+  const maxSizeInBytes = (settings.value?.attachmentSizeLimit ?? 0) * 1024 * 1024;
+  const currentSize = assets.value.reduce((sum, asset) => sum + (asset.fileSize ?? 0), 0);
+  const newFilesSize = Array.from(files).reduce((sum, file) => sum + file.size, 0);
+
+  if (currentSize + newFilesSize > maxSizeInBytes) {
+    return {
+      valid: false,
+      error: t("MESSENGER.ERROR_FILE_SIZE_LIMIT", { limit: settings.value?.attachmentSizeLimit }),
+    };
+  }
+
+  return { valid: true };
+};
+
+const handleFileSelect = async (e: Event) => {
+  const input = e.target as HTMLInputElement;
+  if (input.files?.length) {
+    const validation = validateFileUpload(input.files);
+    if (!validation.valid && validation.error) {
+      showError(validation.error);
+      input.value = "";
+      return;
+    }
+
+    try {
+      isUploading.value = true;
+      await assetsHandler.upload(input.files);
+    } finally {
+      isUploading.value = false;
+      input.value = "";
+    }
+  }
+};
+
 const handleDrop = async (e: DragEvent) => {
   dragCounter = 0;
   isDragging.value = false;
 
   const files = e.dataTransfer?.files;
   if (files?.length) {
+    const validation = validateFileUpload(files);
+    if (!validation.valid && validation.error) {
+      showError(validation.error);
+      return;
+    }
+
     try {
       isUploading.value = true;
       await assetsHandler.upload(files);
@@ -369,22 +397,6 @@ const handleDrop = async (e: DragEvent) => {
 const openFileSelect = () => {
   fileInputRef.value?.click();
 };
-
-const handleFileSelect = async (e: Event) => {
-  const input = e.target as HTMLInputElement;
-  if (input.files?.length) {
-    try {
-      isUploading.value = true;
-      await assetsHandler.upload(input.files);
-    } finally {
-      isUploading.value = false;
-      input.value = "";
-    }
-  }
-};
-
-
-
 </script>
 
 <style lang="scss">
