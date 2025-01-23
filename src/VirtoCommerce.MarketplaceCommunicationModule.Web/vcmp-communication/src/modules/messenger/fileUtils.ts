@@ -9,7 +9,7 @@ const fileThumbnails = [
   { image: "fas fa-file-video", extensions: ["mp4", "avi"] },
 ];
 
-const imageExtensions = new Set(["png", "jpg", "jpeg", "svg", "gif", ".webp"]);
+const imageExtensions = new Set(["png", "jpg", "jpeg", "svg", "gif", "webp"]);
 
 function getExtension(fileName: string) {
   return fileName.split(".").pop()?.toLowerCase();

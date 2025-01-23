@@ -14,7 +14,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
 
         $ctrl.isImage = function(name) {
             if (!name) return false;
-            const imageExtensions = new Set(["png", "jpg", "jpeg", "svg", "gif", ".webp"]);
+            const imageExtensions = new Set(["png", "jpg", "jpeg", "svg", "gif", "webp"]);
             return imageExtensions.has($ctrl.getExtension(name));
         };
 
@@ -90,6 +90,21 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
 
         $ctrl.toggleAssetsList = function() {
             $ctrl.isAssetsExpanded = !$ctrl.isAssetsExpanded;
+        };
+
+        $ctrl.formatFileSize = function(bytes) {
+            if (!bytes) return '';
+
+            const units = ['B', 'KB', 'MB', 'GB'];
+            let size = bytes;
+            let unitIndex = 0;
+
+            while (size >= 1024 && unitIndex < units.length - 1) {
+                size /= 1024;
+                unitIndex++;
+            }
+
+            return `${Math.round(size * 10) / 10} ${units[unitIndex]}`;
         };
     }]
 });

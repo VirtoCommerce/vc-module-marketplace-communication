@@ -27,7 +27,8 @@
           "start-conversation": "Start new conversation...",
           "show-all-threads": "Show all threads",
           "drop-files": "Drop files here to attach",
-          "attach-files": "Attach files"
+          "attach-files": "Attach files",
+          "file-already-attached": "File \"{{name}}\" already attached"
         },
         "buttons": {
           "reply": "Reply",

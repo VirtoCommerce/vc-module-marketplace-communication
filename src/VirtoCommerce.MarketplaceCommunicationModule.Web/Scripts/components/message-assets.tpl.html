@@ -12,11 +12,16 @@
                    ng-class="$ctrl.getFileIcon(asset.fileName)">
                 </i>
             </div>
-            <a ng-href="{{asset.attachmentUrl}}"
-               target="_blank"
-               class="message-assets__name">
-                {{$ctrl.truncateFileName(asset.fileName)}}
-            </a>
+            <div class="message-assets__info">
+                <a ng-href="{{asset.attachmentUrl}}"
+                   target="_blank"
+                   class="message-assets__name">
+                    {{$ctrl.truncateFileName(asset.fileName)}}
+                </a>
+                <span class="message-assets__size" ng-if="asset.fileSize && $ctrl.isEditing">
+                    {{$ctrl.formatFileSize(asset.fileSize)}}
+                </span>
+            </div>
             <button class="btn message-assets__remove"
                     ng-if="$ctrl.isEditing"
                     ng-click="$ctrl.onRemove({asset: asset})">

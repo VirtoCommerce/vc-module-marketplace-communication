@@ -18,6 +18,8 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
         var uploader;
 
         $ctrl.$onInit = function() {
+            $ctrl.isAssetsExpanded = false;
+            $ctrl.uploadError = '';
             if (!$ctrl.message) {
                 $ctrl.message = { text: '', attachments: [] };
             }
@@ -61,40 +63,33 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
                 scope: $scope,
                 headers: { Accept: 'application/json' },
                 method: 'POST',
-                autoUpload: true,
+                autoUpload: false,
                 removeAfterUpload: true,
                 url: getUploaderUrl()
             });
 
             uploader.filters.push({
-                name: 'attachmentCountLimit',
+                name: 'limitCheck',
                 fn: function(item) {
-                    var totalCount = $ctrl.message.attachments.length + uploader.queue.length;
-                    if (totalCount >= $ctrl.settings.attachmentCountLimit) {
-                        var dialog = {
+                    var totalCount = $ctrl.message.attachments.length + uploader.queue.length + 1;
+                    if (totalCount > $ctrl.settings.attachmentCountLimit) {
+                        dialogService.showNotificationDialog({
                             id: "attachmentCountLimitExceeded",
                             title: "marketplaceCommunication.dialogs.attachment-count-limit.title",
                             message: "marketplaceCommunication.dialogs.attachment-count-limit.message",
                             messageValues: { limit: $ctrl.settings.attachmentCountLimit }
-                        };
-                        dialogService.showNotificationDialog(dialog);
+                        });
+                        uploader.clearQueue();
                         return false;
                     }
-                    return true;
-                }
-            });
 
-            uploader.filters.push({
-                name: 'attachmentSizeLimit',
-                fn: function(item) {
                     var totalSize = $ctrl.message.attachments.reduce((sum, asset) => sum + (asset.fileSize || 0), 0);
                     totalSize += uploader.queue.reduce((sum, queuedItem) => sum + queuedItem.file.size, 0);
                     totalSize += item.size;
-
                     var totalSizeMB = totalSize / (1024 * 1024);
 
                     if (totalSizeMB > $ctrl.settings.attachmentSizeLimit) {
-                        var dialog = {
+                        dialogService.showNotificationDialog({
                             id: "attachmentSizeLimitExceeded",
                             title: "marketplaceCommunication.dialogs.attachment-size-limit.title",
                             message: "marketplaceCommunication.dialogs.attachment-size-limit.message",
@@ -102,31 +97,92 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
                                 limit: $ctrl.settings.attachmentSizeLimit,
                                 size: totalSizeMB.toFixed(2)
                             }
-                        };
-                        dialogService.showNotificationDialog(dialog);
+                        });
+                        uploader.clearQueue();
                         return false;
                     }
+
                     return true;
                 }
             });
 
-            uploader.onSuccessItem = function (fileItem, assets, status, headers) {
-                angular.forEach(assets, function (asset) {
+            uploader.filters.push({
+                name: 'duplicateCheck',
+                fn: function(item) {
+                    var isDuplicate = $ctrl.message.attachments.some(function(asset) {
+                        return asset.fileName.toLowerCase() === item.name.toLowerCase();
+                    });
+
+                    if (isDuplicate) {
+                        $ctrl.uploadError = {
+                            fileName: item.name
+                        };
+                        $scope.$apply();
+                        return false;
+                    }
+
+                    $ctrl.uploadError = null;
+                    return true;
+                }
+            });
+
+            uploader.onAfterAddingAll = function(addedItems) {
+                if (addedItems && addedItems.length) {
+                    uploader.uploadAll();
+                }
+            };
+
+            uploader.onBeforeUploadItem = function(item) {
+                // Quantity limit check
+                var totalCount = $ctrl.message.attachments.length + uploader.queue.length;
+                if (totalCount > $ctrl.settings.attachmentCountLimit) {
+                    dialogService.showNotificationDialog({
+                        id: "attachmentCountLimitExceeded",
+                        title: "marketplaceCommunication.dialogs.attachment-count-limit.title",
+                        message: "marketplaceCommunication.dialogs.attachment-count-limit.message",
+                        messageValues: { limit: $ctrl.settings.attachmentCountLimit }
+                    });
+                    uploader.clearQueue();
+                    return false;
+                }
+
+                // Size limit check
+                var totalSize = $ctrl.message.attachments.reduce((sum, asset) => sum + (asset.fileSize || 0), 0);
+                totalSize += uploader.queue.reduce((sum, queuedItem) => sum + queuedItem.file.size, 0);
+                var totalSizeMB = totalSize / (1024 * 1024);
+
+                if (totalSizeMB > $ctrl.settings.attachmentSizeLimit) {
+                    dialogService.showNotificationDialog({
+                        id: "attachmentSizeLimitExceeded",
+                        title: "marketplaceCommunication.dialogs.attachment-size-limit.title",
+                        message: "marketplaceCommunication.dialogs.attachment-size-limit.message",
+                        messageValues: {
+                            limit: $ctrl.settings.attachmentSizeLimit,
+                            size: totalSizeMB.toFixed(2)
+                        }
+                    });
+                    uploader.clearQueue();
+                    return false;
+                }
+
+                return true;
+            };
+
+            uploader.onSuccessItem = function(fileItem, assets, status, headers) {
+                $ctrl.uploadError = '';
+                angular.forEach(assets, function(asset) {
                     $ctrl.message.attachments.push({
                         attachmentUrl: asset.url,
                         fileName: asset.name,
                         fileType: asset.name?.toLowerCase().split(".").pop(),
-                        fileSize: asset.size,
+                        fileSize: fileItem.file.size,
                     });
                 });
                 $scope.$apply();
             };
 
-            uploader.onAfterAddingAll = function (addedItems) {
-                bladeNavigationService.setError(null, $scope.blade);
-            };
-
-            uploader.onErrorItem = function (item, response, status, headers) {
+            uploader.onErrorItem = function(item, response, status, headers) {
+                uploader.clearQueue();
                 bladeNavigationService.setError(item._file.name + ' failed: ' + (response.message ? response.message : status), $scope.blade);
             };
         }
@@ -190,35 +246,6 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
 
         $ctrl.toggleAssetsList = function() {
             $ctrl.isAssetsExpanded = !$ctrl.isAssetsExpanded;
-        };
-
-        $ctrl.isImage = function(name) {
-            if (!name) return false;
-            const imageExtensions = new Set(["png", "jpg", "jpeg", "svg", "gif", ".webp"]);
-            return imageExtensions.has($ctrl.getExtension(name));
-        };
-
-        $ctrl.getExtension = function(fileName) {
-            return fileName.split(".").pop()?.toLowerCase();
-        };
-
-        $ctrl.getFileIcon = function(name) {
-            if (!name) return 'fa-file';
-
-            const fileThumbnails = [
-                { image: "fas fa-file-pdf", extensions: ["pdf"] },
-                { image: "fas fa-file-word", extensions: ["doc", "docx"] },
-                { image: "fas fa-file-excel", extensions: ["xls", "xlsx"] },
-                { image: "fas fa-file-powerpoint", extensions: ["ppt", "pptx"] },
-                { image: "fas fa-file-csv", extensions: ["csv"] },
-                { image: "fas fa-file-archive", extensions: ["zip"] },
-                { image: "fas fa-file-music", extensions: ["mp3", "aac"] },
-                { image: "fas fa-file-video", extensions: ["mp4", "avi"] },
-              ];
-
-              return (
-                fileThumbnails.find((thumb) => thumb.extensions.some((ext) => ext === $ctrl.getExtension(name)))?.image || "fas fa-file"
-              );
         };
     }]
 });

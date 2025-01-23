@@ -12,9 +12,12 @@
                 ng-model="$ctrl.message.text"
                 ng-keypress="$ctrl.handleKeyPress($event)"
                 placeholder="{{ 'marketplaceCommunication.blades.message-list.labels.enter-message' | translate }}"
-                vc-focus="$ctrl.isExpanded">
+                ng-disabled="$ctrl.isLoading">
             </textarea>
-
+            <div class="message-composer__error" ng-if="$ctrl.uploadError">
+                <i class="fa fa-exclamation-circle" class="message-composer__error-icon"></i>
+                {{ 'marketplaceCommunication.blades.message-list.labels.file-already-attached' | translate:{ name: $ctrl.uploadError.fileName } }}
+            </div>
             <div over-class="message-composer__assets-zone--dragging"
                  nv-file-drop
                  nv-file-over
@@ -45,6 +48,8 @@
                 </div>
             </div>
         </div>
+
+
 
         <div class="message-composer__actions">
             <button class="btn __cancel" ng-click="$ctrl.onCancel()">

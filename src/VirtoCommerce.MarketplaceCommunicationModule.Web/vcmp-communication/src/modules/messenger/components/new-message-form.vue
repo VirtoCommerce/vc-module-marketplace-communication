@@ -31,6 +31,15 @@
           @dragover.prevent
           @drop.prevent="handleDrop"
         >
+          <div
+            v-if="uploadError"
+            class="new-message-form__upload-error"
+          >
+            <i class="fas fa-exclamation-circle new-message-form__upload-error-icon" />
+            <span class="new-message-form__upload-error-text">
+              {{ uploadError }}
+            </span>
+          </div>
           <div class="new-message-form__assets-wrapper">
             <input
               ref="fileInputRef"
@@ -51,8 +60,9 @@
               :disabled="isUploading"
               @click="openFileSelect"
             />
+
             <div
-              v-if="assets.length || isUploading"
+              v-if="assets.length || isUploading || uploadError"
               class="new-message-form__assets"
             >
               <div class="new-message-form__assets-list">
@@ -135,6 +145,7 @@ import { loading as vLoading, VcTextarea, VcButton, useAssets, usePopup } from "
 import { useMagicKeys } from "@vueuse/core";
 import { AssetItem } from "./";
 import { getAllowedFileTypes } from "../constants";
+import * as _ from "lodash-es";
 
 const props = defineProps<{
   replyTo?: string;
@@ -171,7 +182,7 @@ const { t } = useI18n();
 const keys = useMagicKeys();
 
 const { edit, upload, remove, loading: assetsLoading } = useAssets();
-const { showConfirmation, showError } = usePopup();
+const { showError } = usePopup();
 
 const entityId = inject("entityId") as string;
 const entityType = inject("entityType") as string;
@@ -184,6 +195,7 @@ const textareaRef = ref<InstanceType<typeof VcTextarea>>();
 const fileInputRef = ref<HTMLInputElement>();
 const isDragging = ref(false);
 const isUploading = ref(false);
+const uploadError = ref<string | null>(null);
 
 const allowedFileTypes = getAllowedFileTypes();
 let dragCounter = 0;
@@ -305,15 +317,19 @@ const assetsHandler = {
     }
   },
   async remove(files: MessageAttachment[]) {
-    if (
-      await showConfirmation(
-        computed(() => t("MESSENGER.PAGES.ALERTS.DELETE_CONFIRMATION_ASSET", { count: files.length })),
-      )
-    ) {
-      assets.value = (await remove(files, assets.value)).map((x) => new MessageAttachment(x));
+    try {
+      if (assets.value && assets.value.length && files.length > 0) {
+        assets.value = _.differenceWith(assets.value, files, (x, y) => {
+          if ("url" in x && "url" in y) {
+            return x.url === y.url;
+          }
+          return x.attachmentUrl === y.attachmentUrl;
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      throw error;
     }
-
-    return assets.value;
   },
 };
 
@@ -358,12 +374,25 @@ const validateFileUpload = (files: FileList): { valid: boolean; error?: string }
   return { valid: true };
 };
 
+const validateDuplicateFile = (fileName: string): boolean => {
+  return assets.value.some((asset) => asset.fileName === fileName);
+};
+
 const handleFileSelect = async (e: Event) => {
   const input = e.target as HTMLInputElement;
   if (input.files?.length) {
+
+    uploadError.value = null;
     const validation = validateFileUpload(input.files);
     if (!validation.valid && validation.error) {
       showError(validation.error);
+      input.value = "";
+      return;
+    }
+
+    const duplicateFile = Array.from(input.files).find((file) => validateDuplicateFile(file.name));
+    if (duplicateFile) {
+      uploadError.value = t("MESSENGER.ERROR_DUPLICATE_FILE", { fileName: duplicateFile.name });
       input.value = "";
       return;
     }
@@ -384,6 +413,14 @@ const handleDrop = async (e: DragEvent) => {
 
   const files = e.dataTransfer?.files;
   if (files?.length) {
+    // Проверяем каждый файл на дубликаты
+    const duplicateFile = Array.from(files).find((file) => validateDuplicateFile(file.name));
+    if (duplicateFile) {
+      uploadError.value = t("MESSENGER.ERROR_DUPLICATE_FILE", { fileName: duplicateFile.name });
+      return;
+    }
+
+    uploadError.value = null;
     const validation = validateFileUpload(files);
     if (!validation.valid && validation.error) {
       showError(validation.error);
@@ -398,6 +435,11 @@ const handleDrop = async (e: DragEvent) => {
     }
   }
 };
+
+// Сбрасываем ошибку при изменении списка файлов
+watch(assets, () => {
+  uploadError.value = null;
+});
 
 const openFileSelect = () => {
   fileInputRef.value?.click();
@@ -527,6 +569,22 @@ const openFileSelect = () => {
 
   &__assets-zone--dragging {
     @apply tw-relative;
+  }
+
+  &__upload-error {
+    @apply tw-flex tw-items-center tw-gap-2;
+    @apply tw-bg-[color:var(--danger-50)];
+    @apply tw-border-b tw-border-[color:var(--danger-100)];
+    @apply tw-px-3 tw-py-2;
+    @apply tw-text-sm;
+  }
+
+  &__upload-error-icon {
+    @apply tw-text-[color:var(--danger-500)];
+  }
+
+  &__upload-error-text {
+    @apply tw-text-[color:var(--danger-500)];
   }
 }
 </style>

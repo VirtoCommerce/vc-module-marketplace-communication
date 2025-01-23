@@ -44,6 +44,8 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             $ctrl.editMode.attachments = angular.copy($ctrl.message.attachments || []);
             $ctrl.editMode.isActive = true;
 
+            console.log($ctrl.message);
+
             messageFormsService.openForm('edit-' + $ctrl.message.id);
         };
 
