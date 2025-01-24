@@ -351,59 +351,97 @@ const handleDragLeave = () => {
   }
 };
 
-const validateFileUpload = (files: FileList): { valid: boolean; error?: string } => {
-  const totalFiles = assets.value.length + files.length;
-  if (totalFiles > (settings.value?.attachmentCountLimit ?? 0)) {
-    return {
-      valid: false,
-      error: t("MESSENGER.ERROR_FILE_COUNT_LIMIT", { limit: settings.value?.attachmentCountLimit }),
-    };
+const validateFiles = (files: File[]): { validFiles: File[]; errors: string[] } => {
+  const errors: string[] = [];
+  let validFiles = [...files];
+
+  const invalidTypeFiles = validFiles.filter((file) => {
+    const extension = file.name.toLowerCase().split(".").pop() || "";
+    return !allowedFileTypes.includes(`.${extension}`);
+  });
+
+  if (invalidTypeFiles.length) {
+    errors.push(t("MESSENGER.ERROR_FILE_TYPE", { fileName: invalidTypeFiles[0].name }));
+    validFiles = validFiles.filter((file) => !invalidTypeFiles.includes(file));
+  }
+
+  const duplicates = validFiles.filter((file) => validateDuplicateFile(file.name));
+  if (duplicates.length) {
+    errors.push(t("MESSENGER.ERROR_DUPLICATE_FILE", { fileName: duplicates[0].name }));
+    validFiles = validFiles.filter((file) => !duplicates.includes(file));
+  }
+
+  const maxFiles = settings.value?.attachmentCountLimit ?? 0;
+  const totalFiles = assets.value.length + validFiles.length;
+  if (totalFiles > maxFiles) {
+    errors.push(t("MESSENGER.ERROR_FILE_COUNT_LIMIT", { limit: maxFiles }));
+    validFiles = validFiles.slice(0, maxFiles - assets.value.length);
   }
 
   const maxSizeInBytes = (settings.value?.attachmentSizeLimit ?? 0) * 1024 * 1024;
   const currentSize = assets.value.reduce((sum, asset) => sum + (asset.fileSize ?? 0), 0);
-  const newFilesSize = Array.from(files).reduce((sum, file) => sum + file.size, 0);
+  let remainingSize = maxSizeInBytes - currentSize;
 
-  if (currentSize + newFilesSize > maxSizeInBytes) {
-    return {
-      valid: false,
-      error: t("MESSENGER.ERROR_FILE_SIZE_LIMIT", { limit: settings.value?.attachmentSizeLimit }),
-    };
+  const validatedBySize: File[] = [];
+  const invalidBySize: File[] = [];
+
+  for (const file of validFiles) {
+    if (remainingSize >= file.size) {
+      validatedBySize.push(file);
+      remainingSize -= file.size;
+    } else {
+      invalidBySize.push(file);
+    }
   }
 
-  return { valid: true };
+  if (invalidBySize.length) {
+    errors.push(t("MESSENGER.ERROR_FILE_SIZE_LIMIT", { limit: settings.value?.attachmentSizeLimit }));
+  }
+
+  return {
+    validFiles: validatedBySize,
+    errors,
+  };
 };
 
 const validateDuplicateFile = (fileName: string): boolean => {
   return assets.value.some((asset) => asset.fileName === fileName);
 };
 
+const processFiles = async (files: File[]) => {
+  const { validFiles, errors } = validateFiles(files);
+
+  const limitErrors = errors.filter((error) => error.includes("Maximum number") || error.includes("Total files size"));
+  if (limitErrors.length) {
+    showError(limitErrors.join("\n"));
+  }
+
+  const inlineErrors = errors.filter(
+    (error) => error.includes("already attached") || error.includes("is not supported"),
+  );
+  if (inlineErrors.length) {
+    uploadError.value = inlineErrors.join("\n");
+  } else {
+    uploadError.value = null;
+  }
+
+  if (validFiles.length) {
+    try {
+      isUploading.value = true;
+      const dataTransfer = new DataTransfer();
+      validFiles.forEach((file) => dataTransfer.items.add(file));
+      await assetsHandler.upload(dataTransfer.files);
+    } finally {
+      isUploading.value = false;
+    }
+  }
+};
+
 const handleFileSelect = async (e: Event) => {
   const input = e.target as HTMLInputElement;
   if (input.files?.length) {
-
-    uploadError.value = null;
-    const validation = validateFileUpload(input.files);
-    if (!validation.valid && validation.error) {
-      showError(validation.error);
-      input.value = "";
-      return;
-    }
-
-    const duplicateFile = Array.from(input.files).find((file) => validateDuplicateFile(file.name));
-    if (duplicateFile) {
-      uploadError.value = t("MESSENGER.ERROR_DUPLICATE_FILE", { fileName: duplicateFile.name });
-      input.value = "";
-      return;
-    }
-
-    try {
-      isUploading.value = true;
-      await assetsHandler.upload(input.files);
-    } finally {
-      isUploading.value = false;
-      input.value = "";
-    }
+    await processFiles(Array.from(input.files));
+    input.value = "";
   }
 };
 
@@ -413,30 +451,10 @@ const handleDrop = async (e: DragEvent) => {
 
   const files = e.dataTransfer?.files;
   if (files?.length) {
-    // Проверяем каждый файл на дубликаты
-    const duplicateFile = Array.from(files).find((file) => validateDuplicateFile(file.name));
-    if (duplicateFile) {
-      uploadError.value = t("MESSENGER.ERROR_DUPLICATE_FILE", { fileName: duplicateFile.name });
-      return;
-    }
-
-    uploadError.value = null;
-    const validation = validateFileUpload(files);
-    if (!validation.valid && validation.error) {
-      showError(validation.error);
-      return;
-    }
-
-    try {
-      isUploading.value = true;
-      await assetsHandler.upload(files);
-    } finally {
-      isUploading.value = false;
-    }
+    await processFiles(Array.from(files));
   }
 };
 
-// Сбрасываем ошибку при изменении списка файлов
 watch(assets, () => {
   uploadError.value = null;
 });

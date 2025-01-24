@@ -69,6 +69,28 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
             });
 
             uploader.filters.push({
+                name: 'fileTypeCheck',
+                fn: function(item) {
+                    var allowedExtensions = $scope.allowedFileTypes.split(',').map(function(ext) {
+                        return ext.toLowerCase().replace('.', '');
+                    });
+
+                    var fileExtension = item.name.split('.').pop().toLowerCase();
+                    var isAllowed = allowedExtensions.includes(fileExtension);
+
+                    if (!isAllowed) {
+                        $ctrl.uploadError = {
+                            fileName: item.name,
+                            type: 'extension'
+                        };
+                        $scope.$apply();
+                        return false;
+                    }
+                    return true;
+                }
+            });
+
+            uploader.filters.push({
                 name: 'limitCheck',
                 fn: function(item) {
                     var totalCount = $ctrl.message.attachments.length + uploader.queue.length + 1;
@@ -79,7 +101,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
                             message: "marketplaceCommunication.dialogs.attachment-count-limit.message",
                             messageValues: { limit: $ctrl.settings.attachmentCountLimit }
                         });
-                        uploader.clearQueue();
+
                         return false;
                     }
 
@@ -98,7 +120,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
                                 size: totalSizeMB.toFixed(2)
                             }
                         });
-                        uploader.clearQueue();
+
                         return false;
                     }
 
@@ -130,42 +152,6 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
                 if (addedItems && addedItems.length) {
                     uploader.uploadAll();
                 }
-            };
-
-            uploader.onBeforeUploadItem = function(item) {
-                // Quantity limit check
-                var totalCount = $ctrl.message.attachments.length + uploader.queue.length;
-                if (totalCount > $ctrl.settings.attachmentCountLimit) {
-                    dialogService.showNotificationDialog({
-                        id: "attachmentCountLimitExceeded",
-                        title: "marketplaceCommunication.dialogs.attachment-count-limit.title",
-                        message: "marketplaceCommunication.dialogs.attachment-count-limit.message",
-                        messageValues: { limit: $ctrl.settings.attachmentCountLimit }
-                    });
-                    uploader.clearQueue();
-                    return false;
-                }
-
-                // Size limit check
-                var totalSize = $ctrl.message.attachments.reduce((sum, asset) => sum + (asset.fileSize || 0), 0);
-                totalSize += uploader.queue.reduce((sum, queuedItem) => sum + queuedItem.file.size, 0);
-                var totalSizeMB = totalSize / (1024 * 1024);
-
-                if (totalSizeMB > $ctrl.settings.attachmentSizeLimit) {
-                    dialogService.showNotificationDialog({
-                        id: "attachmentSizeLimitExceeded",
-                        title: "marketplaceCommunication.dialogs.attachment-size-limit.title",
-                        message: "marketplaceCommunication.dialogs.attachment-size-limit.message",
-                        messageValues: {
-                            limit: $ctrl.settings.attachmentSizeLimit,
-                            size: totalSizeMB.toFixed(2)
-                        }
-                    });
-                    uploader.clearQueue();
-                    return false;
-                }
-
-                return true;
             };
 
             uploader.onSuccessItem = function(fileItem, assets, status, headers) {

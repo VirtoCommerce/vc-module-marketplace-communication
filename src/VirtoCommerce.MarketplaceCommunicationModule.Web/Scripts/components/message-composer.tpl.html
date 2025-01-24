@@ -16,7 +16,12 @@
             </textarea>
             <div class="message-composer__error" ng-if="$ctrl.uploadError">
                 <i class="fa fa-exclamation-circle" class="message-composer__error-icon"></i>
-                {{ 'marketplaceCommunication.blades.message-list.labels.file-already-attached' | translate:{ name: $ctrl.uploadError.fileName } }}
+                <span ng-if="$ctrl.uploadError.type === 'extension'">
+                    {{ 'marketplaceCommunication.blades.message-list.labels.file-type-not-allowed' | translate:{ name: $ctrl.uploadError.fileName } }}
+                </span>
+                <span ng-if="!$ctrl.uploadError.type">
+                    {{ 'marketplaceCommunication.blades.message-list.labels.file-already-attached' | translate:{ name: $ctrl.uploadError.fileName } }}
+                </span>
             </div>
             <div over-class="message-composer__assets-zone--dragging"
                  nv-file-drop

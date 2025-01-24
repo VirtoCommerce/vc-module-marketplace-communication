@@ -106,6 +106,7 @@
     "UNREAD_MESSAGES": "Unread messages",
     "ERROR_FILE_COUNT_LIMIT": "Maximum number of {limit} files exceeded.",
     "ERROR_FILE_SIZE_LIMIT": "Total files size {limit}MB exceeded.",
-    "ERROR_DUPLICATE_FILE": "File \"{fileName}\" already attached"
+    "ERROR_DUPLICATE_FILE": "File \"{fileName}\" already attached",
+    "ERROR_FILE_TYPE": "File \"{fileName}\" is not supported."
   }
 }

@@ -18,7 +18,7 @@
                    class="message-assets__name">
                     {{$ctrl.truncateFileName(asset.fileName)}}
                 </a>
-                <span class="message-assets__size" ng-if="asset.fileSize && $ctrl.isEditing">
+                <span class="message-assets__size" ng-if="asset.fileSize">
                     {{$ctrl.formatFileSize(asset.fileSize)}}
                 </span>
             </div>

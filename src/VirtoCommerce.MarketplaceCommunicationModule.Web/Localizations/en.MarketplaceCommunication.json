@@ -28,7 +28,8 @@
           "show-all-threads": "Show all threads",
           "drop-files": "Drop files here to attach",
           "attach-files": "Attach files",
-          "file-already-attached": "File \"{{name}}\" already attached"
+          "file-already-attached": "File \"{{name}}\" already attached",
+          "file-type-not-allowed": "File \"{{name}}\" type is not allowed"
         },
         "buttons": {
           "reply": "Reply",

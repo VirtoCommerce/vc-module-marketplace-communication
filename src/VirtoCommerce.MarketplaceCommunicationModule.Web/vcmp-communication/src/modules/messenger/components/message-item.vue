@@ -81,6 +81,7 @@
               :key="asset.id"
               :asset="asset"
               class="message-item__asset"
+              show-size
               @preview="openImagePreview"
             />
           </div>

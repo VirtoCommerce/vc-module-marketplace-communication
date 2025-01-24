@@ -14,7 +14,10 @@ angular.module(moduleName, [])
             // Documents
             documents: '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.odt,.ods,.odp,.csv,.xps,' +
                       '.vsd,.vsdx,.vst,.vstx,.vssx,.vssm,.vsdm,.vstm,.docm,.dotx,.dotm,.xlsm,.xltx,' +
-                      '.xltm,.xlsb,.ppsx,.ppsm,.potx,.potm,.pptm,.pub'
+                      '.xltm,.xlsb,.ppsx,.ppsm,.potx,.potm,.pptm,.pub',
+
+            // Archives
+            archives: '.zip,.rar,.7z',
         },
 
         getAllowedFileTypes: function() {
