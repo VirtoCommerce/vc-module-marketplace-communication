@@ -6,7 +6,7 @@
     <div class="asset-item__icon-wrapper">
       <div
         v-if="isImage(asset.fileName)"
-        class="asset-item--image"
+        class="asset-item--asset"
       >
         <img
           crossorigin="anonymous"
@@ -61,12 +61,12 @@ const emit = defineEmits<{
 const openFileBindings = computed(() => {
   return isImage(props.asset.fileName)
     ? {
-        class: "asset-item asset-item--image",
+        class: "asset-item asset-item--asset",
         onClick: () => emit("preview", props.asset),
       }
     : {
         href: props.asset.attachmentUrl,
-        class: "asset-item asset-item--file",
+        class: "asset-item asset-item--asset",
         target: "_blank",
         download: props.asset.fileName,
       };
@@ -81,20 +81,13 @@ const openFileBindings = computed(() => {
   @apply tw-py-1 tw-px-2;
   @apply tw-cursor-pointer;
 
-  &--image {
+  &--asset {
     @apply tw-flex tw-items-center tw-gap-2;
     @apply tw-bg-[color:var(--neutrals-50)];
     @apply tw-relative;
-    @apply hover:tw-bg-[color:var(--neutrals-100)];
-    @apply hover:tw-shadow-sm tw-rounded-[4px] tw-overflow-hidden;
-  }
-
-  &--file {
-    @apply tw-flex tw-items-center tw-gap-2;
-    @apply tw-bg-[color:var(--neutrals-50)];
     @apply tw-border tw-border-[color:var(--neutrals-200)];
     @apply hover:tw-bg-[color:var(--neutrals-100)];
-    @apply hover:tw-shadow-sm;
+    @apply hover:tw-shadow-sm tw-rounded-[4px] tw-overflow-hidden;
   }
 
   &__thumb {
