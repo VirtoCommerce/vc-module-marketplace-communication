@@ -5,7 +5,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             var blade = $scope.widget.blade;
 
             $scope.isDisabled = function () {
-                return $scope.blade.currentEntity.employeeId === null;
+                return !$scope.blade.currentEntity || $scope.blade.currentEntity.employeeId === null;
             }
 
             $scope.openBlade = function () {
