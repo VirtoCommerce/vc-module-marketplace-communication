@@ -43,9 +43,9 @@ public class Module : IModule, IHasConfiguration
         appBuilder.UseModuleAuthorization();
 
         // Apply migrations
-        using var serviceScope = serviceProvider.CreateScope();
-        using var dbContext = serviceScope.ServiceProvider.GetRequiredService<MarketplaceCommunicationModuleDbContext>();
-        dbContext.Database.Migrate();
+        //using var serviceScope = serviceProvider.CreateScope();
+        //using var dbContext = serviceScope.ServiceProvider.GetRequiredService<MarketplaceCommunicationModuleDbContext>();
+        //dbContext.Database.Migrate();
 
     }
 
