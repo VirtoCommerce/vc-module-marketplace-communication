@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
 using VirtoCommerce.CommunicationModule.Core.Models;
 using VirtoCommerce.CommunicationModule.Core.Services;
 using VirtoCommerce.MarketplaceVendorModule.Core.Common;
@@ -39,7 +38,7 @@ public class SendMessageCommandHandler : ICommandHandler<SendMessageCommand>
         _sellerOrderCrudService = sellerOrderCrudService;
     }
 
-    public virtual async Task<Unit> Handle(SendMessageCommand request, CancellationToken cancellationToken)
+    public virtual async Task Handle(SendMessageCommand request, CancellationToken cancellationToken)
     {
         if (request == null)
         {
@@ -102,7 +101,6 @@ public class SendMessageCommandHandler : ICommandHandler<SendMessageCommand>
         message.Recipients = new List<MessageRecipient> { messageRecipient };
 
         await _messageService.SendMessage(message);
-        return Unit.Value;
     }
 
     protected virtual async Task<(string, string)> GetConversationNameByEntity(string entityId, string entityType)

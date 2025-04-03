@@ -1,7 +1,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
 using VirtoCommerce.CommunicationModule.Core.Services;
 using VirtoCommerce.MarketplaceVendorModule.Core.Common;
 using VirtoCommerce.Platform.Core.Common;
@@ -21,7 +20,7 @@ public class UpdateMessageCommandHandler : ICommandHandler<UpdateMessageCommand>
         _messageService = messageService;
     }
 
-    public virtual async Task<Unit> Handle(UpdateMessageCommand request, CancellationToken cancellationToken)
+    public virtual async Task Handle(UpdateMessageCommand request, CancellationToken cancellationToken)
     {
         if (request == null)
         {
@@ -47,7 +46,5 @@ public class UpdateMessageCommandHandler : ICommandHandler<UpdateMessageCommand>
         }
 
         await _messageService.UpdateMessage(message);
-
-        return Unit.Value;
     }
 }

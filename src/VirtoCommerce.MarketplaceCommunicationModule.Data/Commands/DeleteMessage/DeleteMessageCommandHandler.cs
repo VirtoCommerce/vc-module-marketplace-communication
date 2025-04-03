@@ -1,7 +1,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
 using VirtoCommerce.CommunicationModule.Core.Services;
 using VirtoCommerce.MarketplaceVendorModule.Core.Common;
 
@@ -17,7 +16,7 @@ public class DeleteMessageCommandHandler : ICommandHandler<DeleteMessageCommand>
         _messageService = messageService;
     }
 
-    public virtual async Task<Unit> Handle(DeleteMessageCommand request, CancellationToken cancellationToken)
+    public virtual async Task Handle(DeleteMessageCommand request, CancellationToken cancellationToken)
     {
         if (request == null)
         {
@@ -30,7 +29,5 @@ public class DeleteMessageCommandHandler : ICommandHandler<DeleteMessageCommand>
         }
 
         await _messageService.DeleteMessage(request.MessageIds, false);
-
-        return Unit.Value;
     }
 }

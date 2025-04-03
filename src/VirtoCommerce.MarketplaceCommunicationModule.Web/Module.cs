@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.MarketplaceCommunicationModule.Core;
 using VirtoCommerce.MarketplaceCommunicationModule.Core.Services;
+using VirtoCommerce.MarketplaceCommunicationModule.Data;
 using VirtoCommerce.MarketplaceCommunicationModule.Data.Repositories;
 using VirtoCommerce.MarketplaceCommunicationModule.Web.Authorization;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -26,7 +27,7 @@ public class Module : IModule, IHasConfiguration
 
         serviceCollection.AddDbContext<MarketplaceCommunicationModuleDbContext>(options => options.UseSqlServer(connectionString));
 
-        serviceCollection.AddMediatR(typeof(Data.Anchor));
+        serviceCollection.AddMediatR(configuration => configuration.RegisterServicesFromAssemblyContaining<Anchor>());
 
         serviceCollection.AddSingleton<IUserIdProvider, PushNotificationOperatorIdProvider>();
     }

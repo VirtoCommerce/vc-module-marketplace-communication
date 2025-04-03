@@ -87,7 +87,7 @@ public class VcmpMessageController : ControllerBase
         {
             return Forbid();
         }
-        var result = await _mediator.Send(command);
+        await _mediator.Send(command);
 
         return Ok();
     }
@@ -101,7 +101,7 @@ public class VcmpMessageController : ControllerBase
         {
             return Forbid();
         }
-        var result = await _mediator.Send(command);
+        await _mediator.Send(command);
 
         return Ok();
     }
@@ -115,7 +115,7 @@ public class VcmpMessageController : ControllerBase
         {
             return Forbid();
         }
-        var result = await _mediator.Send(command);
+        await _mediator.Send(command);
 
         return Ok();
     }
