@@ -12,7 +12,6 @@ export default getDynamicModuleConfiguration({
     minify: false,
     lib: {
       entry: resolve(__dirname, "./index.ts"),
-      fileName: (format, name) => `${name}.js?v=${Date.now()}`,
     },
   },
   compatibility: {
