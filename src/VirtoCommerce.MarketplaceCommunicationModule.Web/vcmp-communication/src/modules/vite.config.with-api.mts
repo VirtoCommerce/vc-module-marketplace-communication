@@ -1,11 +1,10 @@
-import { defineConfig } from "vite";
-import { resolve, join, dirname } from "node:path";
-import vue from "@vitejs/plugin-vue";
+import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { getDynamicModuleConfiguration } from "@vc-shell/config-generator";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-export default defineConfig({
+export default getDynamicModuleConfiguration({
   build: {
     manifest: "manifest.json",
     copyPublicDir: false,
@@ -14,39 +13,9 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, "./index.ts"),
       fileName: (format, name) => `${name}.js?v=${Date.now()}`,
-      formats: ["umd"],
-      name: "VcShellDynamicModules",
-    },
-
-    outDir: join(__dirname, "../../dist/packages/modules"),
-    rollupOptions: {
-      output: {
-        chunkFileNames: '[name]-[hash].js',
-        entryFileNames: '[name]-[hash].js',
-        assetFileNames: '[name]-[hash][extname]',
-        globals: {
-          vue: "Vue",
-          "vue-router": "VueRouter",
-          "vue-i18n": "VueI18n",
-          "vee-validate": "VeeValidate",
-          moment: "moment",
-          "lodash-es": "_",
-          "@vueuse/core": "VueUse",
-          "@vc-shell/framework": "VcShellFramework",
-        },
-      },
-      external: [
-        /node_modules/,
-        "@vc-shell/framework",
-        "vue",
-        "vue-router",
-        "vee-validate",
-        "vue-i18n",
-        "moment",
-        "lodash-es",
-        "@vueuse/core",
-      ],
     },
   },
-  plugins: [vue()],
+  compatibility: {
+    framework: "^1.1.0",
+  },
 });

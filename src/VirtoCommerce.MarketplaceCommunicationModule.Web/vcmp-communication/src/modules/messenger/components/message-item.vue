@@ -22,7 +22,7 @@
           <VcIcon
             v-else
             class="message-item__avatar"
-            icon="fas fa-user-circle"
+            icon="material-account_circle"
           />
           <div class="message-item__author-info-wrapper">
             <div class="message-item__author-row">
@@ -64,7 +64,7 @@
           ></div>
           <VcButton
             text
-            :icon="isExpanded ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"
+            :icon="isExpanded ? 'material-keyboard_arrow_up' : 'material-keyboard_arrow_down'"
             class="message-item__expand-button"
             @click="toggleExpand"
           >
@@ -108,7 +108,7 @@
         <div class="message-item__actions">
           <VcButton
             small
-            icon="fas fa-reply"
+            icon="material-reply"
             class="message-item__reply-button"
             @click="showReplyForm"
           >
@@ -117,7 +117,7 @@
           <VcButton
             v-if="canManageMessage"
             small
-            icon="fas fa-edit"
+            icon="material-edit"
             class="message-item__edit-button"
             @click="showEditForm"
           >
@@ -126,7 +126,7 @@
           <VcButton
             v-if="canManageMessage"
             small
-            icon="fas fa-trash"
+            icon="material-delete"
             class="message-item__delete-button"
             @click="handleDelete"
           >
@@ -136,7 +136,7 @@
         <VcButton
           v-if="message.answersCount && message.answersCount > 0"
           small
-          :icon="isRepliesExpanded ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"
+          :icon="isRepliesExpanded ? 'material-keyboard_arrow_up' : 'material-keyboard_arrow_down'"
           class="message-item__toggle-replies"
           @click="toggleReplies"
         >

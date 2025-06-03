@@ -96,7 +96,7 @@
             class="tw-w-full tw-h-full tw-box-border tw-flex tw-flex-col tw-items-center tw-justify-center"
           >
             <VcIcon
-              icon="fas fa-comment"
+              icon="material-chat_bubble"
               class="tw-text-[color:var(--empty-communication)]"
               size="xxxl"
             />

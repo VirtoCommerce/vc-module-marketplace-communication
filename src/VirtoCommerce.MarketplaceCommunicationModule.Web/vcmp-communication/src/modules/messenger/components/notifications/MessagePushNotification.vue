@@ -2,7 +2,7 @@
   <NotificationTemplate
     :notification="notification"
     color="var(--success-400)"
-    icon="fas fa-envelope"
+    icon="material-mail"
     :title="notification.title ?? ''"
     @click="openMessageBlade"
   >

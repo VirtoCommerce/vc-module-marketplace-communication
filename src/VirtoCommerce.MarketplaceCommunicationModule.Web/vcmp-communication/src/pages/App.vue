@@ -21,7 +21,7 @@ const version = import.meta.env.PACKAGE_VERSION;
 const { isAuthenticated } = useUser();
 const route = useRoute();
 const seller = ref<{ id: string; name: string }>();
-const updateSignalRCreator = inject(updateSignalRCreatorSymbol);
+const updateSignalRCreator = inject(updateSignalRCreatorSymbol) as (id: string) => void;
 
 onMounted(async () => {
   try {
@@ -55,5 +55,5 @@ provide(
 </script>
 
 <style lang="scss">
-@import "./../styles/index.scss";
+@use "./../styles/index.scss";
 </style>

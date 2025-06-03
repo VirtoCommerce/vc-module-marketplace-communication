@@ -35,7 +35,7 @@
             v-if="uploadError"
             class="new-message-form__upload-error"
           >
-            <i class="fas fa-exclamation-circle new-message-form__upload-error-icon" />
+            <i class="material-error new-message-form__upload-error-icon" />
             <span class="new-message-form__upload-error-text">
               {{ uploadError }}
             </span>
@@ -55,7 +55,7 @@
               :title="$t('MESSENGER.ATTACH_FILES')"
               icon-size="m"
               icon-class="new-message-form__attach-button-icon"
-              :icon="isUploading ? 'fas fa-spinner fa-spin' : 'fas fa-paperclip'"
+              :icon="isUploading ? 'material-sync' : 'material-attach_file'"
               class="new-message-form__attach-button"
               :disabled="isUploading"
               @click="openFileSelect"
@@ -77,7 +77,7 @@
                     <VcButton
                       type="button"
                       text
-                      icon="fas fa-times"
+                      icon="material-close"
                       icon-size="l"
                       class="new-message-form__asset-remove"
                       :disabled="isUploading"
@@ -89,7 +89,7 @@
                   v-if="isUploading"
                   class="new-message-form__asset-item new-message-form__asset-item--loading"
                 >
-                  <i class="fas fa-spinner fa-spin tw-mr-1"></i>
+                  <i class="material-sync tw-animate-spin"></i>
                   <span class="new-message-form__asset-name">
                     {{ $t("MESSENGER.UPLOADING_FILES") }}
                   </span>
@@ -111,7 +111,7 @@
         <VcButton
           type="button"
           small
-          icon="fas fa-times"
+          icon="material-close"
           class="new-message-form__cancel"
           @click="cancel"
         >
@@ -119,7 +119,7 @@
         </VcButton>
         <VcButton
           type="submit"
-          icon="fas fa-paper-plane"
+          icon="material-send"
           :disabled="!content.trim() || !isModified || assetsLoading"
           small
           class="new-message-form__submit"
@@ -506,7 +506,7 @@ const openFileSelect = () => {
   }
 
   &__attach-button-icon {
-    @apply tw-text-[color:var(--new-message-form-attach-button-icon-color)];
+    @apply tw-text-[color:var(--new-message-form-attach-button-icon-color)] tw-animate-spin;
   }
 
   &__submit {
@@ -553,7 +553,7 @@ const openFileSelect = () => {
   &__asset-name {
     @apply tw-max-w-full tw-truncate;
     @apply tw-text-sm tw-font-medium;
-    @apply tw-text-[color:var(--base-text-color)];
+    @apply tw-text-[color:var(--base-text-color)] tw-ml-1;
   }
 
   &__asset-size {

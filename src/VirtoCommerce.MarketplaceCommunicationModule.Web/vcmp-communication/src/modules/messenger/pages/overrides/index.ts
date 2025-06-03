@@ -1,4 +1,4 @@
-import { OverridesSchema } from "@vc-shell/framework";
+import { ControlSchema, OverridesSchema } from "@vc-shell/framework";
 
 export const overrides: OverridesSchema = {
   upsert: [
@@ -6,19 +6,19 @@ export const overrides: OverridesSchema = {
       id: "Product",
       path: "content.productWidgets.children",
       index: 4,
-      value: "MessageWidget",
+      value: { id: "MessageWidget", visibility: { method: "commonWidgetVisibility" } } as unknown as ControlSchema,
     },
     {
       id: "OrderDetails",
       path: "content.orderWidgets.children",
       index: 1,
-      value: "MessageWidget",
+      value: { id: "MessageWidget", visibility: { method: "commonWidgetVisibility" } } as unknown as ControlSchema,
     },
     {
       id: "Offer",
       path: "content.offerWidgets.children",
       index: 1,
-      value: "MessageWidget",
+      value: { id: "MessageWidget", visibility: { method: "commonWidgetVisibility" } } as unknown as ControlSchema,
     },
   ],
 };

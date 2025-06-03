@@ -9,6 +9,7 @@
     @expand="$emit('expand:blade')"
     @collapse="$emit('collapse:blade')"
   >
+    <!-- @vue-generic {Conversation}-->
     <VcTable
       state-key="conversations"
       :items="conversations"
@@ -35,7 +36,7 @@
         <VcIcon
           v-else
           class="conversations__avatar"
-          icon="fas fa-comments"
+          icon="material-forum"
         />
       </template>
       <template #item_name="{ item }">
@@ -90,7 +91,7 @@
       <template #empty>
         <div class="tw-w-full tw-h-full tw-box-border tw-flex tw-flex-col tw-items-center tw-justify-center">
           <VcIcon
-            icon="fas fa-comments"
+            icon="material-forum"
             class="tw-text-[color:var(--conversations-empty-grid-icon-color)]"
             size="xxxl"
           />
@@ -103,7 +104,7 @@
       <template #notfound>
         <div class="tw-w-full tw-h-full tw-box-border tw-flex tw-flex-col tw-items-center tw-justify-center">
           <VcIcon
-            icon="fas fa-comments"
+            icon="material-forum"
             class="tw-text-[color:var(--conversations-empty-grid-icon-color)]"
             size="xxxl"
           />
@@ -163,7 +164,7 @@ defineOptions({
   isWorkspace: true,
   menuItem: {
     title: "ALL_MESSAGES.MENU_TITLE",
-    icon: "fas fa-comment",
+    icon: "material-chat_bubble",
     priority: 5,
   },
 });
@@ -239,13 +240,13 @@ const onSearchList = _.debounce(async (keyword: string | undefined) => {
 const bladeToolbar = computed<IBladeToolbar[]>(() => [
   {
     id: "refresh",
-    icon: "fas fa-sync-alt",
+    icon: "material-refresh",
     title: t("ALL_MESSAGES.TOOLBAR.REFRESH"),
     clickHandler: reload,
   },
   {
     id: "operator-chat",
-    icon: "fas fa-comment",
+    icon: "material-chat_bubble",
     title: t("ALL_MESSAGES.TOOLBAR.OPERATOR_CHAT"),
     clickHandler: async () => {
       try {

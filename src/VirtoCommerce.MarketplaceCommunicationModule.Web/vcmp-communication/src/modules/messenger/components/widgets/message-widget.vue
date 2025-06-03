@@ -1,9 +1,8 @@
 <template>
   <VcWidget
-    v-if="modelValue.item?.id"
     v-loading:500="loading"
     :title="$t('MESSENGER.WIDGET.TITLE')"
-    icon="fas fa-comment"
+    icon="material-chat_bubble"
     :value="messageCount"
     @click="openMessageBlade"
   >
