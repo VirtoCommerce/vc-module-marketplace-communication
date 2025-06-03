@@ -12,7 +12,7 @@ export const overrides: OverridesSchema = {
       id: "OrderDetails",
       path: "content.orderWidgets.children",
       index: 1,
-      value: { id: "MessageWidget", visibility: { method: "commonWidgetVisibility" } } as unknown as ControlSchema,
+      value: "MessageWidget",
     },
     {
       id: "Offer",
