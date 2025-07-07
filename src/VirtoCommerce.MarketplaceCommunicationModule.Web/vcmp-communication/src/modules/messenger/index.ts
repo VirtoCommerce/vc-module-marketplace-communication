@@ -1,11 +1,12 @@
 import * as components from "./components";
 import * as pages from "./pages";
 import * as notifications from "./components/notifications";
-import { createDynamicAppModule, createAppModule } from "@vc-shell/framework";
+import { createDynamicAppModule, createAppModule, registerExternalWidget, IBladeInstance } from "@vc-shell/framework";
 import { overrides } from "./pages/overrides";
 import * as locales from "./locales";
 import { Router } from "vue-router";
-import { App } from "vue";
+import { App, markRaw } from "vue";
+import MessageWidgetNew from "./components/widgets/message-widgetNew.vue";
 
 // Declare globally
 declare module "@vue/runtime-core" {
@@ -15,6 +16,19 @@ declare module "@vue/runtime-core" {
 }
 
 export default (() => {
+  registerExternalWidget({
+    id: "MessageWidget",
+    component: markRaw(MessageWidgetNew),
+    targetBlades: ["ProductDetails"],
+    config: {
+      requiredData: ["id", "objectType"],
+    },
+    isVisible: (bladeInstance?: IBladeInstance) => {
+      return !!bladeInstance?.param;
+    },
+    updateFunctionName: "updateActiveWidgetCount",
+  });
+
   const dynamic = createDynamicAppModule({
     overrides,
     locales,
