@@ -1,6 +1,6 @@
 <template>
   <VcBlade
-    :title="$t('MESSENGER.TITLE')"
+    :title="bladeTitle"
     :closable="true"
     :expanded="expanded"
     width="50%"
@@ -12,18 +12,18 @@
   >
     <div class="messenger__content">
       <div
-        v-if="options?.entityId && options?.entityType && options?.conversation"
+        v-if="options?.entityId && options?.entityType && conversation"
         class="messenger__header"
       >
         <div class="messenger__header-content">
           <VcImage
             size="m"
-            :src="options.conversation.iconUrl"
+            :src="conversation.iconUrl"
           />
           <VcLink
             class="tw-text-lg tw-font-medium"
             @click="goToEntity"
-            >{{ options.conversation.name }}</VcLink
+            >{{ conversation.name }}</VcLink
           >
         </div>
       </div>
@@ -140,7 +140,7 @@
 
 <script setup lang="ts">
 import { computed, ref, provide, onMounted, nextTick, inject, Ref } from "vue";
-import { useMessages } from "../composables";
+import { useMessenger } from "../composables";
 import NewMessageForm from "../components/new-message-form.vue";
 import { IParentCallArgs, useBladeNavigation, useLoading } from "@vc-shell/framework";
 import {
@@ -199,318 +199,290 @@ const {
   sendMessageLoading,
   operator,
   getSeller,
-  seller,
   getThread,
+  seller,
   loadedThread,
-  createConversation,
   getConversation,
   getSettings,
   settings,
   getSettingsLoading,
   getOperatorLoading,
-} = useMessages();
+} = useMessenger();
 
 const { t } = useI18n();
-const rootMessages = computed(() => getRootMessages());
 
+const targetMessageId = computed(() => props.param || null);
+const bladeTitle = computed(() => t("MESSENGER.TITLE"));
 const { openBlade, resolveBladeByName } = useBladeNavigation();
 
-const targetMessageId = ref<string | null>(null);
-
-const threadsInner = ref<HTMLElement | null>(null);
-const previousLoader = ref<HTMLElement | null>(null);
-const nextLoader = ref<HTMLElement | null>(null);
-
 const currentSeller = inject("currentSeller") as Ref<{ id: string; name: string }>;
+const conversation = ref<Conversation>();
 
-const activeForm = ref<{ type: "main" | "reply" | "edit" | null; id: string | null }>({ type: null, id: null });
+provide("entityId", props.options?.entityId || null);
+provide("entityType", props.options?.entityType || null);
+provide("sellerId", currentSeller.value.id);
+provide("sellerName", currentSeller.value.name);
+provide("updateMessage", updateMessage);
+provide("removeMessage", removeMessage);
+provide("seller", seller);
+provide("conversation", conversation);
+provide("settings", settings);
+
+const isProgrammaticScroll = ref(false);
+provide("isProgrammaticScroll", isProgrammaticScroll);
+
+const initLoading = ref(false);
+
+const activeForm = ref<{ type: "main" | "reply" | "edit" | null; id: string | null }>({
+  type: null,
+  id: null,
+});
 
 const setActiveForm = (formType: "main" | "reply" | "edit" | null, formId: string | null) => {
-  activeForm.value = { type: formType, id: formId };
-};
-
-const expandMainForm = () => {
-  setActiveForm("main", "main");
+  activeForm.value.type = formType;
+  activeForm.value.id = formId;
 };
 
 provide("activeForm", activeForm);
 provide("setActiveForm", setActiveForm);
-provide("entityType", props.options?.entityType);
-provide("entityId", props.options?.entityId);
-provide("updateMessage", update);
-provide("removeMessage", remove);
-provide("sellerId", currentSeller?.value?.id);
-provide("sellerName", currentSeller?.value?.name);
-provide("operator", operator);
-provide("seller", seller);
-provide("conversation", props.options?.conversation);
-provide("settings", settings);
 
-function expandAllReplies() {
-  emit("parent:call", {
-    method: "expandAllReplies",
-  });
-}
+const threadsInner = ref<HTMLElement | null>(null);
 
-function updateParent() {
-  emit("parent:call", {
-    method: "refresh",
-  });
-}
+const isLoading = useLoading(searchMessagesLoading, getSettingsLoading, getOperatorLoading, initLoading);
 
-function updateParentThreadMessage(message: Message) {
-  loadedThread.value = loadedThread.value?.map((m) => (m.id === message.id ? message : m));
-}
+const rootMessages = computed(() => {
+  if (messages.value?.length) {
+    return getRootMessages();
+  }
+  return [];
+});
 
-function removeParentThreadMessage(message: Message) {
-  loadedThread.value = loadedThread.value?.filter((m) => m.id !== message.id);
-}
+const updateParent = async () => {
+  await searchRootMessages();
+};
 
-function markThreadMessageAsRead(args: { messageId: string; recipientId: string }) {
-  loadedThread.value = loadedThread.value?.map((m) =>
-    m.id === args.messageId
-      ? new Message({
-          ...m,
-          recipients: m.recipients?.map((r) =>
-            r.recipientId === args.recipientId ? new MessageRecipient({ ...r, readStatus: "Read" }) : r,
-          ),
-        })
-      : m,
-  );
-}
-
-async function markMessageAsRead(args: { messageId: string; recipientId: string }) {
-  messages.value = messages.value?.map((m) =>
-    m.id === args.messageId
-      ? new Message({
-          ...m,
-          recipients: m.recipients?.map((r) =>
-            r.recipientId === args.recipientId ? new MessageRecipient({ ...r, readStatus: "Read" }) : r,
-          ),
-        })
-      : m,
-  );
-}
-
-async function updateParentMessage(message: Message) {
-  messages.value = messages.value?.map((m) => (m.id === message.id ? message : m));
-
-  updateParent();
-}
-
-async function removeParentMessage(message: Message) {
-  messages.value = messages.value?.filter((m) => m.id !== message.id);
-
-  updateParent();
-}
-
-async function remove(args: { messageIds: string[]; withReplies: boolean }) {
-  await removeMessage(args);
-
-  updateParent();
-}
-
-async function update(args: { content: string; messageId: string; attachments: MessageAttachment[] }) {
-  await updateMessage(args);
-
-  updateParent();
-}
-
-// Add new ref for tracking programmatic scroll
-const isProgrammaticScroll = ref(false);
-
-async function sendRootMessage(args: {
+const sendRootMessage = async (args: {
   content: string;
   replyTo: string | undefined;
   entityId: string;
   entityType: string;
   attachments: MessageAttachment[];
-}) {
-  try {
-    // create conversation if it doesn't exist
-    const conversation = await createConversation({
-      sellerId: currentSeller.value?.id,
-      sellerName: currentSeller.value?.name,
-      userIds: [operator.value?.id ?? ""],
-      iconUrl: props.options?.conversation?.iconUrl,
-      entityId: props.options?.entityId,
-      entityType: props.options?.entityType,
-    });
-
-    const newMessage = await sendMessage({
-      ...args,
-      sellerId: currentSeller.value?.id,
-      sellerName: currentSeller.value?.name,
-      rootsOnly: true,
-      conversationId: conversation?.id ?? undefined,
-    });
-
-    updateParent();
-
-    // Scroll to new message after it's rendered
-    if (newMessage) {
-      nextTick(() => {
-        const messageElement = threadsInner.value?.querySelector(`[data-message-id="${newMessage.id}"]`);
-        if (messageElement) {
-          isProgrammaticScroll.value = true; // Set flag before scroll
-          messageElement.scrollIntoView({ behavior: "smooth", block: "center" });
-
-          // Reset flag after animation completes (approximately 300ms for smooth scroll)
-          setTimeout(() => {
-            isProgrammaticScroll.value = false;
-          }, 1000); // Using 1000ms to ensure scroll completes
-        }
-      });
-    }
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-async function search(query?: ISearchMessagesQuery) {
-  let conversationId = props.options?.conversation?.id ?? undefined;
-
-  if (!props.options?.conversation?.id && props.options?.entityId && props.options?.entityType) {
-    const conversation = await getConversation(props.options?.entityId, props.options?.entityType);
-    conversationId = conversation.id;
-  }
-
-  await searchMessages({
-    ...(query ?? {}),
-    entityId: props.options?.entityId,
-    entityType: props.options?.entityType,
+}) => {
+  const newMessage = await sendMessage({
+    ...args,
+    sellerId: currentSeller.value.id,
+    sellerName: currentSeller.value.name,
+    conversationId: conversation.value?.id,
     rootsOnly: true,
-    responseGroup: "Full",
-    conversationId: conversationId,
   });
-}
 
-onMounted(async () => {
-  await getOperator();
-  await getSettings();
-  if (props.param) {
-    await getThread(props.param);
+  // After sending a message, scroll to it
+  if (newMessage) {
+    nextTick(() => {
+      const messageElement = threadsInner.value?.querySelector(`[data-message-id="${newMessage.id}"]`);
+      if (messageElement) {
+        isProgrammaticScroll.value = true;
+        messageElement.scrollIntoView({ behavior: "smooth", block: "center" });
 
-    return;
-  }
-
-  await search();
-
-  if (props.options?.entityId && props.options?.entityType) {
-    await getSeller({
-      entityId: props.options?.entityId,
-      entityType: props.options?.entityType,
+        setTimeout(() => {
+          isProgrammaticScroll.value = false;
+        }, 1000);
+      }
     });
   }
-});
+};
+
+const expandMainForm = () => {
+  activeForm.value.type = "main";
+};
+
+const updateParentMessage = async (message: Message) => {
+  messages.value = messages.value?.map((m) => (m.id === message.id ? message : m));
+};
+
+const removeParentMessage = async (message: Message) => {
+  messages.value = messages.value?.filter((m) => m.id !== message.id);
+};
+
+const updateParentThreadMessage = async (message: Message) => {
+  loadedThread.value = loadedThread.value?.map((m) => (m.id === message.id ? message : m));
+};
+
+const removeParentThreadMessage = async (message: Message) => {
+  loadedThread.value = loadedThread.value?.filter((m) => m.id !== message.id);
+};
+
+const markMessageAsRead = (args: { messageId: string; recipientId: string }) => {
+  messages.value = messages.value?.map((m) =>
+    m.id === args.messageId
+      ? new Message({
+          ...m,
+          recipients: m.recipients?.map((r) =>
+            r.recipientId === args.recipientId
+              ? new MessageRecipient({ ...r, readStatus: "Read", readTimestamp: new Date() })
+              : r,
+          ),
+        })
+      : m,
+  );
+};
+
+const markThreadMessageAsRead = (args: { messageId: string; recipientId: string }) => {
+  loadedThread.value = loadedThread.value?.map((m) =>
+    m.id === args.messageId
+      ? new Message({
+          ...m,
+          recipients: m.recipients?.map((r) =>
+            r.recipientId === args.recipientId
+              ? new MessageRecipient({ ...r, readStatus: "Read", readTimestamp: new Date() })
+              : r,
+          ),
+        })
+      : m,
+  );
+};
+
+const previousLoader = ref<HTMLElement | null>(null);
+const nextLoader = ref<HTMLElement | null>(null);
 
 const { previousLoading, nextLoading } = useInfiniteScroll({
   containerRef: threadsInner,
-  previousLoader,
-  nextLoader,
-  onPreviousIntersection: () => loadPreviousMessages({ rootsOnly: true }),
-  onNextIntersection: () => loadMoreMessages({ ...searchQuery.value, rootsOnly: true }),
+  previousLoader: previousLoader,
+  nextLoader: nextLoader,
+  onPreviousIntersection: () => loadPreviousMessages(),
+  onNextIntersection: () => loadMoreMessages({ ...searchQuery.value }),
   isProgrammaticScroll,
   hasOlderItems: hasOlderMessages,
   hasNewerItems: hasNewerMessages,
   isLoading: searchMessagesLoading,
 });
 
-function goToEntity() {
+async function searchRootMessages() {
+  await searchMessages({
+    entityId: props.options?.entityId,
+    entityType: props.options?.entityType,
+    rootsOnly: true,
+    responseGroup: "Full",
+    conversationId: conversation.value?.id,
+  });
+}
+
+async function initialize() {
+  try {
+    initLoading.value = true;
+  if (props.options?.conversation) {
+    conversation.value = props.options.conversation;
+  } else if (props.options?.entityId && props.options?.entityType) {
+    conversation.value = await getConversation(props.options.entityId, props.options.entityType);
+  }
+
+  await getOperator();
   if (props.options?.entityId && props.options?.entityType) {
-    openBlade({
-      blade: resolveBladeByName(EntityToBlade[props.options.entityType as keyof typeof EntityToBlade]),
-      param: props.options.entityId,
+    await getSeller({
+      entityId: props.options?.entityId,
+      entityType: props.options?.entityType,
     });
+  }
+  await getSettings();
+
+  if (props.param) {
+    await getThread(props.param);
+    return;
+    }
+    await searchRootMessages();
+  } catch (error) {
+    console.error("Error initializing messenger:", error);
+  } finally {
+    initLoading.value = false;
   }
 }
 
-const isLoading = useLoading(getOperatorLoading, getSettingsLoading, searchMessagesLoading);
+onMounted(async () => {
+  await initialize();
+});
+
+const expandAllReplies = async () => {
+  await searchMessages({
+    entityId: props.options?.entityId,
+    entityType: props.options?.entityType,
+    responseGroup: "Full",
+    conversationId: conversation.value?.id,
+  });
+};
+
+function goToEntity() {
+  if (props.options?.entityId && props.options?.entityType) {
+    openBlade({
+      blade: { name: EntityToBlade[props.options.entityType as keyof typeof EntityToBlade] },
+      param: props.options.entityId,
+    });
+  }
+};
 
 defineExpose({
-  title: computed(() => t("MESSENGER.TITLE")),
+  title: bladeTitle,
 });
+
 </script>
 
 <style lang="scss">
 :root {
-  --messenger-form-border-color: var(--base-border-color, var(--neutrals-200));
-  --messenger-header-bg-color: var(--neutrals-50);
+  --empty-communication: var(--empty-grid-icon-color, var(--secondary-500));
 }
 
 .messenger {
+  @apply tw-w-full;
+  @apply tw-flex tw-flex-col tw-h-full;
+
+  .vc-blade__content {
+    @apply tw-p-0;
+  }
+
   &--mobile {
-    @apply tw-w-full tw-h-full;
-  }
-
-  &__header {
-    @apply tw-flex tw-items-center tw-gap-2 tw-px-4 tw-pt-4 tw-pb-2;
-  }
-
-  &__header-content {
-    @apply tw-p-2 tw-bg-[--messenger-header-bg-color] tw-border tw-border-solid tw-border-[--messenger-form-border-color] tw-flex tw-items-center tw-gap-3 tw-flex-auto;
+    .messenger__threads-container {
+      @apply tw-p-2;
+    }
+    .messenger__form-container {
+      @apply tw-px-2;
+    }
   }
 
   &__content {
     @apply tw-flex tw-flex-col tw-h-full;
+    @apply tw-overflow-y-auto;
+    @apply tw-bg-[color:var(--additional-50)];
   }
 
   &__threads-container {
-    @apply tw-flex-grow tw-overflow-y-auto tw-flex tw-flex-col tw-p-4 tw-gap-4;
-    scroll-behavior: smooth;
-
-    // Prevent iOS bounce scroll
-    overscroll-behavior: contain;
-  }
-
-  &__threads {
-    @apply tw-flex tw-flex-col tw-gap-4;
-    // Add padding to ensure loaders are visible
-    @apply tw-py-4;
-  }
-
-  &__threads-inner {
-    @apply tw-flex tw-flex-col tw-gap-2;
+    @apply tw-flex-1;
+    @apply tw-p-6;
+    @apply tw-overflow-y-auto;
+    @apply tw-flex tw-flex-col tw-gap-3;
   }
 
   &__form-container {
-    @apply tw-flex-shrink-0;
+    @apply tw-p-6 tw-pt-3;
+    @apply tw-bg-[color:var(--blade-background-color)];
+    @apply tw-border-t tw-border-solid tw-border-[color:var(--blade-border-color)];
   }
 
   &__new-message-form {
-    @apply tw-p-4 tw-border-t tw-border-t-[--messenger-form-border-color];
-  }
-
-  &--mobile &__threads {
-    @apply tw-gap-2;
-  }
-
-  &--mobile &__new-message-form {
-    @apply tw-p-2;
+    @apply tw-w-full;
   }
 
   &__skeleton {
-    @apply tw-mb-2;
-
-    &:last-child {
-      @apply tw-mb-0;
-    }
+    @apply tw-mb-4;
   }
 
-  &__load-more-button {
-    @apply tw-mt-2 tw-text-sm tw-text-[color:var(--primary-color)];
+  &__header {
+    @apply tw-sticky tw-top-0 tw-z-10;
+    @apply tw-p-4;
+    @apply tw-bg-[color:var(--blade-background-color)];
+    @apply tw-shadow-sm;
   }
 
-  &__load-previous-button {
-    @apply tw-mb-2 tw-text-sm tw-text-[color:var(--primary-color)];
-  }
-
-  &__loader-container {
-    @apply tw-min-h-[60px] tw-flex tw-items-center tw-justify-center;
-  }
-
-  &__loader-content {
-    @apply tw-w-full;
+  &__header-content {
+    @apply tw-flex tw-items-center tw-gap-2;
   }
 }
 </style>

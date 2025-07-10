@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { useMessages } from "../../composables";
+import { useMessenger } from "../../composables";
 import { loading as vLoading, useBladeNavigation, VcWidget } from "@vc-shell/framework";
 
 export interface Props {
@@ -21,7 +21,7 @@ export interface Props {
 
 const props = defineProps<Props>();
 
-const { getUnreadCount } = useMessages();
+const { getUnreadCount } = useMessenger();
 const { openBlade, resolveBladeByName } = useBladeNavigation();
 
 const messageCount = ref(0);

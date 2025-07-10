@@ -506,7 +506,7 @@ const openFileSelect = () => {
   }
 
   &__attach-button-icon {
-    @apply tw-text-[color:var(--new-message-form-attach-button-icon-color)] tw-animate-spin;
+    @apply tw-text-[color:var(--new-message-form-attach-button-icon-color)];
   }
 
   &__submit {

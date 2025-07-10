@@ -120,7 +120,7 @@
 
 <script setup lang="ts">
 import { computed, ComputedRef, inject, onMounted, Ref, ref, watch } from "vue";
-import { useConversationList, useMessages } from "../composables";
+import { useConversationList, useMessenger } from "../composables";
 import {
   IBladeToolbar,
   IParentCallArgs,
@@ -183,7 +183,7 @@ const selectedConversation = ref<Conversation | null | undefined>(null) as Ref<C
 
 const { conversations, loading, getConversations, totalCount, pages, currentPage, searchQuery } = useConversationList();
 
-const { createConversation, getOperator, operator } = useMessages();
+const { createConversation, getOperator, operator } = useMessenger();
 
 const currentSeller = inject<ComputedRef<{ id: string; name: string }>>("currentSeller");
 const isReady = ref(false);

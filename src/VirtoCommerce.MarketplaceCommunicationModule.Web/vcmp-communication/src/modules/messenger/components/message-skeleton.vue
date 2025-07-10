@@ -22,7 +22,7 @@
   --skeleton-bg: var(--additional-50);
 }
 .message-skeleton {
-  @apply tw-p-4 tw-bg-[var(--skeleton-bg)] tw-rounded-lg tw-border tw-border-[color:var(--base-border-color)];
+  @apply tw-p-4 tw-bg-[var(--skeleton-bg)] tw-rounded-lg tw-border tw-border-[color:var(--neutrals-200)];
 
   @keyframes shimmer {
     0% {

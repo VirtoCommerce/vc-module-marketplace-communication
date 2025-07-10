@@ -120,7 +120,7 @@ import {
   MessageAttachment,
   MessageRecipient,
 } from "@vcmp-communication/api/marketplacecommunication";
-import { useMessages } from "../composables/useMessages";
+import { useMessenger } from "../composables";
 import MessageSkeleton from "./message-skeleton.vue";
 import { useLoading } from "@vc-shell/framework";
 import { useInfiniteScroll } from "../composables";
@@ -157,7 +157,7 @@ const {
   loadPreviousMessages,
   updateMessageLoading,
   markMessageAsRead,
-} = useMessages();
+} = useMessenger();
 
 const messageTreeRef = ref<HTMLElement | null>(null);
 const entityId = inject("entityId") as string;
