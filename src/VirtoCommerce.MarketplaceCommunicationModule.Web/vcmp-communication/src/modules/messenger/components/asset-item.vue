@@ -113,7 +113,7 @@ const openFileBindings = computed(() => {
   &__name {
     @apply tw-max-w-[180px] tw-truncate;
     @apply tw-text-sm;
-    @apply tw-text-[color:var(--base-text-color)];
+    @apply tw-text-[color:var(--neutrals-950)];
   }
 
   &__size {

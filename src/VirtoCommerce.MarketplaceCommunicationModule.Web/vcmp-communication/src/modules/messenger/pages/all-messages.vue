@@ -354,7 +354,7 @@ defineExpose({
   --conversations-avatar-size: 42px;
   --conversations-author-color: var(--neutrals-400);
   --conversations-date-color: var(--neutrals-500);
-  --conversations-empty-grid-icon-color: var(--empty-grid-icon-color, var(--secondary-500));
+  --conversations-empty-grid-icon-color: var(--secondary-500, var(--secondary-500));
 }
 
 .conversations {
@@ -417,7 +417,7 @@ defineExpose({
   }
 
   &__author {
-    @apply tw-font-semibold tw-text-sm tw-text-[color:var(--base-text-color)];
+    @apply tw-font-semibold tw-text-sm tw-text-[color:var(--neutrals-950)];
   }
 
   &__date {

@@ -427,7 +427,7 @@ defineExpose({
 
 <style lang="scss">
 :root {
-  --empty-communication: var(--empty-grid-icon-color, var(--secondary-500));
+  --empty-communication: var(--secondary-500, var(--secondary-500));
 }
 
 .messenger {

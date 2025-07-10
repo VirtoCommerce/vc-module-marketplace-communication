@@ -472,7 +472,7 @@ watch(
   }
 
   &__author {
-    @apply tw-font-semibold tw-text-sm tw-text-[color:var(--base-text-color)];
+    @apply tw-font-semibold tw-text-sm tw-text-[color:var(--neutrals-950)];
   }
 
   &__author-info-wrapper {

@@ -553,7 +553,7 @@ const openFileSelect = () => {
   &__asset-name {
     @apply tw-max-w-full tw-truncate;
     @apply tw-text-sm tw-font-medium;
-    @apply tw-text-[color:var(--base-text-color)] tw-ml-1;
+    @apply tw-text-[color:var(--neutrals-950)] tw-ml-1;
   }
 
   &__asset-size {
