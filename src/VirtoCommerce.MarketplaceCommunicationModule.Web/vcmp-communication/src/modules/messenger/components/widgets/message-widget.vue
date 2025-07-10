@@ -15,12 +15,8 @@ import { useMessages } from "../../composables";
 import { loading as vLoading, useBladeNavigation, VcWidget } from "@vc-shell/framework";
 
 export interface Props {
-  modelValue: {
-    item: {
-      id: string;
-      objectType: string;
-    };
-  };
+  id: string;
+  objectType: string;
 }
 
 const props = defineProps<Props>();
@@ -35,8 +31,8 @@ const openMessageBlade = () => {
   openBlade({
     blade: resolveBladeByName("Messenger"),
     options: {
-      entityType: props.modelValue?.item?.objectType,
-      entityId: props.modelValue?.item?.id,
+      entityType: props.objectType,
+      entityId: props.id,
     },
   });
 };
@@ -45,8 +41,8 @@ const populateCounter = async () => {
   try {
     loading.value = true;
     messageCount.value = await getUnreadCount({
-      entityId: props.modelValue?.item?.id,
-      entityType: props.modelValue?.item?.objectType,
+      entityId: props.id,
+      entityType: props.objectType,
     });
   } catch (error) {
     console.error("Error getting unread count:", error);
@@ -56,7 +52,7 @@ const populateCounter = async () => {
 };
 
 onMounted(async () => {
-  if (props.modelValue?.item?.id) {
+  if (props.id) {
     await populateCounter();
   }
 });

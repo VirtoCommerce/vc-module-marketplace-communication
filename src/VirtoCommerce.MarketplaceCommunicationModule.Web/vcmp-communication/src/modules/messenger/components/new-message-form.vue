@@ -89,7 +89,7 @@
                   v-if="isUploading"
                   class="new-message-form__asset-item new-message-form__asset-item--loading"
                 >
-                  <i class="material-sync tw-animate-spin"></i>
+                  <VcIcon icon="material-sync" />
                   <span class="new-message-form__asset-name">
                     {{ $t("MESSENGER.UPLOADING_FILES") }}
                   </span>
