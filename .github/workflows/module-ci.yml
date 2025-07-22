@@ -1,4 +1,4 @@
-# v3.200.30
+# v3.800.13
 name: Module CI
 
 on:
@@ -184,7 +184,7 @@ jobs:
   deploy-cloud:
     if: ${{ (github.ref == 'refs/heads/master') || (github.ref == 'refs/heads/dev') }}
     needs: ci
-    uses: VirtoCommerce/.github/.github/workflows/deploy-cloud.yml@v3.800.12
+    uses: VirtoCommerce/.github/.github/workflows/deploy-cloud.yml@v3.800.13
     with:
       releaseSource: module
       moduleId: ${{ needs.ci.outputs.moduleId }}

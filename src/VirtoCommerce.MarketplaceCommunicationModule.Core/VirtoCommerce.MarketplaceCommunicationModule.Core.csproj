@@ -7,8 +7,8 @@
     <SonarQubeTestProject>false</SonarQubeTestProject>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="VirtoCommerce.MarketplaceVendorModule.Core" Version="3.828.0" />
-    <PackageReference Include="VirtoCommerce.CommunicationModule.Core" Version="3.803.0" />
-    <PackageReference Include="VirtoCommerce.Platform.Core" Version="3.883.0" />
+    <PackageReference Include="VirtoCommerce.MarketplaceVendorModule.Core" Version="3.829.0" />
+    <PackageReference Include="VirtoCommerce.CommunicationModule.Core" Version="3.804.0" />
+    <PackageReference Include="VirtoCommerce.Platform.Core" Version="3.897.0" />
   </ItemGroup>
 </Project>
