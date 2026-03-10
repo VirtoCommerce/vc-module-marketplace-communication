@@ -36,7 +36,7 @@
   <frontendModules>
     <frontendModule id="communication-app" path="vcmp-communication/dist">
       <compatibleWith>
-        <dependency id="@vc-shell/framework">[1.1.58,2.0.0)</dependency>
+        <dependency id="@vc-shell/framework">[2.0.0,3.0.0)</dependency>
       </compatibleWith>
     </frontendModule>
   </frontendModules>
