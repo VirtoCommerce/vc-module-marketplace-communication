@@ -1,4 +1,4 @@
-import { getDynamicModuleConfiguration } from "@vc-shell/config-generator";
+import { getDynamicModuleConfiguration } from "@vc-shell/mf-module";
 
 export default getDynamicModuleConfiguration({
   entry: "./src/modules/index.ts",
