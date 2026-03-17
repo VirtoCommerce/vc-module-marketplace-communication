@@ -61,9 +61,8 @@
         <span v-if="isUnread" class="message-item__unread-dot" />
         <span class="message-item__time">{{ formatDate(message.createdDate) }}</span>
       </div>
-    </div>
 
-    <!-- Hover toolbar (desktop only) -->
+      <!-- Hover toolbar (desktop only) -->
       <MessageHoverToolbar
         v-if="!isMobile"
         class="message-item__toolbar"
