@@ -13,8 +13,6 @@
           "write-reply": "Write your reply...",
           "sending": "Sending...",
           "send": "Send",
-          "show-replies": "Show replies ({{count}})",
-          "hide-replies": "Hide replies",
           "loading-previous": "Loading previous messages...",
           "loading-more": "Loading more messages...",
           "user-avatar": "User avatar",
@@ -25,11 +23,12 @@
           "show-less": "Show less",
           "enter-message": "Enter your message...",
           "start-conversation": "Start new conversation...",
-          "show-all-threads": "Show all threads",
           "drop-files": "Drop files here to attach",
           "attach-files": "Attach files",
           "file-already-attached": "File \"{{name}}\" already attached",
-          "file-type-not-allowed": "File \"{{name}}\" type is not allowed"
+          "file-type-not-allowed": "File \"{{name}}\" type is not allowed",
+          "quote-unavailable": "Message unavailable",
+          "message-not-loaded": "Message not loaded"
         },
         "buttons": {
           "reply": "Reply",
