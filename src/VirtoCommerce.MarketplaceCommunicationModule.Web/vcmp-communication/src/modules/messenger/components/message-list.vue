@@ -107,32 +107,41 @@ provide("isProgrammaticScroll", isProgrammaticScroll);
 
 // Auto-scroll to bottom when messages first load or after sending
 const hasScrolledInitially = ref(false);
+let previousMessageCount = 0;
 
 function scrollToBottom() {
+  // Double nextTick ensures DOM is fully rendered after shallowRef update
   nextTick(() => {
-    if (scrollContainer.value) {
-      isProgrammaticScroll.value = true;
-      scrollContainer.value.scrollTop = scrollContainer.value.scrollHeight;
-      setTimeout(() => {
-        isProgrammaticScroll.value = false;
-      }, 100);
-    }
+    nextTick(() => {
+      if (scrollContainer.value) {
+        isProgrammaticScroll.value = true;
+        scrollContainer.value.scrollTop = scrollContainer.value.scrollHeight;
+        setTimeout(() => {
+          isProgrammaticScroll.value = false;
+        }, 100);
+      }
+    });
   });
 }
 
+// Watch the shallowRef itself (not .length) — shallowRef triggers on reference change
 watch(
-  () => store.messages.value.length,
-  (newLen, oldLen) => {
+  () => store.messages.value,
+  (msgs) => {
+    const newLen = msgs.length;
     // Initial load — scroll to bottom to show latest messages
     if (!hasScrolledInitially.value && newLen > 0) {
       hasScrolledInitially.value = true;
       scrollToBottom();
+      previousMessageCount = newLen;
       return;
     }
     // New message added at the end (sent or received) — scroll to bottom
-    if (newLen > oldLen && oldLen > 0) {
+    // But NOT when loading older messages (prepend — count grows but from the top)
+    if (newLen > previousMessageCount && previousMessageCount > 0 && !isProgrammaticScroll.value) {
       scrollToBottom();
     }
+    previousMessageCount = newLen;
   },
 );
 
