@@ -94,6 +94,10 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             }
         };
 
+        $scope.editMessage = function(message) {
+            messageFormsService.openForm('edit-' + message.id);
+        };
+
         $scope.cancelMessage = function() {
             messageFormsService.closeAllForms();
             $scope.mainForm.text = '';
