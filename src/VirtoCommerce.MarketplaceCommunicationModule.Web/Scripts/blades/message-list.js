@@ -173,44 +173,31 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         // Helper function to load messages
         function loadMessages(criteria, reset) {
             blade.isLoading = true;
-            if (blade.exactlyMessageId) {
-                api.getMessage({ messageId: blade.exactlyMessageId, responseGroup: "WithSender" }, function (message) {
-                    if (message) {
-                        blade.messages = [message];
-                        loadUserInfoForMessages(blade.messages);
-                        blade.isLoading = false;
+            api.searchMessages(criteria, function (response) {
+                if (response && response.results) {
+                    if (reset) {
+                        blade.messages = response.results;
+                    } else {
+                        blade.messages = blade.messages.concat(response.results);
                     }
-                    else {
-                        blade.isLoading = false;
-                    }
-                }).$promise.finally(function () {
-                });
-            }
-            else {
-                api.searchMessages(criteria, function (response) {
-                    if (response && response.results) {
-                        if (reset) {
-                            blade.messages = response.results;
-                        } else {
-                            blade.messages = blade.messages.concat(response.results);
-                        }
 
-                        // Store total count
-                        blade.totalCount = response.totalCount;
-                        blade.hasMore = blade.messages.length < response.totalCount;
+                    // Store total count
+                    blade.totalCount = response.totalCount;
+                    blade.hasMore = blade.messages.length < response.totalCount;
 
-                        loadUserInfoForMessages(response.results);
+                    loadUserInfoForMessages(response.results);
+
+                    // If deep-linked to a specific message, scroll to it after render
+                    if (blade.exactlyMessageId) {
+                        $timeout(function() {
+                            scrollToMessage(blade.exactlyMessageId);
+                        }, 300);
                     }
-                }).$promise.finally(function () {
-                    blade.isLoading = false;
-                });
-            }
+                }
+            }).$promise.finally(function () {
+                blade.isLoading = false;
+            });
         }
-
-        blade.showAllThreads = function () {
-            blade.exactlyMessageId = undefined;
-            blade.refresh();
-        };
 
         // Helper function to load user info
         function loadUserInfoForMessages(messages) {
