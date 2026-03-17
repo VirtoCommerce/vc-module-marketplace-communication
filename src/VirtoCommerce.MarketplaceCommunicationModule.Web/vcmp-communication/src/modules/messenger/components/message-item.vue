@@ -70,7 +70,6 @@
       class="message-item__toolbar"
       :can-edit="canManage"
       :can-delete="canManage"
-      hide-open-thread
       @reply="emit('reply', message)"
       @edit="emit('start-edit', message.id!)"
       @delete="handleDelete"
