@@ -18,11 +18,11 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
     return service;
 })
 .controller('virtoCommerce.marketplaceCommunicationModule.messageListController',
-    ['$scope', '$timeout', 'virtoCommerce.marketplaceCommunicationModule.webApi',
+    ['$scope', '$timeout', '$q', 'virtoCommerce.marketplaceCommunicationModule.webApi',
         'platformWebApp.dialogService', 'messageFormsService',
         'virtoCommerce.marketplaceCommunicationModule.entityTypesResolverService',
         'platformWebApp.bladeNavigationService',
-        function ($scope, $timeout, api,
+        function ($scope, $timeout, $q, api,
             dialogService, messageFormsService,
             entityTypesResolverService,
             bladeNavigationService) {
@@ -31,20 +31,10 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         blade.headIcon = 'fas fa-comment';
 
         blade.messages = [];
-        blade.threadsMap = {};
         $scope.selectedMessageId = null;
-        $scope.replyingTo = null;
-        $scope.newReplyText = '';
         $scope.currentUser = null;
         $scope.isLoading = false;
         $scope.searchMessagesLoading = false;
-
-        // Create object to store form data
-        $scope.replyForm = {
-            text: '',
-            replyingTo: null,
-            attachments: []
-        };
 
         // Form for root message
         $scope.mainForm = {
@@ -56,16 +46,12 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         blade.pageSize = 10;
         blade.currentPage = 1;
         blade.hasMore = true;
-        blade.threadPageSize = 10;
-        blade.threadPagesMap = {};
 
         // Add totalCount tracking
         blade.totalCount = 0;
-        blade.threadTotalCounts = {};
 
         // Add flags for reverse scrolling
         blade.hasPrevious = false;
-        blade.threadHasPrevious = {};
 
         // Add flag for programmatic scrolling
         blade.isScrollingToMessage = false;
@@ -73,10 +59,6 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         // Add new loading states
         $scope.isLoadingPrevious = false;  // For top scroll of root messages
         $scope.isLoadingMore = false;      // For bottom scroll of root messages
-        $scope.threadLoadingStates = {     // For child messages
-            previous: {},
-            more: {}
-        };
 
         // memo
         blade.searchCriteria = null;
@@ -88,6 +70,21 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         $scope.mainForm = $scope.mainForm || {};
 
         $scope.communicationSettings = null;
+
+        // Quotes cache for lazy-loaded quoted messages
+        var quotesCache = {};
+
+        // Reply-to state
+        $scope.replyToMessage = null;
+
+        $scope.setReplyTo = function(message) {
+            $scope.replyToMessage = message;
+            messageFormsService.openForm('root');
+        };
+
+        $scope.cancelReply = function() {
+            $scope.replyToMessage = null;
+        };
 
         $scope.expandForm = function() {
             messageFormsService.openForm('root');
@@ -102,24 +99,15 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             $scope.mainForm.text = '';
             $scope.mainForm.attachments = [];
             $scope.isFormExpanded = false;
+            $scope.replyToMessage = null;
             if (!$scope.$$phase) {
                 $scope.$apply();
             }
         };
 
         function initialize() {
-            blade.threadHasMore = {};
-            blade.threadHasPrevious = {};
-            blade.threadPagesMap = {};
-
             api.getCommunicationSettings(function(response) {
                 $scope.communicationSettings = response;
-            });
-
-            // Ensure threadHasPrevious is initialized for all messages
-            blade.messages?.forEach(message => {
-                var threadId = message.threadId || message.id;
-                blade.threadHasPrevious[threadId] = false;
             });
 
             api.getOperator({}, function(operator) {
@@ -182,162 +170,20 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         }
 
 
-        $scope.sendReply = function(parentMessage, replyText, attachments) {
-            if (!replyText || !replyText.trim()) {
-                return;
-            }
-
-            blade.isLoading = true;
-            var sentTime = new Date();
-
-            var command = {
-                message: {
-                    content: replyText.trim(),
-                    entityId: blade.entityId,
-                    entityType: blade.entityType,
-                    conversationId: blade.conversationId,
-                    replyTo: parentMessage.id,
-                    senderId: $scope.currentUser.id,
-                    recipientId: parentMessage.senderId,
-                    attachments: attachments
-                }
-            };
-
-            api.sendMessage(command, function () {
-
-                const searchCriteria = createSearchCriteria({
-                    threadId: parentMessage.id,
-                    take: 10,
-                    sort: 'createdDate:desc'
-                });
-
-                api.searchMessages(searchCriteria, function(response) {
-
-                    if (response && response.results) {
-                        var threadId = parentMessage.id;
-                        blade.threadsMap[threadId] = response.results.reverse();
-                        blade.threadTotalCounts[threadId] = response.totalCount;
-                        blade.threadHasMore[threadId] = false;
-
-                        // Set flag for previous messages
-                        blade.threadHasPrevious[threadId] = response.totalCount > response.results.length;
-
-                        // Update answers count on parent message
-                        parentMessage.answersCount = response.totalCount;
-
-                        // Load user info for new messages
-                        loadUserInfoForMessages(response.results);
-
-                        // Expand replies if not already expanded
-                        if (!parentMessage.isExpanded) {
-                            parentMessage.isExpanded = true;
-                        }
-
-                        // Find and scroll to the new message
-                        var newMessage = response.results.find(function(msg) {
-                            var timeDiff = Math.abs(new Date(msg.createdDate).getTime() - sentTime.getTime());
-                            return msg.content === replyText.trim() && timeDiff <= 10000;
-                        });
-
-                        if (newMessage) {
-                            scrollToMessage(newMessage.id);
-                        }
-                    }
-                }).$promise.finally(function() {
-                    blade.isLoading = false;
-                    blade.parentBlade.refresh(false);
-                });
-            });
-        };
-
-        $scope.toggleReplies = function(message) {
-            message.isExpanded = !message.isExpanded;
-
-            if (message.isExpanded) {
-
-                var threadId = message.id;
-                if (!blade.threadsMap[threadId] || blade.threadsMap[threadId].length === 0) {
-                    loadThreadMessages(threadId);
-                }
-                // Set hasPrevious only if we know there are more messages than currently loaded
-                blade.threadHasPrevious = blade.threadHasPrevious || {};
-                var currentMessages = blade.threadsMap[threadId]?.length || 0;
-                blade.threadHasPrevious[threadId] = false
-            }
-        };
-
-        // Modify loadThreadMessages to properly initialize previous replies state
-        function loadThreadMessages(threadId, reset = true) {
-            $scope.searchMessagesLoading = true;
-
-            const criteria = createSearchCriteria({
-                threadId: threadId,
-                skip: reset ? 0 : (blade.threadPagesMap[threadId] - 1) * blade.threadPageSize,
-                take: blade.threadPageSize
-            });
-
-            api.searchMessages(criteria, function(response) {
-                if (response && response.results) {
-                    if (reset) {
-                        blade.threadsMap[threadId] = response.results;
-                    } else {
-                        blade.threadsMap[threadId] = blade.threadsMap[threadId].concat(response.results);
-                    }
-
-                    // Store total count for this thread
-                    blade.threadTotalCounts[threadId] = response.totalCount;
-
-                    // Load user info for messages
-                    loadUserInfoForMessages(response.results);
-                }
-            }).$promise.finally(function() {
-                $scope.searchMessagesLoading = false;
-            });
-        }
-
         // Helper function to load messages
         function loadMessages(criteria, reset) {
             blade.isLoading = true;
             if (blade.exactlyMessageId) {
                 api.getMessage({ messageId: blade.exactlyMessageId, responseGroup: "WithSender" }, function (message) {
                     if (message) {
-                        if (message.threadId) {
-                            api.getThread({ threadId: message.threadId }, function (threadMessages) {
-                                threadMessages.forEach(x => {
-                                    x.answersCount = 1;
-                                    x.isExpanded = true;
-                                })
-                                let extendedThreadMessages = threadMessages.reverse();
-                                extendedThreadMessages.push(message);
-                                loadUserInfoForMessages(extendedThreadMessages);
-
-                                extendedThreadMessages.forEach(x => {
-                                    let reply = extendedThreadMessages.find(y => y.threadId === x.id);
-                                    if (reply) {
-                                        blade.threadsMap[x.id] = [];
-                                        blade.threadsMap[x.id].push(reply);
-                                    }
-                                });
-
-                                let rootMessage = extendedThreadMessages.find(x => !x.threadId);
-                                if (rootMessage) {
-                                    blade.messages.push(rootMessage);
-                                }
-                                blade.isLoading = false;
-                            })
-                        }
-                        else {
-                            blade.messages.push(message);
-                            loadUserInfoForMessages(blade.messages);
-                            blade.isLoading = false;
-                        }
+                        blade.messages = [message];
+                        loadUserInfoForMessages(blade.messages);
+                        blade.isLoading = false;
                     }
                     else {
                         blade.isLoading = false;
                     }
                 }).$promise.finally(function () {
-                //    loadUserInfoForMessages(blade.messages);
-                //    blade.isLoading = false;
                 });
             }
             else {
@@ -363,32 +209,51 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
         blade.showAllThreads = function () {
             blade.exactlyMessageId = undefined;
-            blade.threadsMap = {};
             blade.refresh();
         };
 
         // Helper function to load user info
         function loadUserInfoForMessages(messages) {
-            var userIds = messages.map(m => m.senderId);
-            if (userIds.length) {
-                api.getUserInfos({ communicationUserIds: userIds }, function(users) {
-                    messages.forEach(message => {
-                        var user = users.find(u => u.id === message.senderId);
-                        if (user) {
-                            message.senderInfo = user;
-                        }
-                    });
+            var userIds = _.uniq(_.compact(_.map(messages, 'senderId')));
+            if (!userIds.length) return $q.resolve();
+
+            return api.getUserInfos({ communicationUserIds: userIds }).$promise.then(function(users) {
+                angular.forEach(messages, function(message) {
+                    var user = _.find(users, { id: message.senderId });
+                    if (user) {
+                        message.senderInfo = user;
+                    }
                 });
-            }
+            });
         }
 
-        $scope.hasReplies = function(message) {
-            return message && message.answersCount && message.answersCount > 0;
-        };
+        // Lazy-fetch a quoted message by ID
+        function getQuotedMessage(messageId) {
+            // 1. Check loaded messages
+            var found = blade.messages.find(function(m) { return m.id === messageId; });
+            if (found) return $q.resolve(found);
 
-        $scope.getMessageReplies = function(message) {
-            return blade.threadsMap[message.id] || [];
-        };
+            // 2. Check cache
+            if (quotesCache[messageId]) return $q.resolve(quotesCache[messageId]);
+
+            // 3. Lazy fetch via getThread API
+            return api.getThread({ threadId: messageId }).$promise.then(function(result) {
+                var chain = result.results || result;
+                if (chain && chain.length) {
+                    return loadUserInfoForMessages(chain).then(function() {
+                        angular.forEach(chain, function(msg) {
+                            if (msg.id) quotesCache[msg.id] = msg;
+                        });
+                        return _.find(chain, { id: messageId }) || null;
+                    });
+                }
+                return null;
+            }).catch(function() {
+                return null;
+            });
+        }
+
+        $scope.getQuotedMessage = getQuotedMessage;
 
         $scope.markAsRead = function(message) {
             if (!$scope.shouldShowUnreadDot(message)) {
@@ -401,10 +266,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 r.readStatus === 'New'
             );
 
-            // Skip if:
-            // - no recipient record exists
-            // - message was sent by current user
-            // - message is already read
+            // Skip if no recipient record exists
             if (!recipientRecord) {
                 return;
             }
@@ -413,58 +275,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 recipientRecord.readStatus = 'Read';
                 recipientRecord.readTimestamp = new Date().toISOString();
                 blade.parentBlade.refresh(false);
-
-                // Mark all child messages as read when marking root message
-                if (!message.threadId) {
-                    var replies = blade.threadsMap[message.id] || [];
-                    replies.forEach(function(reply) {
-                        const replyRecipient = reply.recipients?.find(r =>
-                            r.recipientId === $scope.currentUser.id &&
-                            r.readStatus === 'New'
-                        );
-
-                        if (replyRecipient) {
-                            api.markRead({ messageId: reply.id, recipientId: $scope.currentUser.id }, function() {
-                                replyRecipient.readStatus = 'Read';
-                                replyRecipient.readTimestamp = new Date().toISOString();
-                            });
-                        }
-                    });
-                }
-                // Mark parent message as read when marking reply
-                else {
-                    var rootMessage = blade.messages.find(m => m.id === message.threadId);
-                    if (rootMessage) {
-                        const rootRecipient = rootMessage.recipients?.find(r =>
-                            r.recipientId === $scope.currentUser.id &&
-                            r.readStatus === 'New'
-                        );
-
-                        if (rootRecipient) {
-                            api.markRead({ messageId: rootMessage.id, recipientId: $scope.currentUser.id }, function() {
-                                rootRecipient.readStatus = 'Read';
-                                rootRecipient.readTimestamp = new Date().toISOString();
-                            });
-                        }
-                    }
-                }
             });
-        };
-
-        // Modify refresh to use pagination
-        blade.refresh = function() {
-            blade.isLoading = true;
-            blade.currentPage = 1;
-            blade.hasMore = true;
-
-            const criteria = createSearchCriteria({
-                rootsOnly: true,
-                skip: 0,
-                take: blade.pageSize
-            });
-
-            loadMessages(criteria, true);
-            $scope.isInitialLoadComplete = true;
         };
 
         // Add loadMore function for root messages
@@ -480,7 +291,6 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             }
 
             const criteria = createSearchCriteria({
-                rootsOnly: true,
                 skip: blade.messages.length,
                 take: blade.pageSize
             });
@@ -502,58 +312,12 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             });
         };
 
-        $scope.hasMoreReplies = function(message) {
-            var threadId = message.id;
-            var currentReplies = blade.threadsMap[threadId] || [];
-            var totalCount = blade.threadTotalCounts[threadId] || 0;
-
-            // Check threadHasMore flag
-            if (blade.threadHasMore && blade.threadHasMore[threadId] === false) {
-                return false;
-            }
-
-            return currentReplies.length < totalCount;
-        };
-
-        $scope.loadMoreReplies = function(message) {
-            var threadId = message.threadId || message.id;
-            var currentReplies = blade.threadsMap[threadId] || [];
-            if ($scope.threadLoadingStates.more[threadId] || blade.isScrollingToMessage) return;
-
-            const criteria = createSearchCriteria({
-                threadId: threadId,
-                skip: currentReplies.length,
-                take: blade.threadPageSize,
-                sort: 'createdDate:asc'
-            });
-
-            $scope.threadLoadingStates.more[threadId] = true;
-
-            api.searchMessages(criteria, function(response) {
-                if (response && response.results) {
-                    blade.threadsMap[threadId] = (blade.threadsMap[threadId] || []).concat(response.results);
-                    blade.threadTotalCounts[threadId] = response.totalCount;
-
-                    // Check if all messages are loaded
-                    if (blade.threadsMap[threadId].length >= response.totalCount) {
-                        blade.threadHasMore = blade.threadHasMore || {};
-                        blade.threadHasMore[threadId] = false;
-                    }
-
-                    loadUserInfoForMessages(response.results);
-                }
-            }).$promise.finally(function() {
-                $scope.threadLoadingStates.more[threadId] = false;
-            });
-        };
-
         $scope.loadPreviousMessages = function() {
             if ($scope.isLoadingPrevious || blade.isScrollingToMessage) {
                 return;
             }
 
             const criteria = createSearchCriteria({
-                rootsOnly: true,
                 skip: blade.messages.length,
                 take: blade.pageSize,
                 sort: 'createdDate:desc'
@@ -574,56 +338,24 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             });
         };
 
-        $scope.loadPreviousReplies = function(message) {
-            var threadId = message.threadId || message.id;
-            var currentReplies = blade.threadsMap[threadId] || [];
-
-            if ($scope.threadLoadingStates.previous[threadId] || blade.isScrollingToMessage) {
-                return;
-            }
-
-            const criteria = createSearchCriteria({
-                threadId: threadId,
-                skip: currentReplies.length,
-                take: blade.threadPageSize,
-                sort: 'createdDate:desc'
-            });
-
-            $scope.threadLoadingStates.previous[threadId] = true;
-
-            api.searchMessages(criteria, function(response) {
-                if (response && response.results) {
-                    blade.threadsMap[threadId] = response.results.reverse().concat(blade.threadsMap[threadId] || []);
-                    blade.threadTotalCounts[threadId] = response.totalCount;
-                    blade.threadHasPrevious[threadId] = blade.threadsMap[threadId].length < response.totalCount;
-                    loadUserInfoForMessages(response.results);
-                }
-            }).$promise.finally(function() {
-                $scope.threadLoadingStates.previous[threadId] = false;
-            });
-        };
-
-        $scope.hasPreviousReplies = function(message) {
-            var threadId = message.threadId || message.id;
-            return blade.threadHasPrevious[threadId] || false;
-        };
-
         function scrollToMessage(messageId) {
             blade.isScrollingToMessage = true;
             $timeout(function() {
-                var messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
-                if (messageElement) {
-                    messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-                    // Reset scroll flag after animation completes (>1000ms)
+                var el = document.querySelector('[data-message-id="' + messageId + '"]');
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    el.classList.add('message-bubble--highlight');
                     $timeout(function() {
+                        el.classList.remove('message-bubble--highlight');
                         blade.isScrollingToMessage = false;
-                    }, 1000);
+                    }, 2000);
                 } else {
                     blade.isScrollingToMessage = false;
                 }
             });
         }
+
+        $scope.scrollToMessage = scrollToMessage;
 
         $scope.sendRootMessage = function() {
             if (!$scope.mainForm.text || !$scope.mainForm.text.trim()) return;
@@ -640,16 +372,19 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     conversationId: blade.conversationId,
                     senderId: $scope.currentUser.id,
                     recipientId: $scope.messageRecipientId,
-                    rootsOnly: true,
                     attachments: $scope.mainForm.attachments
                 }
             };
+
+            // Attach replyTo if replying to a message
+            if ($scope.replyToMessage) {
+                command.message.replyTo = $scope.replyToMessage.id;
+            }
 
             api.sendMessage(command, function() {
                 $scope.cancelMessage();
 
                 const searchCriteria = createSearchCriteria({
-                    rootsOnly: true,
                     take: 20,
                     sort: 'createdDate:desc'
                 });
@@ -679,6 +414,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                     }
                 }).$promise.finally(function() {
                     blade.isLoading = false;
+                    $scope.replyToMessage = null;
                     blade.parentBlade.refresh(false);
                 });
             });
@@ -702,13 +438,7 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         };
 
         $scope.deleteMessage = function(message) {
-            // Get all child messages if this is a root message
             var messageIds = [message.id];
-            if (!message.threadId) {
-                // If this is a root message, include all replies
-                var replies = blade.threadsMap[message.id] || [];
-                messageIds = messageIds.concat(replies.map(reply => reply.id));
-            }
 
             var dialog = {
                 id: "confirmDeleteMessage",
@@ -725,35 +455,9 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
                         // Pass data as a parameter
                         api.deleteMessage(data).$promise.then(function() {
-                            // If it's a reply, remove it from the thread
-                            if (message.threadId) {
-                                var threadMessages = blade.threadsMap[message.threadId] || [];
-                                var index = threadMessages.findIndex(m => m.id === message.id);
-                                if (index !== -1) {
-                                    threadMessages.splice(index, 1);
-
-                                    Object.keys(blade.threadsMap).forEach(key => {
-                                        const parentMessage = blade.threadsMap[key].find(m => m.id === message.threadId);
-                                        if (parentMessage) {
-                                            parentMessage.answersCount = (parentMessage.answersCount || 1) - 1;
-                                        }
-                                    });
-
-                                    // Update the answers count of the parent message
-                                    var parentMessage = blade.messages.find(m => m.id === message.threadId);
-
-                                    if (parentMessage) {
-                                        parentMessage.answersCount = (parentMessage.answersCount || 1) - 1;
-                                    }
-                                }
-                            }
-                            // If it's a root message, remove it and its thread
-                            else {
-                                var index = blade.messages.findIndex(m => m.id === message.id);
-                                if (index !== -1) {
-                                    blade.messages.splice(index, 1);
-                                    delete blade.threadsMap[message.id];
-                                }
+                            var index = blade.messages.findIndex(m => m.id === message.id);
+                            if (index !== -1) {
+                                blade.messages.splice(index, 1);
                             }
                         }).finally(function() {
                             blade.isLoading = false;
@@ -785,19 +489,10 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
                 params.message.content = params.newContent.trim();
                 params.message.attachments = params.attachments;
 
-                if (!params.message.threadId) {
-                    var index = blade.messages.findIndex(m => m.id === params.message.id);
-                    if (index !== -1) {
-                        blade.messages[index].content = params.newContent.trim();
-                        blade.messages[index].attachments = params.attachments;
-                    }
-                } else {
-                    var threadMessages = blade.threadsMap[params.message.threadId] || [];
-                    var replyIndex = threadMessages.findIndex(m => m.id === params.message.id);
-                    if (replyIndex !== -1) {
-                        threadMessages[replyIndex].content = params.newContent.trim();
-                        threadMessages[replyIndex].attachments = params.attachments;
-                    }
+                var index = blade.messages.findIndex(m => m.id === params.message.id);
+                if (index !== -1) {
+                    blade.messages[index].content = params.newContent.trim();
+                    blade.messages[index].attachments = params.attachments;
                 }
             }).$promise.finally(function() {
                 blade.isLoading = false;
@@ -813,9 +508,9 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             blade.isLoading = true;
             blade.currentPage = 1;
             blade.hasMore = true;
+            quotesCache = {};
 
             const criteria = blade.searchCriteria ? angular.copy(blade.searchCriteria) : createSearchCriteria({
-                rootsOnly: true,
                 skip: 0,
                 take: blade.pageSize
             });
@@ -844,4 +539,3 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             }
         });
     }]);
-
