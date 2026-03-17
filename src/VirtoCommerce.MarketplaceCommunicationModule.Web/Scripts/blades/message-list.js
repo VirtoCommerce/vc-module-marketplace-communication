@@ -174,28 +174,44 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
         }
 
 
+        function scrollToBottom() {
+            $timeout(function() {
+                var container = document.querySelector('.messages-layout__content');
+                if (container) {
+                    container.scrollTop = container.scrollHeight;
+                }
+            }, 100);
+        }
+
         // Helper function to load messages
         function loadMessages(criteria, reset) {
             blade.isLoading = true;
+            // Load newest first, then reverse for chronological display
+            criteria.sort = criteria.sort || 'createdDate:desc';
             api.searchMessages(criteria, function (response) {
                 if (response && response.results) {
+                    var results = response.results.reverse();
                     if (reset) {
-                        blade.messages = response.results;
+                        blade.messages = results;
                     } else {
-                        blade.messages = blade.messages.concat(response.results);
+                        blade.messages = blade.messages.concat(results);
                     }
 
                     // Store total count
                     blade.totalCount = response.totalCount;
-                    blade.hasMore = blade.messages.length < response.totalCount;
+                    blade.hasPrevious = blade.messages.length < response.totalCount;
+                    blade.hasMore = false; // newest loaded first, no newer messages
 
-                    loadUserInfoForMessages(response.results);
+                    loadUserInfoForMessages(results);
 
                     // If deep-linked to a specific message, scroll to it after render
                     if (blade.exactlyMessageId) {
                         $timeout(function() {
                             scrollToMessage(blade.exactlyMessageId);
                         }, 300);
+                    } else {
+                        // Scroll to bottom to show latest messages
+                        scrollToBottom();
                     }
                 }
             }).$promise.finally(function () {
