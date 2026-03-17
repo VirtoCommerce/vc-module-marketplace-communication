@@ -329,20 +329,84 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
             });
         };
 
+        function highlightMessageElement(el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.add('message-bubble--highlight');
+            $timeout(function() {
+                el.classList.remove('message-bubble--highlight');
+                blade.isScrollingToMessage = false;
+            }, 2000);
+        }
+
         function scrollToMessage(messageId) {
             blade.isScrollingToMessage = true;
+
             $timeout(function() {
+                // 1. Try to find in DOM immediately
                 var el = document.querySelector('[data-message-id="' + messageId + '"]');
                 if (el) {
-                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    el.classList.add('message-bubble--highlight');
-                    $timeout(function() {
-                        el.classList.remove('message-bubble--highlight');
-                        blade.isScrollingToMessage = false;
-                    }, 2000);
-                } else {
-                    blade.isScrollingToMessage = false;
+                    highlightMessageElement(el);
+                    return;
                 }
+
+                // 2. Not in DOM — load older messages until found (max 10 attempts)
+                var attempts = 0;
+                var MAX_ATTEMPTS = 10;
+
+                function tryLoadAndFind() {
+                    // Check if message is in loaded messages array
+                    var inMessages = blade.messages.some(function(m) { return m.id === messageId; });
+                    if (inMessages) {
+                        $timeout(function() {
+                            var found = document.querySelector('[data-message-id="' + messageId + '"]');
+                            if (found) {
+                                highlightMessageElement(found);
+                            } else {
+                                blade.isScrollingToMessage = false;
+                            }
+                        });
+                        return;
+                    }
+
+                    // No more older messages or max attempts reached
+                    if (!blade.hasPrevious || attempts >= MAX_ATTEMPTS) {
+                        blade.isScrollingToMessage = false;
+                        console.warn('Message ' + messageId + ' not found after loading older messages');
+                        return;
+                    }
+
+                    attempts++;
+
+                    // Load a page of older messages
+                    var criteria = createSearchCriteria({
+                        skip: blade.messages.length,
+                        take: blade.pageSize,
+                        sort: 'createdDate:desc'
+                    });
+
+                    api.searchMessages(criteria, function(response) {
+                        if (response && response.results && response.results.length) {
+                            blade.messages = response.results.reverse().concat(blade.messages);
+                            blade.totalCount = response.totalCount;
+                            blade.hasPrevious = blade.messages.length < response.totalCount;
+                            loadUserInfoForMessages(response.results);
+
+                            // Wait for DOM render, then check again
+                            $timeout(function() {
+                                var found = document.querySelector('[data-message-id="' + messageId + '"]');
+                                if (found) {
+                                    highlightMessageElement(found);
+                                } else {
+                                    tryLoadAndFind();
+                                }
+                            });
+                        } else {
+                            blade.isScrollingToMessage = false;
+                        }
+                    });
+                }
+
+                tryLoadAndFind();
             });
         }
 

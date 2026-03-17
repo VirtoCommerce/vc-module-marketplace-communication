@@ -156,21 +156,70 @@ function cancelReply() {
   replyToMessage.value = null;
 }
 
-function scrollToMessage(messageId: string) {
+const scrollToQuoteLoading = ref(false);
+
+function highlightMessageElement(el: HTMLElement) {
+  isProgrammaticScroll.value = true;
+  el.scrollIntoView({ behavior: "smooth", block: "center" });
+  el.classList.add("message-item--highlight");
+  setTimeout(() => {
+    el.classList.remove("message-item--highlight");
+    isProgrammaticScroll.value = false;
+  }, 2000);
+}
+
+async function scrollToMessage(messageId: string) {
+  // 1. Try to find in DOM immediately
   const el = scrollContainer.value?.querySelector(`[data-message-id="${messageId}"]`) as HTMLElement | null;
   if (el) {
-    isProgrammaticScroll.value = true;
-    el.scrollIntoView({ behavior: "smooth", block: "center" });
-    el.classList.add("message-item--highlight");
-    setTimeout(() => {
-      el.classList.remove("message-item--highlight");
-      isProgrammaticScroll.value = false;
-    }, 2000);
-  } else {
-    // Phase 2: load messages until found
-    // For now, log a warning — MESSAGE_NOT_LOADED i18n key is ready for proper toast
-    console.warn(`Message ${messageId} not found in DOM`);
+    highlightMessageElement(el);
+    return;
   }
+
+  // 2. Not in DOM — load older messages until found (max 10 attempts)
+  scrollToQuoteLoading.value = true;
+  isProgrammaticScroll.value = true;
+
+  const MAX_ATTEMPTS = 10;
+  for (let i = 0; i < MAX_ATTEMPTS; i++) {
+    // Check if message is already in store (loaded but not yet rendered)
+    const inStore = store.messages.value.some((m) => m.id === messageId);
+    if (inStore) {
+      // Wait for DOM render
+      await nextTick();
+      await nextTick();
+      const found = scrollContainer.value?.querySelector(`[data-message-id="${messageId}"]`) as HTMLElement | null;
+      if (found) {
+        scrollToQuoteLoading.value = false;
+        highlightMessageElement(found);
+        return;
+      }
+    }
+
+    // No more older messages to load
+    if (!store.hasOlderMessages.value) break;
+
+    // Load a page of older messages
+    const loaded = await store.loadPreviousMessages();
+    if (!loaded) break;
+
+    // Wait for DOM update
+    await nextTick();
+    await nextTick();
+
+    // Check DOM after load
+    const foundAfterLoad = scrollContainer.value?.querySelector(`[data-message-id="${messageId}"]`) as HTMLElement | null;
+    if (foundAfterLoad) {
+      scrollToQuoteLoading.value = false;
+      highlightMessageElement(foundAfterLoad);
+      return;
+    }
+  }
+
+  // 3. Not found after all attempts
+  scrollToQuoteLoading.value = false;
+  isProgrammaticScroll.value = false;
+  console.warn(`Message ${messageId} not found after loading older messages`);
 }
 
 async function handleSend(payload: { content: string; attachments: MessageAttachment[] }) {
