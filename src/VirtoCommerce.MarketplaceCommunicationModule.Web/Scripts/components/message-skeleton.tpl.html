@@ -1,9 +1,10 @@
-<div class="message-skeleton" ng-repeat="i in $ctrl.getCount() track by $index">
-    <div class="message-skeleton__content">
-        <div class="message-skeleton__avatar"></div>
-        <div class="message-skeleton__body">
-            <div class="message-skeleton__line message-skeleton__line--long"></div>
-            <div class="message-skeleton__line message-skeleton__line--short"></div>
+<div class="message-skeleton">
+    <div class="message-skeleton__bubble">
+        <div class="message-skeleton__author skeleton-block"></div>
+        <div class="message-skeleton__content">
+            <div class="message-skeleton__line skeleton-block"></div>
+            <div class="message-skeleton__line message-skeleton__line--medium skeleton-block"></div>
         </div>
+        <div class="message-skeleton__time skeleton-block"></div>
     </div>
 </div>
