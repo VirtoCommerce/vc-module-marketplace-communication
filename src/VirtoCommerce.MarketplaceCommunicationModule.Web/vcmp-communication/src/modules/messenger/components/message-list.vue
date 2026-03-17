@@ -83,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, inject, provide, watch, nextTick } from "vue";
+import { ref, inject, provide, watch, nextTick, onMounted } from "vue";
 import { useMessengerStore, useMessageActions } from "../composables";
 import { useInfiniteScroll } from "../composables/useInfiniteScroll";
 import { messengerContextKey } from "../injection-keys";
@@ -124,20 +124,27 @@ function scrollToBottom() {
   });
 }
 
-// Watch the shallowRef itself (not .length) — shallowRef triggers on reference change
+// On mount: messages may already be loaded (parent loads before this component mounts)
+onMounted(() => {
+  if (store.messages.value.length > 0 && !hasScrolledInitially.value) {
+    hasScrolledInitially.value = true;
+    previousMessageCount = store.messages.value.length;
+    scrollToBottom();
+  }
+});
+
+// Watch for subsequent message changes (new messages sent/received)
 watch(
   () => store.messages.value,
   (msgs) => {
     const newLen = msgs.length;
-    // Initial load — scroll to bottom to show latest messages
     if (!hasScrolledInitially.value && newLen > 0) {
       hasScrolledInitially.value = true;
       scrollToBottom();
       previousMessageCount = newLen;
       return;
     }
-    // New message added at the end (sent or received) — scroll to bottom
-    // But NOT when loading older messages (prepend — count grows but from the top)
+    // New messages appended (not prepended from loadPrevious)
     if (newLen > previousMessageCount && previousMessageCount > 0 && !isProgrammaticScroll.value) {
       scrollToBottom();
     }
