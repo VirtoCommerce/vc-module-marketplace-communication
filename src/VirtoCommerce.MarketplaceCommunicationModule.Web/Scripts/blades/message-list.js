@@ -176,11 +176,13 @@ angular.module('virtoCommerce.marketplaceCommunicationModule')
 
         function scrollToBottom() {
             $timeout(function() {
-                var container = document.querySelector('.messages-layout__content');
+                // .messages-container is the actual scroll container (position:absolute, overflow-y:auto)
+                var containers = document.querySelectorAll('.messages-container');
+                var container = containers[containers.length - 1];
                 if (container) {
                     container.scrollTop = container.scrollHeight;
                 }
-            }, 100);
+            }, 0);
         }
 
         // Helper function to load messages
