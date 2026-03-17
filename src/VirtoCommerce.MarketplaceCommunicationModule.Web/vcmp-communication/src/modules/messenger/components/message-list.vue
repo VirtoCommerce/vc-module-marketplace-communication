@@ -83,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, inject, provide } from "vue";
+import { ref, inject, provide, watch, nextTick } from "vue";
 import { useMessengerStore, useMessageActions } from "../composables";
 import { useInfiniteScroll } from "../composables/useInfiniteScroll";
 import { messengerContextKey } from "../injection-keys";
@@ -104,6 +104,37 @@ const isProgrammaticScroll = ref(false);
 const replyToMessage = ref<Message | null>(null);
 
 provide("isProgrammaticScroll", isProgrammaticScroll);
+
+// Auto-scroll to bottom when messages first load or after sending
+const hasScrolledInitially = ref(false);
+
+function scrollToBottom() {
+  nextTick(() => {
+    if (scrollContainer.value) {
+      isProgrammaticScroll.value = true;
+      scrollContainer.value.scrollTop = scrollContainer.value.scrollHeight;
+      setTimeout(() => {
+        isProgrammaticScroll.value = false;
+      }, 100);
+    }
+  });
+}
+
+watch(
+  () => store.messages.value.length,
+  (newLen, oldLen) => {
+    // Initial load — scroll to bottom to show latest messages
+    if (!hasScrolledInitially.value && newLen > 0) {
+      hasScrolledInitially.value = true;
+      scrollToBottom();
+      return;
+    }
+    // New message added at the end (sent or received) — scroll to bottom
+    if (newLen > oldLen && oldLen > 0) {
+      scrollToBottom();
+    }
+  },
+);
 
 const { previousLoading, nextLoading } = useInfiniteScroll({
   containerRef: scrollContainer,

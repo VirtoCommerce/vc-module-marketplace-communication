@@ -90,16 +90,17 @@ export function createMessengerStore(): MessengerStore {
   const { action: loadMessagesAction, loading: searchMessagesLoading } = useAsync<ISearchMessagesQuery>(
     async (query) => {
       if (!query) return;
+      // Load newest messages first (desc), then reverse for chronological display
       searchQuery.value = new SearchMessagesQuery({
         ...searchQuery.value,
         ...query,
-
+        sort: "createdDate:desc",
       });
       const result = await searchMessagesApi(searchQuery.value);
       searchResult.value = result;
       await loadUserInfoForMessages(result.results);
-      messages.value = result.results || [];
-      // After initial load with desc sort, we may have older messages
+      // Reverse: API returns newest-first, but UI needs oldest-first (chronological)
+      messages.value = (result.results || []).reverse();
       hasOlderMessages.value = (result.totalCount || 0) > (messages.value.length || 0);
     },
   );
