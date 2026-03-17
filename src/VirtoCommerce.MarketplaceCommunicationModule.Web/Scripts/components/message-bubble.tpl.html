@@ -1,0 +1,79 @@
+<div class="message-bubble"
+     ng-class="{
+         'message-bubble--own': $ctrl.isOwnMessage,
+         'message-bubble--unread': $ctrl.message.isUnread && !$ctrl.isOwnMessage
+     }"
+     data-message-id="{{$ctrl.message.id}}">
+
+    <div class="message-bubble__card">
+        <!-- Author (incoming only) -->
+        <div class="message-bubble__author" ng-if="!$ctrl.isOwnMessage">
+            {{$ctrl.message.senderName || ($ctrl.message.sender && $ctrl.message.sender.userName) || 'Unknown'}}
+        </div>
+
+        <!-- Quote block -->
+        <div class="message-bubble__quote"
+             ng-if="$ctrl.message.threadId"
+             ng-class="{ 'message-bubble__quote--clickable': $ctrl.quotedMessage }"
+             ng-click="$ctrl.handleQuoteClick()">
+            <span ng-if="$ctrl.quoteLoading" class="message-bubble__quote-loading">...</span>
+            <ng-container ng-if="!$ctrl.quoteLoading && $ctrl.quotedMessage">
+                <span class="message-bubble__quote-author">
+                    {{$ctrl.quotedMessage.senderName || ($ctrl.quotedMessage.sender && $ctrl.quotedMessage.sender.userName)}}
+                </span>
+                <span class="message-bubble__quote-text">
+                    {{$ctrl.quotedMessage.content}}
+                </span>
+            </ng-container>
+            <span ng-if="!$ctrl.quoteLoading && !$ctrl.quotedMessage" class="message-bubble__quote-unavailable">
+                {{ 'marketplaceCommunication.blades.message-list.labels.quote-unavailable' | translate }}
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div class="message-bubble__content"
+             ng-class="{ 'message-bubble__content--collapsed': $ctrl.isCollapsed && $ctrl.isTruncated }">
+            {{$ctrl.message.content}}
+        </div>
+        <button class="message-bubble__expand-btn"
+                ng-if="$ctrl.isTruncated"
+                ng-click="$ctrl.toggleContent()">
+            {{$ctrl.isCollapsed
+                ? ('marketplaceCommunication.blades.message-list.labels.show-more' | translate)
+                : ('marketplaceCommunication.blades.message-list.labels.show-less' | translate)}}
+        </button>
+
+        <!-- Attachments -->
+        <message-assets ng-if="$ctrl.message.attachments && $ctrl.message.attachments.length"
+                        assets="$ctrl.message.attachments">
+        </message-assets>
+
+        <!-- Footer -->
+        <div class="message-bubble__footer">
+            <span class="message-bubble__unread-dot"
+                  ng-if="$ctrl.message.isUnread && !$ctrl.isOwnMessage"></span>
+            <span class="message-bubble__time" am-time-ago="$ctrl.message.createdDate"></span>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="message-bubble__actions">
+        <button class="message-bubble__action-btn"
+                ng-click="$ctrl.onReply({ message: $ctrl.message })"
+                title="{{ 'marketplaceCommunication.blades.message-list.buttons.reply' | translate }}">
+            <i class="fa fa-reply"></i>
+        </button>
+        <button class="message-bubble__action-btn"
+                ng-if="$ctrl.canManage"
+                ng-click="$ctrl.onEdit({ message: $ctrl.message })"
+                title="{{ 'marketplaceCommunication.blades.message-list.buttons.edit' | translate }}">
+            <i class="fa fa-pencil"></i>
+        </button>
+        <button class="message-bubble__action-btn message-bubble__action-btn--danger"
+                ng-if="$ctrl.canManage"
+                ng-click="$ctrl.onDelete({ message: $ctrl.message })"
+                title="{{ 'marketplaceCommunication.blades.message-list.buttons.delete' | translate }}">
+            <i class="fa fa-trash-o"></i>
+        </button>
+    </div>
+</div>

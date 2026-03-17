@@ -28,6 +28,7 @@ angular.module(moduleName, [])
     .directive('vcFocus', require('./directives/vcFocus'))
 
     .component('message-tree', require('./components/message-tree.component'))
+    .component('message-bubble', require('./components/message-bubble.component'))
     .component('conversation-header', require('./components/conversation-header.component'))
     .component('empty-state', require('./components/empty-state.component'))
     .component('messages-container', require('./components/messages-container.component'))

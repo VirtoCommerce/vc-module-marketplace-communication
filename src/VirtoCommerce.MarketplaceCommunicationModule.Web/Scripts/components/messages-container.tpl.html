@@ -9,28 +9,17 @@
 
     <message-skeleton ng-if="$ctrl.isLoadingPrevious" count="2"></message-skeleton>
 
-    <message-tree
+    <message-bubble
         ng-repeat="message in $ctrl.messages track by message.id"
         message="message"
         current-user="$ctrl.currentUser"
-        parent-controller="$ctrl"
-        loading-states="$ctrl.threadLoadingStates"
-        on-delete="$ctrl.deleteMessage({message: message})"
-        on-edit="$ctrl.editMessage({message: message})"
-        on-mark-read="$ctrl.markAsRead({message: message})"
-        on-toggle-replies="$ctrl.toggleReplies({message: message})"
-        get-message-replies="$ctrl.getMessageReplies({message: message})"
-        has-replies="$ctrl.hasReplies({message: message})"
-        has-more-replies="$ctrl.hasMoreReplies({message: message})"
-        load-more-replies="$ctrl.loadMoreReplies({message: message})"
-        has-previous-replies="$ctrl.hasPreviousReplies({message: message})"
-        load-previous-replies="$ctrl.loadPreviousReplies({message: message})"
-        search-messages-loading="$ctrl.searchMessagesLoading"
-        on-should-show-unread-dot="$ctrl.shouldShowUnreadDot({message: message})"
-        on-send-reply="$ctrl.onSendReply({message: message, text: text, attachments: attachments})"
-        update-message="$ctrl.handleUpdateMessage(params)"
-        settings="$ctrl.settings">
-    </message-tree>
+        is-own-message="message.senderId === $ctrl.currentUser.id"
+        on-reply="$ctrl.onReply({ message: message })"
+        on-edit="$ctrl.handleStartEdit(message)"
+        on-delete="$ctrl.handleDelete(message)"
+        on-scroll-to-quote="$ctrl.onScrollToQuote({ messageId: messageId })"
+        get-quoted-message="$ctrl.getQuotedMessage({ messageId: messageId })">
+    </message-bubble>
 
     <message-skeleton ng-if="$ctrl.isLoadingMore" count="2"></message-skeleton>
 
