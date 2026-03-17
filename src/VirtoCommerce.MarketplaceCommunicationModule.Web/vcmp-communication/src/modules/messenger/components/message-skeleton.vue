@@ -1,100 +1,71 @@
 <template>
-  <div
-    class="message-skeleton"
-    :class="{ 'message-skeleton--mobile': $isMobile.value }"
-  >
-    <div class="message-skeleton__header">
-      <div class="message-skeleton__avatar"></div>
-      <div class="message-skeleton__meta">
-        <div class="message-skeleton__name"></div>
-        <div class="message-skeleton__date"></div>
+  <div class="message-skeleton">
+    <div class="message-skeleton__bubble">
+      <div class="message-skeleton__author" />
+      <div class="message-skeleton__content">
+        <div class="message-skeleton__line" />
+        <div class="message-skeleton__line message-skeleton__line--medium" />
       </div>
-    </div>
-    <div class="message-skeleton__content">
-      <div class="message-skeleton__line"></div>
-      <div class="message-skeleton__line message-skeleton__line--short"></div>
+      <div class="message-skeleton__time" />
     </div>
   </div>
 </template>
 
 <style lang="scss">
-:root {
-  --skeleton-bg: var(--additional-50);
+@keyframes skeleton-shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: 200px 0; }
 }
+
+%skeleton-block {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 400px 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
 .message-skeleton {
-  @apply tw-p-4 tw-bg-[var(--skeleton-bg)] tw-rounded-lg tw-border tw-border-[color:var(--neutrals-200)];
+  display: flex;
+  padding: 4px 16px;
 
-  @keyframes shimmer {
-    0% {
-      background-position: -200% 0;
-    }
-    100% {
-      background-position: 200% 0;
-    }
+  &__bubble {
+    max-width: 70%;
+    min-width: 200px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background-color: var(--neutral-50, #f8fafc);
+    border: 1px solid var(--neutral-200, #e2e8f0);
   }
 
-  &__header {
-    @apply tw-flex tw-items-center tw-gap-3 tw-mb-2;
-  }
-
-  &__avatar {
-    @apply tw-w-10 tw-h-10 tw-rounded-full;
-    background: linear-gradient(90deg, var(--neutrals-100) 25%, var(--neutrals-200) 50%, var(--neutrals-100) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-  }
-
-  &__meta {
-    @apply tw-flex tw-flex-col tw-gap-1;
-  }
-
-  &__name {
-    @apply tw-h-4 tw-w-32 tw-rounded;
-    background: linear-gradient(90deg, var(--neutrals-100) 25%, var(--neutrals-200) 50%, var(--neutrals-100) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-  }
-
-  &__date {
-    @apply tw-h-3 tw-w-24 tw-rounded;
-    background: linear-gradient(90deg, var(--neutrals-100) 25%, var(--neutrals-200) 50%, var(--neutrals-100) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
+  &__author {
+    @extend %skeleton-block;
+    width: 80px;
+    height: 14px;
+    margin-bottom: 4px;
   }
 
   &__content {
-    @apply tw-mt-3 tw-space-y-2;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
 
   &__line {
-    @apply tw-h-4 tw-rounded;
-    background: linear-gradient(90deg, var(--neutrals-100) 25%, var(--neutrals-200) 50%, var(--neutrals-100) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
+    @extend %skeleton-block;
+    width: 100%;
+    height: 14px;
 
-    &--short {
-      @apply tw-w-2/3;
+    &--medium {
+      width: 60%;
     }
   }
 
-  &--mobile {
-    @apply tw-p-2;
-
-    .message-skeleton__avatar {
-      @apply tw-w-8 tw-h-8;
-    }
-
-    .message-skeleton__name {
-      @apply tw-w-24;
-    }
-
-    .message-skeleton__date {
-      @apply tw-w-16;
-    }
-
-    .message-skeleton__line {
-      @apply tw-w-full;
-    }
+  &__time {
+    @extend %skeleton-block;
+    width: 40px;
+    height: 10px;
+    margin-top: 4px;
+    margin-left: auto;
   }
 }
 </style>
