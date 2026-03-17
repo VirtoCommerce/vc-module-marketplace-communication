@@ -64,15 +64,16 @@
     </div>
 
     <!-- Hover toolbar (desktop only) -->
-    <MessageHoverToolbar
-      v-if="!isMobile"
-      class="message-item__toolbar"
-      :can-edit="canManage"
-      :can-delete="canManage"
-      @reply="emit('reply', message)"
-      @edit="emit('start-edit', message.id!)"
-      @delete="handleDelete"
-    />
+      <MessageHoverToolbar
+        v-if="!isMobile"
+        class="message-item__toolbar"
+        :can-edit="canManage"
+        :can-delete="canManage"
+        @reply="emit('reply', message)"
+        @edit="emit('start-edit', message.id!)"
+        @delete="handleDelete"
+      />
+    </div>
   </div>
 </template>
 
@@ -361,13 +362,14 @@ onBeforeUnmount(() => {
 
   &__toolbar {
     position: absolute;
-    top: 0;
-    right: 16px;
+    top: -12px;
+    right: 4px;
     opacity: 0;
     transition: opacity 0.15s;
+    z-index: 1;
   }
 
-  &:hover &__toolbar {
+  &__bubble:hover &__toolbar {
     opacity: 1;
   }
 }
