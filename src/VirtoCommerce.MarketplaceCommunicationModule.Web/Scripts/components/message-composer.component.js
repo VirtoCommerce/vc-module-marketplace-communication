@@ -10,7 +10,9 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
         conversationId: '=',
         entityId: '=',
         entityType: '=',
-        settings: '<'
+        settings: '<',
+        replyTo: '<',
+        onCancelReply: '&'
     },
     controller: ['$scope', 'FileUploader', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'marketplaceCommunicationConstants',
     function($scope, FileUploader, bladeNavigationService, dialogService, constants) {
@@ -41,6 +43,9 @@ angular.module('virtoCommerce.marketplaceCommunicationModule').component('messag
             }
             if ((changes.conversationId || changes.entityId || changes.entityType) && uploader) {
                 updateUploaderUrl();
+            }
+            if (changes.replyTo && changes.replyTo.currentValue) {
+                $ctrl.isExpanded = true;
             }
         };
 

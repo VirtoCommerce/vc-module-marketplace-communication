@@ -7,6 +7,20 @@
 
     <div class="message-composer__expanded" ng-if="$ctrl.isExpanded">
         <div class="message-composer__content-wrapper">
+            <!-- Reply preview -->
+            <div class="message-composer__reply-preview" ng-if="$ctrl.replyTo">
+                <div class="message-composer__reply-preview-content">
+                    <span class="message-composer__reply-preview-author">
+                        {{$ctrl.replyTo.senderName || ($ctrl.replyTo.sender && $ctrl.replyTo.sender.userName)}}
+                    </span>
+                    <span class="message-composer__reply-preview-text">
+                        {{$ctrl.replyTo.content}}
+                    </span>
+                </div>
+                <button class="message-composer__reply-preview-close" ng-click="$ctrl.onCancelReply()">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
             <textarea
                 class="message-composer__input"
                 ng-model="$ctrl.message.text"
