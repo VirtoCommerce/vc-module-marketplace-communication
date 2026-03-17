@@ -43,7 +43,7 @@ export interface MessengerStore {
   removeMessageFromList(ids: string[]): void;
 
   // Actions
-  loadRootMessages(query: ISearchMessagesQuery): Promise<void>;
+  loadMessages(query: ISearchMessagesQuery): Promise<void>;
   loadMoreMessages(query: ISearchMessagesQuery): Promise<boolean>;
   loadPreviousMessages(query?: ISearchMessagesQuery): Promise<boolean>;
   initializeConversation(options: {
