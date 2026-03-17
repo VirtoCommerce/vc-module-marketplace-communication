@@ -64,17 +64,21 @@
     "FILE_TOO_LARGE": "File is too large",
     "UNSUPPORTED_FILE_TYPE": "Unsupported file type",
     "THREAD": {
-      "TITLE": "Message Thread",
-      "NEW": "New Thread",
-      "SUBJECT": "Subject",
-      "PARTICIPANTS": "Participants",
-      "ADD_PARTICIPANT": "Add Participant",
-      "REMOVE_PARTICIPANT": "Remove Participant",
-      "LEAVE": "Leave Thread",
-      "LEAVE_CONFIRM": "Are you sure you want to leave this thread?",
-      "LEAVE_SUCCESS": "You have left the thread",
-      "LEAVE_ERROR": "Error leaving thread"
+      "TITLE": "Thread",
+      "CLOSE": "Close",
+      "REPLY_PLACEHOLDER": "Reply in thread...",
+      "REPLIES_COUNT": "{count} replies",
+      "REPLYING_TO": "Replying to {name}",
+      "LAST_REPLY": "Last reply {time}",
+      "BACK": "Back"
     },
+    "HOVER": {
+      "REPLY": "Reply",
+      "EDIT": "Edit",
+      "DELETE": "Delete",
+      "OPEN_THREAD": "Open thread"
+    },
+    "MORE_ACTIONS": "More actions",
     "SEARCH": {
       "PLACEHOLDER": "Search messages",
       "NO_RESULTS": "No messages found",
@@ -107,6 +111,8 @@
     "ERROR_FILE_COUNT_LIMIT": "Maximum number of {limit} files exceeded.",
     "ERROR_FILE_SIZE_LIMIT": "Total files size {limit}MB exceeded.",
     "ERROR_DUPLICATE_FILE": "File \"{fileName}\" already attached",
-    "ERROR_FILE_TYPE": "File \"{fileName}\" is not supported."
+    "ERROR_FILE_TYPE": "File \"{fileName}\" is not supported.",
+    "QUOTE_UNAVAILABLE": "Message unavailable",
+    "MESSAGE_NOT_LOADED": "Message not loaded"
   }
 }
