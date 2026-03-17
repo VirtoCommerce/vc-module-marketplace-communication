@@ -26,7 +26,6 @@ export function useMessageActions() {
     threadId?: string;
     conversationId?: string;
     attachments?: MessageAttachment[];
-    rootsOnly?: boolean;
   }>(async (args) => {
     if (!args) return;
     store.sendMessageLoading.value = true;

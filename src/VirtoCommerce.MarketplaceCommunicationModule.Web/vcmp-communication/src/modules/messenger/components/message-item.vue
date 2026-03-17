@@ -4,7 +4,6 @@
     class="message-item"
     :class="{
       'message-item--own': isOwnMessage,
-      'message-item--highlight': isHighlighted,
     }"
     :data-message-id="message.id"
   >
@@ -109,7 +108,6 @@ const { showConfirmation } = usePopup();
 // --- Refs ---
 const messageItemRef = ref<HTMLElement | null>(null);
 const contentRef = ref<HTMLElement | null>(null);
-const isHighlighted = ref(false);
 const isExpanded = ref(false);
 const isContentTruncated = ref(false);
 
@@ -163,14 +161,6 @@ onMounted(() => {
 watch(() => props.message.content, () => nextTick(checkTruncation));
 
 onBeforeUnmount(() => resizeObserver?.disconnect());
-
-// --- Highlight on target ---
-onMounted(() => {
-  if (messageItemRef.value?.classList.contains("message-item--target")) {
-    isHighlighted.value = true;
-    setTimeout(() => (isHighlighted.value = false), 3000);
-  }
-});
 
 // --- Image preview ---
 const activeAsset = ref<MessageAttachment | null>(null);

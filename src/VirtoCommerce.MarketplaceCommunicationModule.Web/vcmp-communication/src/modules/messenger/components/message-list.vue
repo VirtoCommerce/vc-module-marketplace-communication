@@ -135,6 +135,10 @@ function scrollToMessage(messageId: string) {
       el.classList.remove("message-item--highlight");
       isProgrammaticScroll.value = false;
     }, 2000);
+  } else {
+    // Phase 2: load messages until found
+    // For now, log a warning — MESSAGE_NOT_LOADED i18n key is ready for proper toast
+    console.warn(`Message ${messageId} not found in DOM`);
   }
 }
 

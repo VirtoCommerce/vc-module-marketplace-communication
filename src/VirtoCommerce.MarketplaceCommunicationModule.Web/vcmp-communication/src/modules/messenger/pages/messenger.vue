@@ -111,7 +111,6 @@ onMounted(async () => {
     await store.loadMessages({
       entityId: props.options?.entityId,
       entityType: props.options?.entityType,
-      rootsOnly: true,
       responseGroup: "Full",
       conversationId: store.conversation.value?.id,
     });

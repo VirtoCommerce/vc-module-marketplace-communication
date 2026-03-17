@@ -87,7 +87,7 @@ export function createMessengerStore(): MessengerStore {
   }
 
   // --- Actions ---
-  const { action: loadRootMessagesAction, loading: searchMessagesLoading } = useAsync<ISearchMessagesQuery>(
+  const { action: loadMessagesAction, loading: searchMessagesLoading } = useAsync<ISearchMessagesQuery>(
     async (query) => {
       if (!query) return;
       searchQuery.value = new SearchMessagesQuery({
@@ -125,8 +125,8 @@ export function createMessengerStore(): MessengerStore {
   }
 
   // --- Actions ---
-  async function loadRootMessages(query: ISearchMessagesQuery): Promise<void> {
-    await loadRootMessagesAction(query);
+  async function loadMessages(query: ISearchMessagesQuery): Promise<void> {
+    await loadMessagesAction(query);
   }
 
   async function loadMoreMessages(query: ISearchMessagesQuery): Promise<boolean> {
@@ -212,6 +212,7 @@ export function createMessengerStore(): MessengerStore {
     seller.value = undefined;
     settings.value = undefined;
     hasOlderMessages.value = false;
+    quotesCache.clear();
   }
 
   return {
@@ -239,7 +240,7 @@ export function createMessengerStore(): MessengerStore {
     getQuotedMessage,
 
     // Actions
-    loadMessages: loadRootMessages,
+    loadMessages,
     loadMoreMessages,
     loadPreviousMessages,
     initializeConversation,
