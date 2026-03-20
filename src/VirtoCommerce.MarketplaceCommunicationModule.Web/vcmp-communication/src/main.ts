@@ -22,7 +22,7 @@ async function startApp() {
         fallbackLocale: import.meta.env.APP_I18N_FALLBACK_LOCALE,
       },
     })
-    .use(Messenger, { router })
+    .use(Messenger)
     .use(router);
 
   Object.entries(locales).forEach(([key, message]) => {

@@ -5,7 +5,7 @@
     "declarationDir": "dist/types",
     "outDir": "dist",
     "rootDir": "./",
-    "types": ["vite/client", "../shims-vue.d.ts"],
+    "types": ["vite/client", "@vc-shell/framework/globals"],
   },
   "files": ["package.json"],
   "include": ["index.ts", "**/*.ts", "**/*.vue", "**/*.json", "vite.config.mts"]

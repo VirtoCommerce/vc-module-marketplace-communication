@@ -2,7 +2,7 @@
   <NotificationTemplate
     :notification="notification"
     color="var(--success-400)"
-    icon="material-mail"
+    icon="lucide-mail"
     :title="notification.title ?? ''"
     @click="openMessageBlade"
   >

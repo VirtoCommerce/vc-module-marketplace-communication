@@ -2,7 +2,7 @@
   <VcWidget
     v-loading:500="loading"
     :title="$t('MESSENGER.WIDGET.TITLE')"
-    icon="material-chat_bubble"
+    icon="lucide-message-circle"
     :value="messageCount"
     @click="openMessageBlade"
   >
@@ -10,29 +10,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useMessenger } from "../../composables";
-import { loading as vLoading, useBladeNavigation, VcWidget } from "@vc-shell/framework";
+import { loading as vLoading, useBlade, useWidget, injectBladeContext, VcWidget } from "@vc-shell/framework";
 
-export interface Props {
-  id: string;
-  objectType: string;
-}
-
-const props = defineProps<Props>();
+const ctx = injectBladeContext();
+const bladeItem = computed(() => ctx.value.item as { id?: string; objectType?: string });
+const entityId = computed(() => bladeItem.value?.id ?? "");
+const entityType = computed(() => bladeItem.value?.objectType ?? "");
 
 const { getUnreadCount } = useMessenger();
-const { openBlade, resolveBladeByName } = useBladeNavigation();
+const { openBlade } = useBlade();
 
 const messageCount = ref(0);
 const loading = ref(false);
 
 const openMessageBlade = () => {
   openBlade({
-    blade: resolveBladeByName("Messenger"),
+    name: "Messenger",
     options: {
-      entityType: props.objectType,
-      entityId: props.id,
+      entityType: entityType.value,
+      entityId: entityId.value,
     },
   });
 };
@@ -41,8 +39,8 @@ const populateCounter = async () => {
   try {
     loading.value = true;
     messageCount.value = await getUnreadCount({
-      entityId: props.id,
-      entityType: props.objectType,
+      entityId: entityId.value,
+      entityType: entityType.value,
     });
   } catch (error) {
     console.error("Error getting unread count:", error);
@@ -52,12 +50,11 @@ const populateCounter = async () => {
 };
 
 onMounted(async () => {
-  if (props.id) {
+  if (entityId.value) {
     await populateCounter();
   }
 });
 
-defineExpose({
-  updateActiveWidgetCount: populateCounter,
-});
+const { setTrigger } = useWidget();
+setTrigger({ onRefresh: populateCounter });
 </script>

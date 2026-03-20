@@ -9,112 +9,157 @@
     @expand="$emit('expand:blade')"
     @collapse="$emit('collapse:blade')"
   >
-    <!-- @vue-generic {Conversation}-->
-    <VcTable
-      state-key="conversations"
-      :items="conversations"
-      :columns="columns"
-      :loading="loading"
-      :pages="pages"
-      :current-page="currentPage"
-      :total-count="totalCount"
-      :search-value="searchValue"
-      :selected-item-id="selectedItemId"
-      @search:change="onSearchList"
-      @item-click="handleConversationSelect"
-      @pagination-click="onPaginationClick"
-      @scroll:ptr="reload"
-    >
-      <template #item_iconUrl="{ item }">
-        <VcImage
-          v-if="item.iconUrl"
-          :src="item.iconUrl"
-          rounded
-          size="s"
-          class="conversations__avatar"
+    <div class="chat-list">
+      <!-- Search -->
+      <div class="chat-list__search">
+        <VcInput
+          v-model="searchValue"
+          :placeholder="$t('MESSENGER.SEARCH.PLACEHOLDER')"
+          :clearable="true"
+          class="chat-list__search-input"
+          @update:model-value="onSearchInput"
         />
-        <VcIcon
-          v-else
-          class="conversations__avatar"
-          icon="material-forum"
-        />
-      </template>
-      <template #item_name="{ item }">
-        <div class="conversations__header">
-          <div class="conversations__author-info">
-            <div class="conversations__author-wrapper">
-              <div class="conversations__author-row">
-                <span class="conversations__author">{{ item.name }}</span>
-                <div
-                  v-if="item.entityType"
-                  class="conversations__type-wrapper"
-                >
-                  <span class="conversations__type conversations__type--entity">
-                    {{ getConversationType(item.entityType) }}
-                  </span>
-                </div>
-              </div>
-              <span
-                class="conversations__date"
-                :title="formatDate(item.lastMessage?.createdDate)"
-              >
-                {{ dateAgo(item.lastMessage?.createdDate) }}
-              </span>
+      </div>
 
-              <VcBadge
-                v-if="item.unreadMessagesCount && item.unreadMessagesCount > 0"
-                :content="item.unreadMessagesCount"
-                class="conversations__badge"
+      <!-- Loading -->
+      <div
+        v-if="loading"
+        class="chat-list__loading"
+      >
+        <div
+          v-for="n in 6"
+          :key="n"
+          class="chat-list__skeleton"
+        >
+          <div class="chat-list__skeleton-avatar" />
+          <div class="chat-list__skeleton-content">
+            <!-- Top row: name + type badge + time (mirrors chat-item__top) -->
+            <div class="chat-list__skeleton-row">
+              <div class="chat-list__skeleton-name" />
+              <div class="chat-list__skeleton-badge" />
+              <span class="tw-flex-1" />
+              <div class="chat-list__skeleton-time" />
+            </div>
+            <!-- Bottom row: preview text (mirrors chat-item__bottom) -->
+            <div class="chat-list__skeleton-row">
+              <div class="chat-list__skeleton-preview" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conversation list -->
+      <div
+        v-else-if="conversations.length"
+        class="chat-list__items"
+      >
+        <div
+          v-for="conv in conversations"
+          :key="conv.id"
+          class="chat-item"
+          :class="{ 'chat-item--active': selectedItemId === conv.id }"
+          @click="selectConversation(conv)"
+        >
+          <!-- Avatar -->
+          <div class="chat-item__avatar">
+            <VcImage
+              v-if="conv.iconUrl"
+              :src="conv.iconUrl"
+              rounded
+              size="s"
+            />
+            <VcIcon
+              v-else
+              icon="lucide-messages-square"
+              size="l"
+            />
+          </div>
+
+          <!-- Content -->
+          <div class="chat-item__body">
+            <div class="chat-item__top">
+              <span class="chat-item__name">{{ conv.name }}</span>
+              <span
+                v-if="conv.entityType"
+                class="chat-item__type"
+                >{{ getConversationType(conv.entityType) }}</span
               >
-              </VcBadge>
+              <span class="tw-flex-1" />
+              <span
+                v-if="conv.lastMessage?.createdDate"
+                class="chat-item__time"
+                :title="formatDate(conv.lastMessage.createdDate)"
+                >{{ dateAgo(conv.lastMessage.createdDate) }}</span
+              >
+            </div>
+            <div class="chat-item__bottom">
+              <span
+                v-if="conv.lastMessage"
+                class="chat-item__preview"
+              >
+                <span class="chat-item__sender">
+                  {{
+                    conv.lastMessage.sender?.userName === currentSeller.name
+                      ? $t("ALL_MESSAGES.LIST.YOU")
+                      : conv.lastMessage.sender?.userName
+                  }}:
+                </span>
+                {{ conv.lastMessage.content }}
+              </span>
+              <span class="tw-flex-1" />
+              <span
+                v-if="conv.unreadMessagesCount && conv.unreadMessagesCount > 0"
+                class="chat-item__unread"
+                >{{ conv.unreadMessagesCount }}</span
+              >
             </div>
           </div>
         </div>
 
-        <div class="conversations__content">
-          <div
-            v-if="item.lastMessage"
-            class="conversations__message"
-          >
-            <span class="conversations__sender">
-              {{
-                item.lastMessage.sender?.userName === currentSeller.name
-                  ? $t("ALL_MESSAGES.LIST.YOU")
-                  : item.lastMessage.sender?.userName
-              }}:
-            </span>
-            <span class="conversations__text">{{ item.lastMessage.content }}</span>
-          </div>
-        </div>
-      </template>
-
-      <template #empty>
-        <div class="tw-w-full tw-h-full tw-box-border tw-flex tw-flex-col tw-items-center tw-justify-center">
-          <VcIcon
-            icon="material-forum"
-            class="tw-text-[color:var(--conversations-empty-grid-icon-color)]"
-            size="xxxl"
+        <!-- Pagination -->
+        <div
+          v-if="pages > 1"
+          class="chat-list__pagination"
+        >
+          <VcButton
+            small
+            icon="lucide-chevron-left"
+            :disabled="currentPage <= 1"
+            @click="onPaginationClick(currentPage - 1)"
           />
-          <div class="tw-m-4 tw-text-xl tw-font-medium">
-            {{ $t("ALL_MESSAGES.TABLE.EMPTY.NO_ITEMS") }}
-          </div>
-        </div>
-      </template>
-
-      <template #notfound>
-        <div class="tw-w-full tw-h-full tw-box-border tw-flex tw-flex-col tw-items-center tw-justify-center">
-          <VcIcon
-            icon="material-forum"
-            class="tw-text-[color:var(--conversations-empty-grid-icon-color)]"
-            size="xxxl"
+          <span class="chat-list__page-info">{{ currentPage }} / {{ pages }}</span>
+          <VcButton
+            small
+            icon="lucide-chevron-right"
+            :disabled="currentPage >= pages"
+            @click="onPaginationClick(currentPage + 1)"
           />
-          <div class="tw-m-4 tw-text-xl tw-font-medium">
-            {{ $t("ALL_MESSAGES.TABLE.NOT_FOUND.EMPTY") }}
-          </div>
-          <VcButton @click="reset">{{ $t("ALL_MESSAGES.TABLE.NOT_FOUND.RESET") }}</VcButton>
         </div>
-      </template>
-    </VcTable>
+      </div>
+
+      <!-- Empty state -->
+      <div
+        v-else
+        class="chat-list__empty"
+      >
+        <VcIcon
+          icon="lucide-messages-square"
+          size="xxl"
+          class="tw-text-[color:var(--neutrals-300)]"
+        />
+        <span class="chat-list__empty-text">
+          {{ searchValue ? $t("ALL_MESSAGES.TABLE.NOT_FOUND.EMPTY") : $t("ALL_MESSAGES.TABLE.EMPTY.NO_ITEMS") }}
+        </span>
+        <VcButton
+          v-if="searchValue"
+          text
+          small
+          @click="resetSearch"
+        >
+          {{ $t("ALL_MESSAGES.TABLE.NOT_FOUND.RESET") }}
+        </VcButton>
+      </div>
+    </div>
   </VcBlade>
 </template>
 
@@ -124,7 +169,8 @@ import { useConversationList, useMessenger } from "../composables";
 import {
   IBladeToolbar,
   IParentCallArgs,
-  ITableColumns,
+  VcInput,
+  VcButton,
   notification,
   useBladeNavigation,
   useNotifications,
@@ -136,7 +182,7 @@ import type {
 import { useI18n } from "vue-i18n";
 import { useMounted } from "@vueuse/core";
 import { MessagePushNotification, ConversationListType } from "../typings";
-import * as _ from "lodash-es";
+import { useDebounceFn } from "@vueuse/core";
 import { formatDate, dateAgo } from "../utils";
 
 const props = defineProps<{
@@ -164,7 +210,7 @@ defineOptions({
   isWorkspace: true,
   menuItem: {
     title: "ALL_MESSAGES.MENU_TITLE",
-    icon: "material-chat_bubble",
+    icon: "lucide-message-circle",
     priority: 5,
   },
 });
@@ -187,7 +233,7 @@ const { createConversation, getOperator, operator } = useMessenger();
 
 const currentSeller = inject<ComputedRef<{ id: string; name: string }>>("currentSeller");
 const isReady = ref(false);
-const searchValue = ref();
+const searchValue = ref("");
 const selectedItemId = ref<string>();
 
 if (!currentSeller?.value) {
@@ -199,14 +245,11 @@ const title = computed(() => t("ALL_MESSAGES.TITLE"));
 watch(
   [() => props.param, () => conversations.value, useMounted()],
   ([conversationId, conversations, mounted]) => {
-    if (selectedConversation.value) {
-      return;
-    }
+    if (selectedConversation.value) return;
     if (conversations && conversationId && mounted) {
       selectedConversation.value = conversations.find((c) => c.id === conversationId);
-
       if (selectedConversation.value) {
-        handleConversationSelect(selectedConversation.value, props.options?.messageId);
+        selectConversation(selectedConversation.value, props.options?.messageId);
         selectedItemId.value = conversationId;
       }
     } else {
@@ -228,25 +271,27 @@ const getConversationType = (entityType?: string) => {
   return entityType ? ConversationListType[entityType as keyof typeof ConversationListType] : null;
 };
 
-const onSearchList = _.debounce(async (keyword: string | undefined) => {
-  console.debug(`Offers list search by ${keyword}`);
-  searchValue.value = keyword;
+const debouncedSearch = useDebounceFn(async (keyword: string | undefined) => {
   await loadConversations({
     ...searchQuery.value,
     keyword,
   });
-}, 1000);
+}, 500);
+
+function onSearchInput() {
+  debouncedSearch(searchValue.value || undefined);
+}
 
 const bladeToolbar = computed<IBladeToolbar[]>(() => [
   {
     id: "refresh",
-    icon: "material-refresh",
+    icon: "lucide-refresh-cw",
     title: t("ALL_MESSAGES.TOOLBAR.REFRESH"),
     clickHandler: reload,
   },
   {
     id: "operator-chat",
-    icon: "material-chat_bubble",
+    icon: "lucide-message-circle",
     title: t("ALL_MESSAGES.TOOLBAR.OPERATOR_CHAT"),
     clickHandler: async () => {
       try {
@@ -257,9 +302,7 @@ const bladeToolbar = computed<IBladeToolbar[]>(() => [
         });
         await openBlade({
           blade: resolveBladeByName("Messenger"),
-          options: {
-            conversation,
-          },
+          options: { conversation },
         });
       } catch (error) {
         console.error(error);
@@ -268,19 +311,7 @@ const bladeToolbar = computed<IBladeToolbar[]>(() => [
   },
 ]);
 
-const columns = ref<ITableColumns[]>([
-  {
-    id: "iconUrl",
-    title: computed(() => t("ALL_MESSAGES.TABLE.COLUMNS.ICON_URL")),
-    width: "80px",
-  },
-  {
-    id: "name",
-    title: computed(() => t("ALL_MESSAGES.TABLE.COLUMNS.NAME")),
-  },
-]);
-
-function handleConversationSelect(conversation: Conversation, messageId?: string) {
+function selectConversation(conversation: Conversation, messageId?: string) {
   openBlade({
     blade: resolveBladeByName("Messenger"),
     param: messageId,
@@ -314,12 +345,6 @@ const reload = async () => {
   });
 };
 
-function expandAllReplies() {
-  if (selectedConversation.value) {
-    handleConversationSelect(selectedConversation.value, undefined);
-  }
-}
-
 async function loadConversations(query: ISearchConversationsQuery) {
   if (currentSeller?.value) {
     await getConversations({
@@ -329,7 +354,7 @@ async function loadConversations(query: ISearchConversationsQuery) {
   }
 }
 
-async function reset() {
+async function resetSearch() {
   searchValue.value = "";
   await loadConversations({
     ...searchQuery.value,
@@ -345,106 +370,176 @@ onMounted(async () => {
 defineExpose({
   title,
   refresh: reload,
-  expandAllReplies,
 });
 </script>
 
 <style lang="scss">
-:root {
-  --conversations-avatar-size: 42px;
-  --conversations-author-color: var(--neutrals-400);
-  --conversations-date-color: var(--neutrals-500);
-  --conversations-empty-grid-icon-color: var(--secondary-500, var(--secondary-500));
+.chat-list {
+  @apply tw-flex tw-flex-col tw-h-full;
+  @apply tw-bg-[color:var(--additional-50)];
+
+  &__search {
+    @apply tw-px-4 tw-py-3;
+    @apply tw-border-b tw-border-solid tw-border-[color:var(--neutrals-100)];
+    @apply tw-bg-[color:var(--blade-background-color)];
+  }
+
+  &__search-input {
+    @apply tw-w-full;
+  }
+
+  &__items {
+    @apply tw-flex-1 tw-overflow-y-auto;
+  }
+
+  &__loading {
+    @apply tw-flex-1 tw-overflow-hidden tw-p-2;
+  }
+
+  &__skeleton {
+    // Mirrors .chat-item layout
+    @apply tw-flex tw-items-start tw-gap-3 tw-px-4 tw-py-3;
+    @apply tw-border-b tw-border-solid tw-border-[color:var(--neutrals-50)];
+
+    &-avatar {
+      // Mirrors .chat-item__avatar: 10x10 circle
+      @apply tw-w-10 tw-h-10 tw-rounded-full tw-flex-shrink-0;
+      @apply tw-bg-[color:var(--neutrals-100)];
+      animation: skeleton-pulse 1.5s ease-in-out infinite;
+    }
+
+    &-content {
+      // Mirrors .chat-item__body
+      @apply tw-flex tw-flex-col tw-gap-1.5 tw-flex-1 tw-min-w-0;
+    }
+
+    &-row {
+      @apply tw-flex tw-items-center tw-gap-2;
+    }
+
+    &-name {
+      @apply tw-h-3.5 tw-w-28 tw-rounded;
+      @apply tw-bg-[color:var(--neutrals-100)];
+      animation: skeleton-pulse 1.5s ease-in-out infinite;
+    }
+
+    &-badge {
+      @apply tw-h-4 tw-w-14 tw-rounded-full;
+      @apply tw-bg-[color:var(--neutrals-100)];
+      animation: skeleton-pulse 1.5s ease-in-out infinite;
+    }
+
+    &-time {
+      @apply tw-h-3 tw-w-10 tw-rounded tw-flex-shrink-0;
+      @apply tw-bg-[color:var(--neutrals-100)];
+      animation: skeleton-pulse 1.5s ease-in-out infinite;
+    }
+
+    &-preview {
+      @apply tw-h-3 tw-w-4/5 tw-rounded;
+      @apply tw-bg-[color:var(--neutrals-100)];
+      animation: skeleton-pulse 1.5s ease-in-out infinite;
+    }
+  }
+
+  &__empty {
+    @apply tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3;
+    @apply tw-flex-1 tw-py-12;
+  }
+
+  &__empty-text {
+    @apply tw-text-sm tw-text-[color:var(--neutrals-500)];
+  }
+
+  &__pagination {
+    @apply tw-flex tw-items-center tw-justify-center tw-gap-3;
+    @apply tw-py-3;
+    @apply tw-border-t tw-border-solid tw-border-[color:var(--neutrals-100)];
+  }
+
+  &__page-info {
+    @apply tw-text-xs tw-text-[color:var(--neutrals-500)];
+  }
 }
 
-.conversations {
-  @apply tw-h-full tw-overflow-y-auto tw-bg-[color:var(--additional-50)];
+.chat-item {
+  @apply tw-flex tw-items-start tw-gap-3;
+  @apply tw-px-4 tw-py-3;
+  @apply tw-cursor-pointer;
+  @apply tw-border-b tw-border-solid tw-border-[color:var(--neutrals-50)];
+  @apply tw-transition-colors;
 
-  &__empty-state {
-    @apply tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-full tw-text-[color:var(--neutrals-500)] tw-gap-3;
+  &:hover {
+    @apply tw-bg-[color:var(--neutrals-50)];
   }
 
-  &__empty-icon {
-    @apply tw-text-[48px];
-  }
-
-  &__list {
-    @apply tw-list-none tw-p-0 tw-m-0;
-  }
-
-  &__item {
-    @apply tw-flex tw-flex-col tw-p-4 tw-cursor-pointer tw-border-b tw-border-[color:var(--neutrals-100)];
+  &--active {
+    @apply tw-bg-[color:var(--primary-50)];
 
     &:hover {
-      @apply tw-bg-[color:var(--neutrals-50)];
+      @apply tw-bg-[color:var(--primary-50)];
     }
-
-    &--selected {
-      @apply tw-bg-[color:var(--neutrals-50)];
-    }
-
-    &--skeleton {
-      @apply tw-pointer-events-none;
-    }
-  }
-
-  &__header {
-    @apply tw-flex tw-justify-between tw-items-start tw-w-full;
-  }
-
-  &__author-row {
-    @apply tw-flex tw-items-center tw-justify-between tw-gap-2;
-  }
-
-  &__type {
-    @apply tw-text-xs tw-px-2 tw-py-0.5 tw-rounded-full tw-font-medium;
-
-    &--entity {
-      @apply tw-bg-[color:var(--primary-50)] tw-text-[color:var(--primary-500)];
-    }
-  }
-
-  &__author-info {
-    @apply tw-flex tw-items-start tw-flex-1;
   }
 
   &__avatar {
-    @apply tw-mr-2 tw-text-[length:var(--conversations-avatar-size)] tw-text-[color:var(--conversations-author-color)] #{!important};
+    @apply tw-flex tw-items-center tw-justify-center;
+    @apply tw-w-10 tw-h-10 tw-flex-shrink-0;
+    @apply tw-rounded-full;
+    @apply tw-bg-[color:var(--neutrals-100)] tw-text-[color:var(--neutrals-400)];
+    @apply tw-overflow-hidden;
   }
 
-  &__author-wrapper {
-    @apply tw-flex tw-flex-row tw-gap-1 tw-flex-1 tw-items-center;
+  &__body {
+    @apply tw-flex tw-flex-col tw-flex-1 tw-min-w-0 tw-gap-0.5;
   }
 
-  &__author {
-    @apply tw-font-semibold tw-text-sm tw-text-[color:var(--neutrals-950)];
+  &__top {
+    @apply tw-flex tw-items-center tw-gap-2;
   }
 
-  &__date {
-    @apply tw-text-[color:var(--conversations-date-color)] tw-text-xs;
+  &__name {
+    @apply tw-font-semibold tw-text-sm tw-text-[color:var(--neutrals-900)];
+    @apply tw-truncate;
   }
 
-  &__content {
-    @apply tw-mt-2;
+  &__type {
+    @apply tw-text-[11px] tw-leading-none tw-px-1.5 tw-py-0.5 tw-rounded-full tw-font-medium tw-flex-shrink-0;
+    @apply tw-bg-[color:var(--primary-50)] tw-text-[color:var(--primary-500)];
   }
 
-  &__message {
-    @apply tw-flex tw-gap-1 tw-text-sm tw-text-[color:var(--neutrals-600)];
+  &__time {
+    @apply tw-text-xs tw-text-[color:var(--neutrals-400)] tw-flex-shrink-0 tw-whitespace-nowrap;
+  }
+
+  &__bottom {
+    @apply tw-flex tw-items-center tw-gap-2;
+  }
+
+  &__preview {
+    @apply tw-text-[13px] tw-text-[color:var(--neutrals-500)];
+    @apply tw-truncate;
   }
 
   &__sender {
-    @apply tw-text-[color:var(--neutrals-500)] tw-whitespace-nowrap;
+    @apply tw-text-[color:var(--neutrals-400)];
   }
 
-  &__text {
-    @apply tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap;
+  &__unread {
+    @apply tw-flex tw-items-center tw-justify-center;
+    @apply tw-min-w-[20px] tw-h-5 tw-px-1.5;
+    @apply tw-rounded-full tw-flex-shrink-0;
+    @apply tw-bg-[color:var(--primary-500)] tw-text-white;
+    @apply tw-text-[11px] tw-font-semibold;
   }
+}
 
-  &__badge {
-    @apply tw-flex;
-    .vc-badge__badge {
-      @apply tw-static tw-right-1 -tw-top-1 #{!important};
-    }
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
   }
 }
 </style>
