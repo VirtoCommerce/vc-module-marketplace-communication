@@ -57,7 +57,7 @@
           icon="lucide-message-square"
           size="xl"
         />
-        <span>{{ $t("messenger.no_messages") }}</span>
+        <span>{{ $t("MESSENGER.NO_MESSAGES") }}</span>
       </div>
 
       <!-- Next messages loader sentinel -->
