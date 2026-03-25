@@ -1,13 +1,8 @@
 <template>
   <VcBlade
     :title="title"
-    :expanded="expanded"
-    :closable="closable"
     width="50%"
     :toolbar-items="bladeToolbar"
-    @close="$emit('close:blade')"
-    @expand="$emit('expand:blade')"
-    @collapse="$emit('collapse:blade')"
   >
     <div class="chat-list">
       <!-- Search -->
@@ -50,7 +45,7 @@
 
       <!-- Conversation list -->
       <div
-        v-else-if="conversations.length"
+        v-else-if="conversations?.length"
         class="chat-list__items"
       >
         <div
@@ -166,46 +161,18 @@
 <script setup lang="ts">
 import { computed, ComputedRef, inject, onMounted, Ref, ref, watch } from "vue";
 import { useConversationList, useMessenger } from "../composables";
-import {
-  IBladeToolbar,
-  IParentCallArgs,
-  VcInput,
-  VcButton,
-  notification,
-  useBladeNavigation,
-  useNotifications,
-} from "@vc-shell/framework";
+import { IBladeToolbar, VcInput, VcButton, notification, useBlade, useBladeNotifications } from "@vc-shell/framework";
 import type {
   Conversation,
   ISearchConversationsQuery,
 } from "../../../api_client/virtocommerce.marketplacecommunication";
 import { useI18n } from "vue-i18n";
-import { useMounted } from "@vueuse/core";
+import { useMounted, useDebounceFn } from "@vueuse/core";
 import { MessagePushNotification, ConversationListType } from "../typings";
-import { useDebounceFn } from "@vueuse/core";
 import { formatDate, dateAgo } from "../utils";
 
-const props = defineProps<{
-  expanded?: boolean;
-  closable?: boolean;
-  param?: string;
-  options?: {
-    entityId?: string;
-    entityType?: string;
-    messageId?: string;
-  };
-}>();
-
-const emit = defineEmits<{
-  (event: "parent:call", args: IParentCallArgs): void;
-  (event: "close:blade"): void;
-  (event: "expand:blade"): void;
-  (event: "collapse:blade"): void;
-}>();
-
-defineOptions({
+defineBlade({
   name: "AllMessages",
-  notifyType: "MessagePushNotification",
   url: "/communication",
   isWorkspace: true,
   menuItem: {
@@ -216,13 +183,20 @@ defineOptions({
 });
 
 const { t } = useI18n({ useScope: "global" });
-const { openBlade, resolveBladeByName } = useBladeNavigation();
-const { setNotificationHandler } = useNotifications("MessagePushNotification");
 
-setNotificationHandler(async (notify) => {
-  const messageNotify = notify as MessagePushNotification;
-  notification(messageNotify.title + ": " + messageNotify.content);
-  await load();
+const { openBlade, exposeToChildren, options, param } = useBlade<{
+  entityId?: string;
+  entityType?: string;
+  messageId?: string;
+}>();
+
+useBladeNotifications({
+  types: ["MessagePushNotification"],
+  onMessage: async (notify) => {
+    const messageNotify = notify as MessagePushNotification;
+    notification(messageNotify.title + ": " + messageNotify.content);
+    await load();
+  },
 });
 
 const selectedConversation = ref<Conversation | null | undefined>(null) as Ref<Conversation | null | undefined>;
@@ -243,13 +217,13 @@ if (!currentSeller?.value) {
 const title = computed(() => t("ALL_MESSAGES.TITLE"));
 
 watch(
-  [() => props.param, () => conversations.value, useMounted()],
+  [() => param.value, () => conversations.value, useMounted()],
   ([conversationId, conversations, mounted]) => {
     if (selectedConversation.value) return;
     if (conversations && conversationId && mounted) {
       selectedConversation.value = conversations.find((c) => c.id === conversationId);
       if (selectedConversation.value) {
-        selectConversation(selectedConversation.value, props.options?.messageId);
+        selectConversation(selectedConversation.value, options.value?.messageId);
         selectedItemId.value = conversationId;
       }
     } else {
@@ -301,7 +275,7 @@ const bladeToolbar = computed<IBladeToolbar[]>(() => [
           userIds: [operator.value?.id ?? ""],
         });
         await openBlade({
-          blade: resolveBladeByName("Messenger"),
+          name: "Messenger",
           options: { conversation },
         });
       } catch (error) {
@@ -313,7 +287,7 @@ const bladeToolbar = computed<IBladeToolbar[]>(() => [
 
 function selectConversation(conversation: Conversation, messageId?: string) {
   openBlade({
-    blade: resolveBladeByName("Messenger"),
+    name: "Messenger",
     param: messageId,
     options: {
       conversation,
@@ -367,10 +341,7 @@ onMounted(async () => {
   await getOperator();
 });
 
-defineExpose({
-  title,
-  refresh: reload,
-});
+exposeToChildren({ refresh: reload });
 </script>
 
 <style lang="scss">

@@ -1,10 +1,9 @@
-import * as components from "./components";
 import * as pages from "./pages";
-import * as notifications from "./components/notifications";
-import { createAppModule, registerExternalWidget, IBladeInstance } from "@vc-shell/framework";
+import { registerExternalWidget, IBladeInstance, defineAppModule } from "@vc-shell/framework";
 import * as locales from "./locales";
 import { App, markRaw } from "vue";
 import { MessageWidget } from "./components/widgets";
+import MessagePushNotification from "./notifications/MessagePushNotification.vue";
 
 export default (() => {
   registerExternalWidget({
@@ -15,7 +14,16 @@ export default (() => {
       return !!bladeInstance?.param;
     },
   });
-  const module = createAppModule(pages, locales, notifications);
+  const module = defineAppModule({
+    blades: pages,
+    locales,
+    notifications: {
+      MessagePushNotification: {
+        template: MessagePushNotification,
+        toast: { mode: "auto" },
+      },
+    },
+  });
 
   return {
     install(app: App): void {

@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useMessenger } from "../../composables";
-import { loading as vLoading, useBlade, useWidget, injectBladeContext, VcWidget } from "@vc-shell/framework";
+import { loading as vLoading, useBlade, injectBladeContext, useWidgetTrigger, VcWidget } from "@vc-shell/framework";
 
 const ctx = injectBladeContext();
 const bladeItem = computed(() => ctx.value.item as { id?: string; objectType?: string });
@@ -49,12 +49,11 @@ const populateCounter = async () => {
   }
 };
 
+useWidgetTrigger({ onRefresh: populateCounter });
+
 onMounted(async () => {
   if (entityId.value) {
     await populateCounter();
   }
 });
-
-const { setTrigger } = useWidget();
-setTrigger({ onRefresh: populateCounter });
 </script>

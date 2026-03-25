@@ -6,5 +6,4 @@ export { default as MessageSkeleton } from "./message-skeleton.vue";
 export { default as AssetItem } from "./asset-item.vue";
 export { default as ImagePreviewPopup } from "./image-preview-popup.vue";
 
-export * from "./notifications";
 export * from "./widgets";

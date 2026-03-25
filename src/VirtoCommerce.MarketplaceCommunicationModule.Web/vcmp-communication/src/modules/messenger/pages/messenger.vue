@@ -1,14 +1,9 @@
 <template>
   <VcBlade
     :title="bladeTitle"
-    :closable="true"
-    :expanded="expanded"
     width="50%"
     class="messenger"
     :class="{ 'messenger--mobile': $isMobile.value }"
-    @close="$emit('close:blade')"
-    @expand="$emit('expand:blade')"
-    @collapse="$emit('collapse:blade')"
   >
     <div class="messenger__content">
       <!-- Header with entity info -->
@@ -44,7 +39,7 @@
 
 <script setup lang="ts">
 import { computed, ref, provide, onMounted, inject, type Ref } from "vue";
-import { IParentCallArgs, useBladeNavigation } from "@vc-shell/framework";
+import { useBlade } from "@vc-shell/framework";
 import { Conversation } from "@vcmp-communication/api/marketplacecommunication";
 import { useI18n } from "vue-i18n";
 import { createMessengerStore } from "../composables/useMessengerStore";
@@ -52,34 +47,17 @@ import { messengerStoreKey, messengerContextKey } from "../injection-keys";
 import { MessageList, MessageSkeleton } from "../components";
 import { EntityToBlade } from "../typings";
 
-export interface Props {
-  expanded?: boolean;
-  closable?: boolean;
-  param?: string;
-  options?: {
-    conversation?: Conversation;
-    entityId?: string;
-    entityType?: string;
-  };
-}
-
-export interface Emits {
-  (event: "parent:call", args: IParentCallArgs): void;
-  (event: "close:blade"): void;
-  (event: "expand:blade"): void;
-  (event: "collapse:blade"): void;
-}
-
-const props = defineProps<Props>();
-const emit = defineEmits<Emits>();
-
-defineOptions({
+defineBlade({
   name: "Messenger",
-  notifyType: "MessagePushNotification",
 });
 
 const { t } = useI18n();
-const { openBlade, resolveBladeByName } = useBladeNavigation();
+const { openBlade, options } = useBlade<{
+  conversation?: Conversation;
+  entityId?: string;
+  entityType?: string;
+}>();
+
 const currentSeller = inject("currentSeller") as Ref<{ id: string; name: string }>;
 
 const bladeTitle = computed(() => t("MESSENGER.TITLE"));
@@ -91,8 +69,8 @@ provide(messengerStoreKey, store);
 
 // --- Provide context ---
 provide(messengerContextKey, {
-  entityId: props.options?.entityId,
-  entityType: props.options?.entityType,
+  entityId: options.value?.entityId,
+  entityType: options.value?.entityType,
   sellerId: currentSeller.value.id,
   sellerName: currentSeller.value.name,
   conversation: store.conversation,
@@ -103,14 +81,14 @@ onMounted(async () => {
   try {
     initLoading.value = true;
     await store.initializeConversation({
-      entityId: props.options?.entityId,
-      entityType: props.options?.entityType,
-      conversation: props.options?.conversation,
+      entityId: options.value?.entityId,
+      entityType: options.value?.entityType,
+      conversation: options.value?.conversation,
     });
 
     await store.loadMessages({
-      entityId: props.options?.entityId,
-      entityType: props.options?.entityType,
+      entityId: options.value?.entityId,
+      entityType: options.value?.entityType,
       responseGroup: "Full",
       conversationId: store.conversation.value?.id,
     });
@@ -122,17 +100,13 @@ onMounted(async () => {
 });
 
 function goToEntity() {
-  if (props.options?.entityId && props.options?.entityType) {
+  if (options.value?.entityId && options.value?.entityType) {
     openBlade({
-      blade: { name: EntityToBlade[props.options.entityType as keyof typeof EntityToBlade] },
-      param: props.options.entityId,
+      name: EntityToBlade[options.value.entityType as keyof typeof EntityToBlade],
+      param: options.value.entityId,
     });
   }
 }
-
-defineExpose({
-  title: bladeTitle,
-});
 </script>
 
 <style lang="scss">
