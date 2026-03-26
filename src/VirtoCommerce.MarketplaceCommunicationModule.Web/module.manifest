@@ -7,8 +7,8 @@
   <platformVersion>3.897.0</platformVersion>
   <dependencies>
     <dependency id="VirtoCommerce.Core" version="3.808.0" />
-    <dependency id="VirtoCommerce.Communication" version="3.804.0" />
-    <dependency id="VirtoCommerce.MarketplaceVendor" version="3.830.0-alpha.924" />
+    <dependency id="VirtoCommerce.Communication" version="3.805.0" />
+    <dependency id="VirtoCommerce.MarketplaceVendor" version="3.830.0" />
     <dependency id="VirtoCommerce.Orders" version="3.800.0" />
   </dependencies>
 
@@ -30,7 +30,7 @@
   <moduleType>VirtoCommerce.MarketplaceCommunicationModule.Web.Module, VirtoCommerce.MarketplaceCommunicationModule.Web</moduleType>
 
   <releaseNotes>First version.</releaseNotes>
-  <copyright>Copyright © 2024-2025 VirtoCommerce. All rights reserved</copyright>
+  <copyright>Copyright © 2024-2026 VirtoCommerce. All rights reserved</copyright>
   <tags>Marketplace Communication module</tags>
   <useFullTypeNameInSwagger>false</useFullTypeNameInSwagger>
   <frontendModules>
