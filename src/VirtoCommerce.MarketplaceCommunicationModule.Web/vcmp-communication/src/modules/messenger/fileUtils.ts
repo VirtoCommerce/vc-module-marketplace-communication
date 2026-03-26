@@ -27,6 +27,26 @@ function getFileThumbnail(name: string | undefined) {
   );
 }
 
+const extensionColors: Record<string, string> = {
+  pdf: "var(--danger-500)",
+  doc: "var(--primary-500)",
+  docx: "var(--primary-500)",
+  xls: "var(--success-500)",
+  xlsx: "var(--success-500)",
+  csv: "var(--success-500)",
+  ppt: "var(--warning-600)",
+  pptx: "var(--warning-600)",
+  zip: "var(--warning-500)",
+  rar: "var(--warning-500)",
+  "7z": "var(--warning-500)",
+};
+
+function getExtensionColor(name: string | undefined): string {
+  if (!name) return "var(--info-500)";
+  const ext = getExtension(name) ?? "";
+  return extensionColors[ext] ?? "var(--info-500)";
+}
+
 function readableSize(bytes: number | undefined, decimals = 2) {
   if (!bytes) return "0 Bytes";
 
@@ -59,4 +79,4 @@ const createThumbnailLink = (url: string | undefined) => {
   return thumbnailUrl;
 };
 
-export { imageExtensions, getExtension, isImage, getFileThumbnail, readableSize, createThumbnailLink };
+export { imageExtensions, getExtension, isImage, getFileThumbnail, getExtensionColor, readableSize, createThumbnailLink };
