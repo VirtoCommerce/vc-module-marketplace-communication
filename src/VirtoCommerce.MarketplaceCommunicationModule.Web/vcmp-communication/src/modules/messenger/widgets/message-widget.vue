@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-import { useMessenger } from "../../composables";
+import { useMessenger } from "../composables";
 import { loading as vLoading, useBlade, injectBladeContext, useWidgetTrigger, VcWidget } from "@vc-shell/framework";
 
 const ctx = injectBladeContext();

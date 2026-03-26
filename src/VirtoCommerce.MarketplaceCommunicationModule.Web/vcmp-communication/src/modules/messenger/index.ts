@@ -2,7 +2,7 @@ import * as pages from "./pages";
 import { registerExternalWidget, IBladeInstance, defineAppModule } from "@vc-shell/framework";
 import * as locales from "./locales";
 import { App, markRaw } from "vue";
-import { MessageWidget } from "./components/widgets";
+import { MessageWidget } from "./widgets";
 import MessagePushNotification from "./notifications/MessagePushNotification.vue";
 
 export default (() => {
@@ -10,7 +10,7 @@ export default (() => {
     id: "MessageWidget",
     component: markRaw(MessageWidget),
     targetBlades: ["ProductDetails", "Offer", "OrderDetails"],
-    isVisible: (bladeInstance?: IBladeInstance) => {
+    isVisible: (bladeInstance) => {
       return !!bladeInstance?.param;
     },
   });

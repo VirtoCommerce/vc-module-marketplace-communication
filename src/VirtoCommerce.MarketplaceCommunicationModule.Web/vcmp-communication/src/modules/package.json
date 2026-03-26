@@ -1,7 +1,0 @@
-{
-  "name": "@vcmp-communication/modules",
-  "version": "1.0.0",
-  "type": "module",
-  "main": "./dist/index.mjs",
-  "types": "./dist/types/index.d.ts"
-}
