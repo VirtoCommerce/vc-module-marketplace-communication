@@ -239,8 +239,8 @@ onBeforeUnmount(() => {
     justify-content: flex-end;
 
     .message-item__bubble {
-      background-color: var(--primary-50, #eff6ff);
-      border-color: var(--primary-200, #bfdbfe);
+      background-color: var(--primary-50);
+      border-color: var(--primary-200);
     }
   }
 
@@ -253,21 +253,21 @@ onBeforeUnmount(() => {
     min-width: 120px;
     padding: 8px 12px;
     border-radius: 12px;
-    background-color: var(--neutral-50, #f8fafc);
-    border: 1px solid var(--neutral-200, #e2e8f0);
+    background-color: var(--neutrals-50);
+    border: 1px solid var(--neutrals-200);
     position: relative;
   }
 
   &__author {
     font-size: 13px;
     font-weight: 600;
-    color: var(--primary-600, #2563eb);
+    color: var(--primary-600);
     margin-bottom: 2px;
   }
 
   &__quote {
-    background-color: var(--neutral-100, #f1f5f9);
-    border-left: 3px solid var(--primary-400, #60a5fa);
+    background-color: var(--neutrals-100);
+    border-left: 3px solid var(--primary-400);
     border-radius: 4px;
     padding: 4px 8px;
     margin-bottom: 4px;
@@ -277,7 +277,7 @@ onBeforeUnmount(() => {
       cursor: pointer;
 
       &:hover {
-        background-color: var(--neutral-200, #e2e8f0);
+        background-color: var(--neutrals-200);
       }
     }
   }
@@ -286,13 +286,13 @@ onBeforeUnmount(() => {
     display: block;
     font-size: 12px;
     font-weight: 600;
-    color: var(--primary-600, #2563eb);
+    color: var(--primary-600);
   }
 
   &__quote-text {
     display: block;
     font-size: 12px;
-    color: var(--neutral-600, #475569);
+    color: var(--neutrals-600);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -301,12 +301,12 @@ onBeforeUnmount(() => {
   &__quote-unavailable {
     font-size: 12px;
     font-style: italic;
-    color: var(--neutral-400, #94a3b8);
+    color: var(--neutrals-400);
   }
 
   &__quote-loading {
     font-size: 12px;
-    color: var(--neutral-400, #94a3b8);
+    color: var(--neutrals-400);
   }
 
   &__content {
@@ -349,7 +349,7 @@ onBeforeUnmount(() => {
 
   &__time {
     font-size: 11px;
-    color: var(--neutral-400, #94a3b8);
+    color: var(--neutrals-400);
   }
 
   &__unread-dot {
@@ -375,7 +375,7 @@ onBeforeUnmount(() => {
 
 @keyframes message-highlight {
   0% {
-    background-color: var(--warning-100, #fef3c7);
+    background-color: var(--warning-100);
   }
   100% {
     background-color: transparent;
