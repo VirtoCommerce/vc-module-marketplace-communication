@@ -62,7 +62,7 @@ defineEmits<{
 }>();
 
 const isImageFile = computed(() => isImage(props.asset.fileName));
-const extensionLabel = computed(() => (getExtension(props.asset.fileName) ?? "FILE").toUpperCase());
+const extensionLabel = computed(() => (getExtension(props.asset.fileName ?? "") ?? "FILE").toUpperCase());
 const extensionColor = computed(() => getExtensionColor(props.asset.fileName));
 </script>
 

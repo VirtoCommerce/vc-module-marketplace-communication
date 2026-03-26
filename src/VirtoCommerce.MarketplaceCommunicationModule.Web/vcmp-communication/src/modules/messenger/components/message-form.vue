@@ -73,6 +73,7 @@
         maxlength="10000"
         @focus="isFocused = true"
         @blur="isFocused = false"
+        @keydown="handleKeydown"
       />
 
       <!-- Attached files grid -->
@@ -172,7 +173,7 @@ import {
   MessageAttachment,
 } from "@vcmp-communication/api/marketplacecommunication";
 import { loading as vLoading, VcTextarea, useAssets, usePopup } from "@vc-shell/framework";
-import { useMagicKeys } from "@vueuse/core";
+
 import { getAllowedFileTypes } from "../constants";
 import { messengerContextKey, messengerStoreKey } from "../injection-keys";
 import AttachmentPreview from "./attachment-preview.vue";
@@ -197,8 +198,6 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const keys = useMagicKeys();
-
 const { edit, upload, remove, loading: assetsLoading } = useAssets();
 const { showError } = usePopup();
 
@@ -228,13 +227,13 @@ let dragCounter = 0;
 
 // Ctrl+Enter (Win/Linux) or Cmd+Enter (Mac) to send
 const isMac = navigator.platform.toUpperCase().includes("MAC");
-const sendCombo = isMac ? keys["Meta+Enter"] : keys["Control+Enter"];
 
-watch(sendCombo, (v) => {
-  if (v && isFocused.value) {
+const handleKeydown = (e: KeyboardEvent) => {
+  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+    e.preventDefault();
     send();
   }
-});
+};
 
 const isAssetsModified = computed(() => {
   if (!props.message?.attachments) return assets.value.length > 0;
