@@ -30,6 +30,8 @@
     "COPY_IMAGE_LINK": "Copy image link",
     "DROP_FILES": "Drop files here",
     "UPLOADING_FILES": "Uploading files...",
+    "NEW_LINE_HINT": "new line",
+    "SEND_HINT": "send",
     "SHOW_MORE": "Show more",
     "SHOW_LESS": "Show less",
     "PAGES": {
