@@ -75,34 +75,23 @@
         @blur="isFocused = false"
       />
 
-      <!-- Attached files list -->
+      <!-- Attached files grid -->
       <div
         v-if="assets.length || isUploading"
         class="message-form__attachments"
       >
-        <div class="message-form__attachments-list">
-          <div
+        <div class="message-form__attachments-grid">
+          <AttachmentPreview
             v-for="asset in assets"
             :key="asset.id"
-            class="message-form__attachment-chip"
-          >
-            <VcIcon icon="lucide-file" size="xs" class="message-form__attachment-chip-icon" />
-            <span class="message-form__attachment-chip-name">{{ asset.fileName }}</span>
-            <button
-              class="message-form__attachment-chip-remove"
-              :disabled="isUploading"
-              @click="removeAsset(asset)"
-            >
-              <VcIcon icon="lucide-x" size="xs" />
-            </button>
-          </div>
-          <div
+            :asset="asset"
+            @remove="removeAsset(asset)"
+          />
+          <AttachmentPreview
             v-if="isUploading"
-            class="message-form__attachment-chip message-form__attachment-chip--loading"
-          >
-            <VcIcon icon="lucide-loader-2" size="xs" class="message-form__uploading-spinner" />
-            <span class="message-form__attachment-chip-name">{{ $t("MESSENGER.UPLOADING_FILES") }}</span>
-          </div>
+            :asset="({} as any)"
+            uploading
+          />
         </div>
       </div>
 
@@ -154,6 +143,24 @@
         </div>
       </div>
     </div>
+
+    <!-- Keyboard hints -->
+    <div
+      v-if="isExpanded || mode === 'reply' || mode === 'edit'"
+      class="message-form__hint"
+    >
+      <span class="message-form__hint-item">
+        <kbd class="message-form__kbd">Enter</kbd>
+        {{ $t("MESSENGER.NEW_LINE_HINT") }}
+      </span>
+      <span class="message-form__hint-item">
+        <kbd v-if="isMac" class="message-form__kbd">⌘</kbd>
+        <kbd v-else class="message-form__kbd">Ctrl</kbd>
+        <span class="message-form__hint-plus">+</span>
+        <kbd class="message-form__kbd">Enter</kbd>
+        {{ $t("MESSENGER.SEND_HINT") }}
+      </span>
+    </div>
   </div>
 </template>
 
@@ -168,6 +175,7 @@ import { loading as vLoading, VcTextarea, useAssets, usePopup } from "@vc-shell/
 import { useMagicKeys } from "@vueuse/core";
 import { getAllowedFileTypes } from "../constants";
 import { messengerContextKey, messengerStoreKey } from "../injection-keys";
+import AttachmentPreview from "./attachment-preview.vue";
 import * as _ from "lodash-es";
 
 const props = withDefaults(
@@ -218,12 +226,12 @@ const uploadError = ref<string | null>(null);
 const allowedFileTypes = getAllowedFileTypes();
 let dragCounter = 0;
 
-// Enter to send (but not Shift+Enter)
-const enter = keys["Enter"];
-const shift = keys["Shift"];
+// Ctrl+Enter (Win/Linux) or Cmd+Enter (Mac) to send
+const isMac = navigator.platform.toUpperCase().includes("MAC");
+const sendCombo = isMac ? keys["Meta+Enter"] : keys["Control+Enter"];
 
-watch(enter, (v) => {
-  if (v && !shift.value && isFocused.value) {
+watch(sendCombo, (v) => {
+  if (v && isFocused.value) {
     send();
   }
 });
@@ -539,9 +547,9 @@ const openFileSelect = () => {
     align-items: center;
     gap: 8px;
     padding: 8px 12px;
-    background-color: var(--neutral-50, #f8fafc);
-    border-left: 3px solid var(--primary-400, #60a5fa);
-    border-bottom: 1px solid var(--neutral-200, #e2e8f0);
+    background-color: var(--neutrals-50);
+    border-left: 3px solid var(--primary-400);
+    border-bottom: 1px solid var(--neutrals-200);
   }
 
   &__reply-preview-content {
@@ -554,13 +562,13 @@ const openFileSelect = () => {
     display: block;
     font-size: 12px;
     font-weight: 600;
-    color: var(--primary-600, #2563eb);
+    color: var(--primary-600);
   }
 
   &__reply-preview-text {
     display: block;
     font-size: 12px;
-    color: var(--neutral-600, #475569);
+    color: var(--neutrals-600);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -571,11 +579,11 @@ const openFileSelect = () => {
     background: none;
     border: none;
     cursor: pointer;
-    color: var(--neutral-400);
+    color: var(--neutrals-400);
     padding: 4px;
 
     &:hover {
-      color: var(--neutral-600);
+      color: var(--neutrals-600);
     }
   }
 
@@ -597,49 +605,13 @@ const openFileSelect = () => {
     }
   }
 
-  // --- Attachments ---
+  // --- Attachments grid ---
   &__attachments {
-    @apply tw-px-3 tw-pb-1;
+    @apply tw-px-3 tw-py-2;
   }
 
-  &__attachments-list {
-    @apply tw-flex tw-flex-wrap tw-gap-1.5;
-  }
-
-  &__attachment-chip {
-    @apply tw-inline-flex tw-items-center tw-gap-1;
-    @apply tw-pl-1.5 tw-pr-1 tw-py-0.5;
-    @apply tw-rounded-md;
-    @apply tw-bg-[color:var(--neutrals-50)];
-    @apply tw-border tw-border-solid tw-border-[color:var(--neutrals-200)];
-    @apply tw-text-xs;
-
-    &--loading {
-      @apply tw-text-[color:var(--neutrals-500)];
-    }
-  }
-
-  &__attachment-chip-icon {
-    @apply tw-text-[color:var(--neutrals-400)] tw-flex-shrink-0;
-  }
-
-  &__attachment-chip-name {
-    @apply tw-max-w-[140px] tw-truncate;
-    @apply tw-text-[color:var(--neutrals-700)];
-  }
-
-  &__attachment-chip-remove {
-    @apply tw-flex tw-items-center tw-justify-center;
-    @apply tw-w-4 tw-h-4 tw-rounded-sm;
-    @apply tw-border-0 tw-bg-transparent tw-cursor-pointer;
-    @apply tw-text-[color:var(--neutrals-400)];
-    @apply tw-opacity-60;
-    @apply tw-transition-all;
-
-    &:hover {
-      @apply tw-opacity-100;
-      @apply tw-bg-[color:var(--neutrals-100)];
-    }
+  &__attachments-grid {
+    @apply tw-flex tw-flex-wrap tw-gap-2;
   }
 
   // --- Toolbar ---
@@ -750,6 +722,36 @@ const openFileSelect = () => {
   // --- Uploading spinner ---
   &__uploading-spinner {
     animation: message-form-spin 1s linear infinite;
+  }
+
+  // --- Keyboard hint ---
+  &__hint {
+    @apply tw-flex tw-items-center tw-justify-end tw-gap-3;
+    @apply tw-pt-1.5 tw-px-1;
+    @apply tw-select-none;
+  }
+
+  &__hint-item {
+    @apply tw-flex tw-items-center tw-gap-1;
+    @apply tw-text-[11px];
+    @apply tw-text-[color:var(--neutrals-400)];
+    @apply tw-leading-none;
+  }
+
+  &__hint-plus {
+    @apply tw-text-[color:var(--neutrals-300)];
+  }
+
+  &__kbd {
+    @apply tw-inline-flex tw-items-center tw-justify-center;
+    @apply tw-min-w-[20px] tw-h-[18px] tw-px-1;
+    @apply tw-rounded-sm;
+    @apply tw-text-[10px] tw-font-medium;
+    @apply tw-text-[color:var(--neutrals-500)];
+    @apply tw-bg-[color:var(--neutrals-100)];
+    @apply tw-border tw-border-solid tw-border-[color:var(--neutrals-200)];
+    @apply tw-leading-none;
+    box-shadow: 0 1px 0 var(--neutrals-200);
   }
 }
 
