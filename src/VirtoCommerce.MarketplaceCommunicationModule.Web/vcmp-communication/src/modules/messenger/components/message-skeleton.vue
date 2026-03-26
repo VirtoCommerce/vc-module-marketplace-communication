@@ -18,7 +18,7 @@
 }
 
 %skeleton-block {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, var(--neutrals-100) 25%, var(--neutrals-200) 50%, var(--neutrals-100) 75%);
   background-size: 400px 100%;
   animation: skeleton-shimmer 1.5s infinite;
   border-radius: 4px;
@@ -33,8 +33,8 @@
     min-width: 200px;
     padding: 8px 12px;
     border-radius: 12px;
-    background-color: var(--neutral-50, #f8fafc);
-    border: 1px solid var(--neutral-200, #e2e8f0);
+    background-color: var(--neutrals-50);
+    border: 1px solid var(--neutrals-200);
   }
 
   &__author {
