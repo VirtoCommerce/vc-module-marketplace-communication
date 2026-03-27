@@ -8,7 +8,11 @@
     <div class="messenger__content">
       <!-- Header with entity info -->
       <div
-        v-if="options?.entityId && options?.entityType && store.conversation.value"
+        v-if="
+          options?.entityId &&
+          options?.entityType &&
+          (store.conversation.value?.iconUrl || store.conversation.value?.name)
+        "
         class="messenger__header"
       >
         <div class="messenger__header-content">
