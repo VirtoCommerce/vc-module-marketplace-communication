@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Project is not a test project -->
     <SonarQubeTestProject>false</SonarQubeTestProject>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="VirtoCommerce.MarketplaceVendorModule.Core" Version="3.830.0" />
-    <PackageReference Include="VirtoCommerce.CommunicationModule.Core" Version="3.805.0" />
-    <PackageReference Include="VirtoCommerce.Platform.Core" Version="3.897.0" />
+    <PackageReference Include="VirtoCommerce.MarketplaceVendorModule.Core" Version="3.1000.0" />
+    <PackageReference Include="VirtoCommerce.CommunicationModule.Core" Version="3.1000.0" />
+    <PackageReference Include="VirtoCommerce.Platform.Core" Version="3.1002.0" />
   </ItemGroup>
 </Project>
