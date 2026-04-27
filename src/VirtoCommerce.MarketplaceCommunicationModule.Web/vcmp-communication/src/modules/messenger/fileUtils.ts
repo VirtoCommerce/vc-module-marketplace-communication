@@ -1,12 +1,12 @@
 const fileThumbnails = [
-  { image: "bi-filetype-pdf", extensions: ["pdf"] },
-  { image: "bi-filetype-doc", extensions: ["doc", "docx"] },
-  { image: "bi-filetype-xls", extensions: ["xls", "xlsx"] },
-  { image: "bi-filetype-ppt", extensions: ["ppt", "pptx"] },
-  { image: "bi-filetype-csv", extensions: ["csv"] },
-  { image: "bi-file-zip", extensions: ["zip"] },
-  { image: "bi-file-music", extensions: ["mp3", "aac"] },
-  { image: "bi-file-play", extensions: ["mp4", "avi"] },
+  { image: "lucide-file-text", extensions: ["pdf"] },
+  { image: "lucide-file-text", extensions: ["doc", "docx"] },
+  { image: "lucide-file-spreadsheet", extensions: ["xls", "xlsx"] },
+  { image: "lucide-presentation", extensions: ["ppt", "pptx"] },
+  { image: "lucide-file-spreadsheet", extensions: ["csv"] },
+  { image: "lucide-file-archive", extensions: ["zip"] },
+  { image: "lucide-file-audio", extensions: ["mp3", "aac"] },
+  { image: "lucide-file-video", extensions: ["mp4", "avi"] },
 ];
 
 const imageExtensions = new Set(["png", "jpg", "jpeg", "svg", "gif", "webp"]);
@@ -21,9 +21,9 @@ function isImage(name: string | undefined) {
 }
 
 function getFileThumbnail(name: string | undefined) {
-  if (!name) return "bi-file-earmark";
+  if (!name) return "lucide-file";
   return (
-    fileThumbnails.find((thumb) => thumb.extensions.some((ext) => ext === getExtension(name)))?.image || "bi-file-earmark"
+    fileThumbnails.find((thumb) => thumb.extensions.some((ext) => ext === getExtension(name)))?.image || "lucide-file"
   );
 }
 
