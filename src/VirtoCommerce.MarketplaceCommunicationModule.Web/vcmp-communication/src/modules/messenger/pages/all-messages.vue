@@ -1,8 +1,5 @@
 <template>
-  <VcBlade
-    :title="title"
-    width="50%"
-    :toolbar-items="bladeToolbar"
+  <VcBlade :title="title" width="50%" :toolbar-items="bladeToolbar"
   >
     <div class="chat-list">
       <!-- Search -->
@@ -63,10 +60,7 @@
               rounded
               size="s"
             />
-            <VcIcon
-              v-else
-              icon="lucide-messages-square"
-              size="l"
+            <VcIcon v-else icon="lucide-messages-square" size="l"
             />
           </div>
 
@@ -113,21 +107,21 @@
 
         <!-- Pagination -->
         <div
-          v-if="pages > 1"
+          v-if="pagination.pages > 1"
           class="chat-list__pagination"
         >
           <VcButton
             small
             icon="lucide-chevron-left"
-            :disabled="currentPage <= 1"
-            @click="onPaginationClick(currentPage - 1)"
+            :disabled="pagination.currentPage <= 1"
+            @click="pagination.goToPage(pagination.currentPage - 1)"
           />
-          <span class="chat-list__page-info">{{ currentPage }} / {{ pages }}</span>
+          <span class="chat-list__page-info">{{ pagination.currentPage }} / {{ pagination.pages }}</span>
           <VcButton
             small
             icon="lucide-chevron-right"
-            :disabled="currentPage >= pages"
-            @click="onPaginationClick(currentPage + 1)"
+            :disabled="pagination.currentPage >= pagination.pages"
+            @click="pagination.goToPage(pagination.currentPage + 1)"
           />
         </div>
       </div>
@@ -137,10 +131,7 @@
         v-else
         class="chat-list__empty"
       >
-        <VcIcon
-          icon="lucide-messages-square"
-          size="xxl"
-          class="tw-text-[color:var(--neutrals-300)]"
+        <VcIcon icon="lucide-messages-square" size="xxl" class="tw-text-[color:var(--neutrals-300)]"
         />
         <span class="chat-list__empty-text">
           {{ searchValue ? $t("ALL_MESSAGES.TABLE.NOT_FOUND.EMPTY") : $t("ALL_MESSAGES.TABLE.EMPTY.NO_ITEMS") }}
@@ -161,15 +152,17 @@
 <script setup lang="ts">
 import { computed, ComputedRef, inject, onMounted, Ref, ref, watch } from "vue";
 import { useConversationList, useMessenger } from "../composables";
-import { IBladeToolbar, VcInput, VcButton, notification, useBlade, useBladeNotifications } from "@vc-shell/framework";
+import { IBladeToolbar, notification, useBlade, useBladeNotifications } from "@vc-shell/framework";
 import type {
   Conversation,
-  ISearchConversationsQuery,
+  SearchConversationsQuery,
 } from "../../../api_client/virtocommerce.marketplacecommunication";
 import { useI18n } from "vue-i18n";
 import { useMounted, useDebounceFn } from "@vueuse/core";
 import { MessagePushNotification, ConversationListType } from "../typings";
 import { formatDate, dateAgo } from "../utils";
+
+import { VcBlade, VcButton, VcIcon, VcImage, VcInput } from "@vc-shell/framework/ui";
 
 defineBlade({
   name: "AllMessages",
@@ -201,7 +194,7 @@ useBladeNotifications({
 
 const selectedConversation = ref<Conversation | null | undefined>(null) as Ref<Conversation | null | undefined>;
 
-const { conversations, loading, getConversations, totalCount, pages, currentPage, searchQuery } = useConversationList();
+const { conversations, loading, getConversations, pagination, searchQuery } = useConversationList();
 
 const { createConversation, getOperator, operator } = useMessenger();
 
@@ -233,13 +226,6 @@ watch(
   },
   { immediate: true },
 );
-
-const onPaginationClick = async (page: number) => {
-  await loadConversations({
-    ...searchQuery.value,
-    skip: (page - 1) * (searchQuery.value.take ?? 10),
-  });
-};
 
 const getConversationType = (entityType?: string) => {
   return entityType ? ConversationListType[entityType as keyof typeof ConversationListType] : null;
@@ -315,11 +301,11 @@ async function load() {
 const reload = async () => {
   await loadConversations({
     ...searchQuery.value,
-    skip: (currentPage.value - 1) * (searchQuery.value.take ?? 10),
+    skip: pagination.skip,
   });
 };
 
-async function loadConversations(query: ISearchConversationsQuery) {
+async function loadConversations(query: SearchConversationsQuery) {
   if (currentSeller?.value) {
     await getConversations({
       ...query,
