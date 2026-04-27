@@ -1,5 +1,5 @@
 import * as pages from "./pages";
-import { registerExternalWidget, IBladeInstance, defineAppModule } from "@vc-shell/framework";
+import { registerExternalWidget, type BladeDescriptor, defineAppModule } from "@vc-shell/framework";
 import * as locales from "./locales";
 import { App, markRaw } from "vue";
 import { MessageWidget } from "./widgets";
@@ -10,7 +10,7 @@ export default (() => {
     id: "MessageWidget",
     component: markRaw(MessageWidget),
     targetBlades: ["ProductDetails", "Offer", "OrderDetails"],
-    isVisible: (bladeInstance) => {
+    isVisible: (bladeInstance?: BladeDescriptor) => {
       return !!bladeInstance?.param;
     },
   });

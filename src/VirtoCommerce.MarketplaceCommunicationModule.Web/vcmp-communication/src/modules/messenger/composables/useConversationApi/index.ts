@@ -17,7 +17,9 @@ export function useConversationApi() {
     entityType?: string;
   }): Promise<Conversation> {
     const client = await getConversationClient();
-    const command = new CreateConversationCommand(args);
+    const command = {
+      ...args,
+    } as CreateConversationCommand;
     return await client.createConversation(command);
   }
 

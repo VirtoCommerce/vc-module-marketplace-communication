@@ -9,7 +9,10 @@
       class="message-form__collapsed"
       @click="expandForm"
     >
-      <VcIcon icon="lucide-message-square-plus" size="s" class="message-form__collapsed-icon"
+      <VcIcon
+        icon="lucide-message-square-plus"
+        size="s"
+        class="message-form__collapsed-icon"
       />
       <span class="message-form__collapsed-text">
         {{ placeholder ?? $t("MESSENGER.ADD_PLACEHOLDER") }}
@@ -34,7 +37,11 @@
         v-if="isDragging"
         class="message-form__drop-overlay"
       >
-        <VcIcon icon="lucide-upload" size="l" class="message-form__drop-icon" />
+        <VcIcon
+          icon="lucide-upload"
+          size="l"
+          class="message-form__drop-icon"
+        />
         <span class="message-form__drop-text">{{ $t("MESSENGER.DROP_FILES") }}</span>
       </div>
 
@@ -43,21 +50,40 @@
         v-if="uploadError"
         class="message-form__error"
       >
-        <VcIcon icon="lucide-alert-circle" size="s" class="message-form__error-icon" />
+        <VcIcon
+          icon="lucide-alert-circle"
+          size="s"
+          class="message-form__error-icon"
+        />
         <span class="message-form__error-text">{{ uploadError }}</span>
-        <button class="message-form__error-close" @click="uploadError = null">
-          <VcIcon icon="lucide-x" size="xs" />
+        <button
+          class="message-form__error-close"
+          @click="uploadError = null"
+        >
+          <VcIcon
+            icon="lucide-x"
+            size="xs"
+          />
         </button>
       </div>
 
       <!-- Reply preview -->
-      <div v-if="replyTo" class="message-form__reply-preview">
+      <div
+        v-if="replyTo"
+        class="message-form__reply-preview"
+      >
         <div class="message-form__reply-preview-content">
           <span class="message-form__reply-preview-author">{{ replyTo.sender?.userName }}</span>
           <span class="message-form__reply-preview-text">{{ replyTo.content }}</span>
         </div>
-        <button class="message-form__reply-preview-close" @click="$emit('cancel')">
-          <VcIcon icon="lucide-x" size="xs" />
+        <button
+          class="message-form__reply-preview-close"
+          @click="$emit('cancel')"
+        >
+          <VcIcon
+            icon="lucide-x"
+            size="xs"
+          />
         </button>
       </div>
 
@@ -87,7 +113,7 @@
           />
           <AttachmentPreview
             v-if="isUploading"
-            :asset="({} as any)"
+            :asset="{} as any"
             uploading
           />
         </div>
@@ -101,7 +127,7 @@
           type="file"
           multiple
           :accept="allowedFileTypes"
-          style="display: none !important; position: absolute; width: 0; height: 0; overflow: hidden;"
+          style="display: none !important; position: absolute; width: 0; height: 0; overflow: hidden"
           @change="handleFileSelect"
         />
         <div class="message-form__toolbar-left">
@@ -112,7 +138,10 @@
             :disabled="isUploading"
             @click="openFileSelect"
           >
-            <VcIcon :icon="isUploading ? 'lucide-loader-2' : 'lucide-paperclip'" size="s" :class="{ 'message-form__uploading-spinner': isUploading }"
+            <VcIcon
+              :icon="isUploading ? 'lucide-loader-2' : 'lucide-paperclip'"
+              size="s"
+              :class="{ 'message-form__uploading-spinner': isUploading }"
             />
           </button>
         </div>
@@ -132,7 +161,10 @@
             :disabled="!canSend"
             @click="send"
           >
-            <VcIcon icon="lucide-send" size="xs" />
+            <VcIcon
+              icon="lucide-send"
+              size="xs"
+            />
             <span>{{ submitButtonText }}</span>
           </button>
         </div>
@@ -149,8 +181,16 @@
         {{ $t("MESSENGER.NEW_LINE_HINT") }}
       </span>
       <span class="message-form__hint-item">
-        <kbd v-if="isMac" class="message-form__kbd">⌘</kbd>
-        <kbd v-else class="message-form__kbd">Ctrl</kbd>
+        <kbd
+          v-if="isMac"
+          class="message-form__kbd"
+          >⌘</kbd
+        >
+        <kbd
+          v-else
+          class="message-form__kbd"
+          >Ctrl</kbd
+        >
         <span class="message-form__hint-plus">+</span>
         <kbd class="message-form__kbd">Enter</kbd>
         {{ $t("MESSENGER.SEND_HINT") }}
@@ -162,7 +202,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, inject, nextTick } from "vue";
 import { useI18n } from "vue-i18n";
-import { Message, MessageAttachment, } from "@vcmp-communication/api/marketplacecommunication";
+import { Message, MessageAttachment } from "@vcmp-communication/api/marketplacecommunication";
 import { vLoading, VcTextarea, useAssetsManager, usePopup, type AssetLike } from "@vc-shell/framework";
 
 import { getAllowedFileTypes } from "../constants";
@@ -198,9 +238,7 @@ const entityType = computed(() => messengerContext?.entityType);
 const conversation = computed(() => messengerContext?.conversation.value);
 const settings = computed(() => messengerStore?.settings.value);
 
-const assets = ref<MessageAttachment[]>(
-  props.mode === "edit" ? (props.message?.attachments ?? []) : [],
-);
+const assets = ref<MessageAttachment[]>(props.mode === "edit" ? (props.message?.attachments ?? []) : []);
 
 // Bridge between MessageAttachment[] (domain shape) and AssetLike[] (manager shape).
 // AssetLike uses `url`/`name`; MessageAttachment uses `attachmentUrl`/`fileName`.
@@ -219,11 +257,9 @@ const assetsBridge = computed<AssetLike[]>({
           ...x,
           attachmentUrl: x.url ?? (x as any).attachmentUrl,
           fileName: x.name ?? (x as any).fileName,
-          fileType:
-            (x as any).fileType ??
-            (x.name ?? (x as any).fileName ?? "").toLowerCase().split(".").pop(),
+          fileType: (x as any).fileType ?? (x.name ?? (x as any).fileName ?? "").toLowerCase().split(".").pop(),
           fileSize: (x as any).size ?? (x as any).fileSize,
-        } as MessageAttachment),
+        }) as MessageAttachment,
     );
   },
 });
@@ -321,11 +357,14 @@ const cancel = () => {
 };
 
 // Auto-expand form when replyTo is set
-watch(() => props.replyTo, (newVal) => {
-  if (newVal) {
-    isExpanded.value = true;
-  }
-});
+watch(
+  () => props.replyTo,
+  (newVal) => {
+    if (newVal) {
+      isExpanded.value = true;
+    }
+  },
+);
 
 // Auto-focus for reply/edit modes
 watch(
@@ -737,7 +776,11 @@ const openFileSelect = () => {
 }
 
 @keyframes message-form-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

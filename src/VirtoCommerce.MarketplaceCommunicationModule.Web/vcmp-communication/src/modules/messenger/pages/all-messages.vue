@@ -1,5 +1,8 @@
 <template>
-  <VcBlade :title="title" width="50%" :toolbar-items="bladeToolbar"
+  <VcBlade
+    :title="title"
+    width="50%"
+    :toolbar-items="bladeToolbar"
   >
     <div class="chat-list">
       <!-- Search -->
@@ -60,7 +63,10 @@
               rounded
               size="s"
             />
-            <VcIcon v-else icon="lucide-messages-square" size="l"
+            <VcIcon
+              v-else
+              icon="lucide-messages-square"
+              size="l"
             />
           </div>
 
@@ -131,7 +137,10 @@
         v-else
         class="chat-list__empty"
       >
-        <VcIcon icon="lucide-messages-square" size="xxl" class="tw-text-[color:var(--neutrals-300)]"
+        <VcIcon
+          icon="lucide-messages-square"
+          size="xxl"
+          class="tw-text-[color:var(--neutrals-300)]"
         />
         <span class="chat-list__empty-text">
           {{ searchValue ? $t("ALL_MESSAGES.TABLE.NOT_FOUND.EMPTY") : $t("ALL_MESSAGES.TABLE.EMPTY.NO_ITEMS") }}

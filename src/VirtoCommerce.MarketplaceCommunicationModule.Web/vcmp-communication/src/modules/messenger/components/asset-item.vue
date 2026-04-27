@@ -44,7 +44,7 @@
 
 <script setup lang="ts">
 import { MessageAttachment } from "@vcmp-communication/api/marketplacecommunication";
-import { VcIcon } from "@vc-shell/framework";
+import { VcIcon } from "@vc-shell/framework/ui";
 import { isImage, getFileThumbnail, createThumbnailLink, readableSize } from "../fileUtils";
 import { truncateFileName } from "../utils";
 import { computed } from "vue";

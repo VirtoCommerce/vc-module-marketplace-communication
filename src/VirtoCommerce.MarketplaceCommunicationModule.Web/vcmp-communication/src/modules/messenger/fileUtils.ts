@@ -79,4 +79,12 @@ const createThumbnailLink = (url: string | undefined) => {
   return thumbnailUrl;
 };
 
-export { imageExtensions, getExtension, isImage, getFileThumbnail, getExtensionColor, readableSize, createThumbnailLink };
+export {
+  imageExtensions,
+  getExtension,
+  isImage,
+  getFileThumbnail,
+  getExtensionColor,
+  readableSize,
+  createThumbnailLink,
+};

@@ -9,7 +9,10 @@
   >
     <div class="message-item__bubble">
       <!-- Author name (incoming only) -->
-      <div v-if="!isOwnMessage" class="message-item__author">
+      <div
+        v-if="!isOwnMessage"
+        class="message-item__author"
+      >
         {{ message.sender?.userName }}
       </div>
 
@@ -42,12 +45,19 @@
       >
         {{ message.content }}
       </div>
-      <button v-if="isContentTruncated" class="message-item__expand-btn" @click="isExpanded = !isExpanded">
+      <button
+        v-if="isContentTruncated"
+        class="message-item__expand-btn"
+        @click="isExpanded = !isExpanded"
+      >
         {{ isExpanded ? $t("MESSENGER.SHOW_LESS") : $t("MESSENGER.SHOW_MORE") }}
       </button>
 
       <!-- Attachments -->
-      <div v-if="message.attachments?.length" class="message-item__attachments">
+      <div
+        v-if="message.attachments?.length"
+        class="message-item__attachments"
+      >
         <AssetItem
           v-for="asset in message.attachments"
           :key="asset.id"
@@ -58,7 +68,10 @@
 
       <!-- Timestamp + unread -->
       <div class="message-item__footer">
-        <span v-if="isUnread" class="message-item__unread-dot" />
+        <span
+          v-if="isUnread"
+          class="message-item__unread-dot"
+        />
         <span class="message-item__time">{{ formatDate(message.createdDate) }}</span>
       </div>
 
@@ -112,9 +125,7 @@ const isExpanded = ref(false);
 const isContentTruncated = ref(false);
 
 // --- Computed ---
-const isOwnMessage = computed(
-  () => store.seller.value?.userId === props.message.sender?.userId,
-);
+const isOwnMessage = computed(() => store.seller.value?.userId === props.message.sender?.userId);
 
 const canManage = computed(
   () => store.seller.value?.userId === props.message.sender?.userId && props.message.answersCount === 0,
@@ -158,7 +169,10 @@ onMounted(() => {
   });
 });
 
-watch(() => props.message.content, () => nextTick(checkTruncation));
+watch(
+  () => props.message.content,
+  () => nextTick(checkTruncation),
+);
 
 onBeforeUnmount(() => resizeObserver?.disconnect());
 

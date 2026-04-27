@@ -1,6 +1,6 @@
 <template>
   <VcWidget
-    v-loading:500="loading"
+    :loading="loading"
     :title="$t('MESSENGER.WIDGET.TITLE')"
     icon="lucide-message-circle"
     :value="messageCount"
@@ -12,7 +12,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useMessenger } from "../composables";
-import { loading as vLoading, useBlade, injectBladeContext, useWidgetTrigger, VcWidget } from "@vc-shell/framework";
+import { loading as vLoading, useBlade, injectBladeContext, useWidgetTrigger } from "@vc-shell/framework";
+
+import { VcWidget } from "@vc-shell/framework/ui";
 
 const ctx = injectBladeContext();
 const bladeItem = computed(() => ctx.value.item as { id?: string; objectType?: string });

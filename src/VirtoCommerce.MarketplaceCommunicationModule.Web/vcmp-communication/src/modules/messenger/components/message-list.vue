@@ -39,7 +39,7 @@
           <MessageItem
             v-else
             :message="message"
-            :is-mobile="$isMobile.value"
+            :is-mobile="isMobile"
             @reply="handleReply(message)"
             @start-edit="editingMessageId = $event"
             @deleted="refreshMessages"
@@ -91,6 +91,12 @@ import MessageItem from "./message-item.vue";
 import MessageForm from "./message-form.vue";
 import MessageSkeleton from "./message-skeleton.vue";
 import { Message, MessageAttachment } from "@vcmp-communication/api/marketplacecommunication";
+
+import { useResponsive } from "@vc-shell/framework";
+
+import { VcIcon } from "@vc-shell/framework/ui";
+
+const { isMobile } = useResponsive();
 
 const store = useMessengerStore();
 const actions = useMessageActions();
@@ -224,7 +230,9 @@ async function scrollToMessage(messageId: string) {
     await nextTick();
 
     // Check DOM after load
-    const foundAfterLoad = scrollContainer.value?.querySelector(`[data-message-id="${messageId}"]`) as HTMLElement | null;
+    const foundAfterLoad = scrollContainer.value?.querySelector(
+      `[data-message-id="${messageId}"]`,
+    ) as HTMLElement | null;
     if (foundAfterLoad) {
       scrollToQuoteLoading.value = false;
       highlightMessageElement(foundAfterLoad);
@@ -239,11 +247,10 @@ async function scrollToMessage(messageId: string) {
 }
 
 async function handleSend(payload: { content: string; attachments: MessageAttachment[] }) {
-  const replyTo = replyToMessage.value?.id;
   await actions.send({
     content: payload.content,
     attachments: payload.attachments,
-    ...(replyTo ? { replyTo } : {}),
+    replyTo: replyToMessage.value?.id,
     conversationId: ctx.conversation.value?.id,
   });
   replyToMessage.value = null;

@@ -7,8 +7,7 @@ import {
   Conversation,
   MarketplaceCommunicationSettings,
   GetSellerCommunicationUserQuery,
-  ISearchMessagesQuery,
-  ISearchMessageResult,
+  SearchMessageResult,
 } from "@vcmp-communication/api/marketplacecommunication";
 import { useMessageApi } from "./useMessageApi";
 import { useConversationApi } from "./useConversationApi";
@@ -25,12 +24,10 @@ export function createMessengerStore(): MessengerStore {
 
   // --- Local state (scoped to this factory instance) ---
   const messages = shallowRef<Message[]>([]);
-  const searchResult = shallowRef<ISearchMessageResult | null>(null);
-  const searchQuery = ref<SearchMessagesQuery>(
-    new SearchMessagesQuery({
-      take: 10,
-    }),
-  );
+  const searchResult = shallowRef<SearchMessageResult | null>(null);
+  const searchQuery = ref<SearchMessagesQuery>({
+    take: 10,
+  } as SearchMessagesQuery);
   const operator = ref<CommunicationUser>();
   const seller = ref<CommunicationUser>();
   const settings = ref<MarketplaceCommunicationSettings>();
@@ -87,15 +84,15 @@ export function createMessengerStore(): MessengerStore {
   }
 
   // --- Actions ---
-  const { action: loadMessagesAction, loading: searchMessagesLoading } = useAsync<ISearchMessagesQuery>(
+  const { action: loadMessagesAction, loading: searchMessagesLoading } = useAsync<SearchMessagesQuery>(
     async (query) => {
       if (!query) return;
       // Load newest messages first (desc), then reverse for chronological display
-      searchQuery.value = new SearchMessagesQuery({
+      searchQuery.value = {
         ...searchQuery.value,
         ...query,
         sort: "createdDate:desc",
-      });
+      } as SearchMessagesQuery;
       const result = await searchMessagesApi(searchQuery.value);
       searchResult.value = result;
       await loadUserInfoForMessages(result.results);
@@ -126,19 +123,19 @@ export function createMessengerStore(): MessengerStore {
   }
 
   // --- Actions ---
-  async function loadMessages(query: ISearchMessagesQuery): Promise<void> {
+  async function loadMessages(query: SearchMessagesQuery): Promise<void> {
     await loadMessagesAction(query);
   }
 
-  async function loadMoreMessages(query: ISearchMessagesQuery): Promise<boolean> {
+  async function loadMoreMessages(query: SearchMessagesQuery): Promise<boolean> {
     if (!searchResult.value || messages.value.length >= (searchResult.value.totalCount || 0)) {
       return false;
     }
-    const newQuery = new SearchMessagesQuery({
+    const newQuery = {
       ...searchQuery.value,
       ...query,
       skip: messages.value.length,
-    });
+    } as SearchMessagesQuery;
     const result = await searchMessagesApi(newQuery);
     await loadUserInfoForMessages(result.results);
 
@@ -151,13 +148,13 @@ export function createMessengerStore(): MessengerStore {
     return (result.results?.length || 0) > 0;
   }
 
-  async function loadPreviousMessages(query?: ISearchMessagesQuery): Promise<boolean> {
-    const previousQuery = new SearchMessagesQuery({
+  async function loadPreviousMessages(query?: SearchMessagesQuery): Promise<boolean> {
+    const previousQuery = {
       ...searchQuery.value,
       ...(query || {}),
       skip: messages.value.length,
       sort: "createdDate:desc",
-    });
+    } as SearchMessagesQuery;
 
     const result = await searchMessagesApi(previousQuery);
     await loadUserInfoForMessages(result.results);
@@ -193,12 +190,10 @@ export function createMessengerStore(): MessengerStore {
 
     // 3. Load seller if entityId+entityType provided
     if (options.entityId && options.entityType) {
-      seller.value = await getSellerApi(
-        new GetSellerCommunicationUserQuery({
-          entityId: options.entityId,
-          entityType: options.entityType,
-        }),
-      );
+      seller.value = await getSellerApi({
+        entityId: options.entityId,
+        entityType: options.entityType,
+      } as GetSellerCommunicationUserQuery);
     }
 
     // 4. Load settings
@@ -208,7 +203,7 @@ export function createMessengerStore(): MessengerStore {
   function reset() {
     messages.value = [];
     searchResult.value = null;
-    searchQuery.value = new SearchMessagesQuery({ take: 10 });
+    searchQuery.value = { take: 10 } as SearchMessagesQuery;
     conversation.value = undefined;
     seller.value = undefined;
     settings.value = undefined;

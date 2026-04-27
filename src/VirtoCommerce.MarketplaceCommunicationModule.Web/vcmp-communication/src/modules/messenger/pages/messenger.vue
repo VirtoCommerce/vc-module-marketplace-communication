@@ -3,7 +3,7 @@
     :title="bladeTitle"
     width="50%"
     class="messenger"
-    :class="{ 'messenger--mobile': $isMobile.value }"
+    :class="{ 'messenger--mobile': isMobile }"
   >
     <div class="messenger__content">
       <!-- Header with entity info -->
@@ -43,13 +43,17 @@
 
 <script setup lang="ts">
 import { computed, ref, provide, onMounted, inject, type Ref } from "vue";
-import { useBlade } from "@vc-shell/framework";
+import { useBlade, useResponsive } from "@vc-shell/framework";
 import { Conversation } from "@vcmp-communication/api/marketplacecommunication";
 import { useI18n } from "vue-i18n";
 import { createMessengerStore } from "../composables/useMessengerStore";
 import { messengerStoreKey, messengerContextKey } from "../injection-keys";
 import { MessageList, MessageSkeleton } from "../components";
 import { EntityToBlade } from "../typings";
+
+import { VcBlade, VcImage, VcLink } from "@vc-shell/framework/ui";
+
+const { isMobile } = useResponsive();
 
 defineBlade({
   name: "Messenger",

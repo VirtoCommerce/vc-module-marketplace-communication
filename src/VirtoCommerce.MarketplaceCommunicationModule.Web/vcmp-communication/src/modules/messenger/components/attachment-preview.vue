@@ -7,7 +7,11 @@
   >
     <!-- Uploading state -->
     <template v-if="uploading">
-      <VcIcon icon="lucide-loader-2" size="s" class="attachment-preview__spinner" />
+      <VcIcon
+        icon="lucide-loader-2"
+        size="s"
+        class="attachment-preview__spinner"
+      />
       <span class="attachment-preview__upload-label">{{ $t("MESSENGER.UPLOADING_FILES") }}</span>
     </template>
 
@@ -29,7 +33,10 @@
       >
         {{ extensionLabel }}
       </div>
-      <span class="attachment-preview__name" :title="asset.fileName">
+      <span
+        class="attachment-preview__name"
+        :title="asset.fileName"
+      >
         {{ truncateFileName(asset.fileName) }}
       </span>
     </template>
@@ -40,14 +47,17 @@
       class="attachment-preview__remove"
       @click.stop="$emit('remove')"
     >
-      <VcIcon icon="lucide-x" size="xs" />
+      <VcIcon
+        icon="lucide-x"
+        size="xs"
+      />
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { VcIcon } from "@vc-shell/framework";
+import { VcIcon } from "@vc-shell/framework/ui";
 import { MessageAttachment } from "@vcmp-communication/api/marketplacecommunication";
 import { isImage, getExtension, getExtensionColor } from "../fileUtils";
 import { truncateFileName } from "../utils";
@@ -139,7 +149,11 @@ const extensionColor = computed(() => getExtensionColor(props.asset.fileName));
 }
 
 @keyframes attachment-preview-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

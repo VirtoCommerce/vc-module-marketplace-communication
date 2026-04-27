@@ -2,7 +2,6 @@ import {
   VcmpCommunicationUserClient,
   CommunicationUser,
   GetSellerCommunicationUserQuery,
-  IGetSellerCommunicationUserQuery,
 } from "@vcmp-communication/api/marketplacecommunication";
 import { useApiClient } from "@vc-shell/framework";
 
@@ -14,9 +13,11 @@ export function useUserApi() {
     return await client.getOperator();
   }
 
-  async function getSeller(query: IGetSellerCommunicationUserQuery): Promise<CommunicationUser> {
+  async function getSeller(query: GetSellerCommunicationUserQuery): Promise<CommunicationUser> {
     const client = await getCommunicationUserClient();
-    return await client.getSeller(new GetSellerCommunicationUserQuery(query));
+    return await client.getSeller({
+      ...query,
+    } as GetSellerCommunicationUserQuery);
   }
 
   async function getUsers(ids: string[] | undefined): Promise<CommunicationUser[]> {

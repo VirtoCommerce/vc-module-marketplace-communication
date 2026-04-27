@@ -1,4 +1,7 @@
-import { VcmpCommunicationClient, MarketplaceCommunicationSettings } from "@vcmp-communication/api/marketplacecommunication";
+import {
+  VcmpCommunicationClient,
+  MarketplaceCommunicationSettings,
+} from "@vcmp-communication/api/marketplacecommunication";
 import { useApiClient } from "@vc-shell/framework";
 
 export function useSettingsApi() {

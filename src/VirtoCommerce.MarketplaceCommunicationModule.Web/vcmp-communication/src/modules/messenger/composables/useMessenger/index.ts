@@ -4,14 +4,11 @@ import {
   SearchMessagesQuery,
   Message,
   CommunicationUser,
-  IUpdateMessageCommand,
-  IDeleteMessageCommand,
-  ISearchMessagesQuery,
-  IMarkMessageAsReadCommand,
-  IGetSellerCommunicationUserQuery,
-  ISearchMessageResult,
-  IGetUnreadCountQuery,
-  IMessage,
+  UpdateMessageCommand,
+  DeleteMessageCommand,
+  MarkMessageAsReadCommand,
+  SearchMessageResult,
+  GetUnreadCountQuery,
   Conversation,
   MessageAttachment,
   MarketplaceCommunicationSettings,
@@ -37,24 +34,24 @@ export interface IUseMessenger {
     attachments?: MessageAttachment[];
   }) => Promise<Message | undefined>;
   unreadCount: ComputedRef<number>;
-  searchMessages: (query: ISearchMessagesQuery) => Promise<void>;
+  searchMessages: (query: SearchMessagesQuery) => Promise<void>;
   searchMessagesLoading: Ref<boolean>;
   searchQuery: Ref<SearchMessagesQuery>;
   operator: Ref<CommunicationUser | undefined>;
   getOperator: () => Promise<void>;
   getRootMessages: () => Message[];
-  updateMessage: (message: IUpdateMessageCommand) => Promise<void>;
-  removeMessage: (message: IDeleteMessageCommand) => Promise<void>;
-  loadMoreMessages: (query: ISearchMessagesQuery) => Promise<boolean>;
+  updateMessage: (message: UpdateMessageCommand) => Promise<void>;
+  removeMessage: (message: DeleteMessageCommand) => Promise<void>;
+  loadMoreMessages: (query: SearchMessagesQuery) => Promise<boolean>;
   totalItems: ComputedRef<number>;
   sendMessageLoading: Ref<boolean>;
-  loadPreviousMessages: (query?: ISearchMessagesQuery) => Promise<boolean>;
+  loadPreviousMessages: (query?: SearchMessagesQuery) => Promise<boolean>;
   hasOlderMessages: Ref<boolean>;
   hasNewerMessages: ComputedRef<boolean>;
   updateMessageLoading: Ref<boolean>;
-  markMessageAsRead: (args: IMarkMessageAsReadCommand) => Promise<void>;
-  getSeller: (query: IGetSellerCommunicationUserQuery) => Promise<void>;
-  getUnreadCount: (query: IGetUnreadCountQuery) => Promise<number>;
+  markMessageAsRead: (args: MarkMessageAsReadCommand) => Promise<void>;
+  getSeller: (query: GetSellerCommunicationUserQuery) => Promise<void>;
+  getUnreadCount: (query: GetUnreadCountQuery) => Promise<number>;
   getThread: (id: string | undefined) => Promise<void>;
   seller: Ref<CommunicationUser | undefined>;
   loadedThread: Ref<Message[] | undefined>;
@@ -100,12 +97,10 @@ export const useMessenger = (): IUseMessenger => {
 
   // State
   const messages = shallowRef<Message[] | undefined>([]);
-  const searchResult = shallowRef<ISearchMessageResult | null>(null);
-  const searchQuery = ref<SearchMessagesQuery>(
-    new SearchMessagesQuery({
-      take: 10,
-    }),
-  );
+  const searchResult = shallowRef<SearchMessageResult | null>(null);
+  const searchQuery = ref<SearchMessagesQuery>({
+    take: 10,
+  } as SearchMessagesQuery);
   const loadedThread = ref<Message[] | undefined>([]);
   const settings = ref<MarketplaceCommunicationSettings>();
   const seller = ref<CommunicationUser>();
@@ -130,7 +125,7 @@ export const useMessenger = (): IUseMessenger => {
   }
 
   // Actions
-  const { action: searchMessages, loading: searchMessagesLoading } = useAsync<ISearchMessagesQuery>(async (query) => {
+  const { action: searchMessages, loading: searchMessagesLoading } = useAsync<SearchMessagesQuery>(async (query) => {
     if (!query) return;
     searchQuery.value = { ...searchQuery.value, ...query };
     const result = await searchMessagesApi(searchQuery.value);
@@ -162,7 +157,7 @@ export const useMessenger = (): IUseMessenger => {
     await sendMessageApi({ ...message, recipientId: operator.value?.id });
 
     // Re-fetch messages to get the new one
-    const latestMessagesQuery = new SearchMessagesQuery({
+    const latestMessagesQuery = {
       ...searchQuery.value,
       take: 10,
       sort: "createdDate:desc",
@@ -172,7 +167,7 @@ export const useMessenger = (): IUseMessenger => {
       entityType: message.entityType,
       rootsOnly: message.rootsOnly,
       threadId: message.threadId,
-    });
+    } as SearchMessagesQuery;
 
     const result = await searchMessagesApi(latestMessagesQuery);
     await loadUserInfoForMessages(result.results);
@@ -189,7 +184,7 @@ export const useMessenger = (): IUseMessenger => {
     });
   });
 
-  const { action: updateMessage, loading: updateMessageLoading } = useAsync<IUpdateMessageCommand>(async (message) => {
+  const { action: updateMessage, loading: updateMessageLoading } = useAsync<UpdateMessageCommand>(async (message) => {
     if (!message || !message.messageId) return;
     await updateMessageApi({
       ...message,
@@ -198,7 +193,7 @@ export const useMessenger = (): IUseMessenger => {
     });
   });
 
-  const { action: removeMessage } = useAsync<IDeleteMessageCommand>(async (args) => {
+  const { action: removeMessage } = useAsync<DeleteMessageCommand>(async (args) => {
     if (!args || !args.messageIds) return;
     await removeMessageApi({
       ...args,
@@ -214,21 +209,23 @@ export const useMessenger = (): IUseMessenger => {
     }
   });
 
-  const { action: markMessageAsRead } = useAsync<IMarkMessageAsReadCommand>(async (args) => {
+  const { action: markMessageAsRead } = useAsync<MarkMessageAsReadCommand>(async (args) => {
     if (!args) return;
     await markMessageAsReadApi(args);
   });
 
-  const { action: getSeller } = useAsync<IGetSellerCommunicationUserQuery>(async (query) => {
+  const { action: getSeller } = useAsync<GetSellerCommunicationUserQuery>(async (query) => {
     if (!query) return;
-    seller.value = await getSellerApi(new GetSellerCommunicationUserQuery(query));
+    seller.value = await getSellerApi({
+      ...query,
+    } as GetSellerCommunicationUserQuery);
   });
 
   const { action: getSettings, loading: getSettingsLoading } = useAsync(async () => {
     settings.value = await getSettingsApi();
   });
 
-  const { action: getUnreadCount } = useAsync<IGetUnreadCountQuery, number>(async (query) => {
+  const { action: getUnreadCount } = useAsync<GetUnreadCountQuery, number>(async (query) => {
     if (!query) return 0;
     return getUnreadCountApi({
       ...query,
@@ -242,7 +239,7 @@ export const useMessenger = (): IUseMessenger => {
     await loadUserInfoForMessages(result);
 
     const buildMessageTree = (treeMessages: Message[]): Message[] => {
-      const messageMap = new Map<string, IMessage>();
+      const messageMap = new Map<string, Message>();
       const rootMessages: Message[] = [];
       treeMessages.forEach((msg) => messageMap.set(msg.id!, { ...msg, answers: [] }));
       treeMessages.forEach((msg) => {
@@ -252,11 +249,15 @@ export const useMessenger = (): IUseMessenger => {
             const parentMessage = messageMap.get(msg.threadId);
             if (parentMessage) {
               if (!parentMessage.answers) parentMessage.answers = [];
-              parentMessage.answers.push(new Message(message));
-              parentMessage.answersCount = parentMessage.answers.length;
+              parentMessage.answers.push({
+                ...message,
+              } as Message);
+              messageMap.set(msg.threadId, { ...parentMessage, answersCount: parentMessage.answers.length });
             }
           } else {
-            rootMessages.push(new Message(message));
+            rootMessages.push({
+              ...message,
+            } as Message);
           }
         }
       });
@@ -270,7 +271,7 @@ export const useMessenger = (): IUseMessenger => {
   // Public functions that use state and actions
   const getRootMessages = () => messages.value?.filter((msg) => !msg.threadId) || [];
 
-  const loadMoreMessages = async (query: ISearchMessagesQuery): Promise<boolean> => {
+  const loadMoreMessages = async (query: SearchMessagesQuery): Promise<boolean> => {
     if (!searchResult.value || (messages.value?.length || 0) >= (searchResult.value?.totalCount || 0)) {
       return false;
     }
@@ -290,13 +291,13 @@ export const useMessenger = (): IUseMessenger => {
     return (result.results?.length || 0) > 0;
   };
 
-  const loadPreviousMessages = async (query?: ISearchMessagesQuery): Promise<boolean> => {
-    const previousQuery = new SearchMessagesQuery({
+  const loadPreviousMessages = async (query?: SearchMessagesQuery): Promise<boolean> => {
+    const previousQuery = {
       ...searchQuery.value,
       ...(query || {}),
       skip: messages.value?.length || 0,
       sort: "createdDate:desc",
-    });
+    } as SearchMessagesQuery;
 
     const result = await searchMessagesApi(previousQuery);
     await loadUserInfoForMessages(result.results);

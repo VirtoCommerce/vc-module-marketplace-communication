@@ -5,7 +5,10 @@
       :title="$t('MESSENGER.HOVER.REPLY')"
       @click="$emit('reply')"
     >
-      <VcIcon icon="lucide-reply" size="s" />
+      <VcIcon
+        icon="lucide-reply"
+        size="s"
+      />
     </button>
     <button
       v-if="canEdit"
@@ -13,7 +16,10 @@
       :title="$t('MESSENGER.HOVER.EDIT')"
       @click="$emit('edit')"
     >
-      <VcIcon icon="lucide-pencil" size="s" />
+      <VcIcon
+        icon="lucide-pencil"
+        size="s"
+      />
     </button>
     <button
       v-if="canDelete"
@@ -21,12 +27,16 @@
       :title="$t('MESSENGER.HOVER.DELETE')"
       @click="$emit('delete')"
     >
-      <VcIcon icon="lucide-trash-2" size="s" />
+      <VcIcon
+        icon="lucide-trash-2"
+        size="s"
+      />
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
+import { VcIcon } from "@vc-shell/framework/ui";
 defineProps<{
   canEdit: boolean;
   canDelete: boolean;

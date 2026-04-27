@@ -6,24 +6,21 @@ import {
   SendMessageCommand,
   MessageShort,
   UpdateMessageCommand,
-  IUpdateMessageCommand,
   DeleteMessageCommand,
-  IDeleteMessageCommand,
-  ISearchMessagesQuery,
   MarkMessageAsReadCommand,
-  IMarkMessageAsReadCommand,
   GetUnreadCountQuery,
-  IGetUnreadCountQuery,
-  ISearchMessageResult,
+  SearchMessageResult,
   MessageAttachment,
 } from "@vcmp-communication/api/marketplacecommunication";
 
 export function useMessageApi() {
   const { getApiClient: getMessagingClient } = useApiClient(VcmpMessageClient);
 
-  async function searchMessages(query: ISearchMessagesQuery): Promise<ISearchMessageResult> {
+  async function searchMessages(query: SearchMessagesQuery): Promise<SearchMessageResult> {
     const client = await getMessagingClient();
-    return await client.search(new SearchMessagesQuery(query));
+    return await client.search({
+      ...query,
+    } as SearchMessagesQuery);
   }
 
   async function sendMessage(message: {
@@ -38,10 +35,10 @@ export function useMessageApi() {
     recipientId?: string;
   }): Promise<void> {
     const client = await getMessagingClient();
-    const command = new SendMessageCommand({
+    const command = {
       sellerId: message.sellerId,
       sellerName: message.sellerName,
-      message: new MessageShort({
+      message: {
         content: message.content,
         replyTo: message.replyTo,
         entityId: message.entityId,
@@ -50,31 +47,39 @@ export function useMessageApi() {
         conversationId: message.conversationId,
         recipientId: message.recipientId,
         attachments: message.attachments,
-      }),
-    });
+      } as MessageShort,
+    } as SendMessageCommand;
     await client.sendMessage(command);
   }
 
-  async function updateMessage(message: IUpdateMessageCommand): Promise<void> {
-    const command = new UpdateMessageCommand(message);
+  async function updateMessage(message: UpdateMessageCommand): Promise<void> {
+    const command = {
+      ...message,
+    } as UpdateMessageCommand;
     const client = await getMessagingClient();
     await client.updateMessage(command);
   }
 
-  async function removeMessage(args: IDeleteMessageCommand): Promise<void> {
-    const command = new DeleteMessageCommand(args);
+  async function removeMessage(args: DeleteMessageCommand): Promise<void> {
+    const command = {
+      ...args,
+    } as DeleteMessageCommand;
     const client = await getMessagingClient();
     await client.deleteMessage(command);
   }
 
-  async function markMessageAsRead(args: IMarkMessageAsReadCommand): Promise<void> {
+  async function markMessageAsRead(args: MarkMessageAsReadCommand): Promise<void> {
     const client = await getMessagingClient();
-    await client.markMessageAsRead(new MarkMessageAsReadCommand(args));
+    await client.markMessageAsRead({
+      ...args,
+    } as MarkMessageAsReadCommand);
   }
 
-  async function getUnreadCount(query: IGetUnreadCountQuery): Promise<number> {
+  async function getUnreadCount(query: GetUnreadCountQuery): Promise<number> {
     const client = await getMessagingClient();
-    const result = await client.getUnreadMessageCount(new GetUnreadCountQuery(query));
+    const result = await client.getUnreadMessageCount({
+      ...query,
+    } as GetUnreadCountQuery);
     return result || 0;
   }
 

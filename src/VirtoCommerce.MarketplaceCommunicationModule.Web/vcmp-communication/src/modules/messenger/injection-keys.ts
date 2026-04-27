@@ -5,7 +5,6 @@ import type {
   MarketplaceCommunicationSettings,
   Message,
   SearchMessagesQuery,
-  ISearchMessagesQuery,
 } from "@vcmp-communication/api/marketplacecommunication";
 
 // --- Messenger Context (entity + seller info) ---
@@ -43,9 +42,9 @@ export interface MessengerStore {
   removeMessageFromList(ids: string[]): void;
 
   // Actions
-  loadMessages(query: ISearchMessagesQuery): Promise<void>;
-  loadMoreMessages(query: ISearchMessagesQuery): Promise<boolean>;
-  loadPreviousMessages(query?: ISearchMessagesQuery): Promise<boolean>;
+  loadMessages(query: SearchMessagesQuery): Promise<void>;
+  loadMoreMessages(query: SearchMessagesQuery): Promise<boolean>;
+  loadPreviousMessages(query?: SearchMessagesQuery): Promise<boolean>;
   initializeConversation(options: {
     entityId?: string;
     entityType?: string;

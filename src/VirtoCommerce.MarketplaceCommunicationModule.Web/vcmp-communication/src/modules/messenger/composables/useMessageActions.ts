@@ -2,7 +2,6 @@ import { inject } from "vue";
 import { useAsync } from "@vc-shell/framework";
 import {
   MessageAttachment,
-  IUpdateMessageCommand,
   UpdateMessageCommand,
   DeleteMessageCommand,
   MarkMessageAsReadCommand,
@@ -49,30 +48,32 @@ export function useMessageActions() {
     }
   });
 
-  async function update(args: IUpdateMessageCommand) {
-    await updateMessageApi(new UpdateMessageCommand({
+  async function update(args: UpdateMessageCommand) {
+    await updateMessageApi({
       ...args,
       sellerId: ctx.sellerId,
       sellerName: ctx.sellerName,
-    }));
+    } as UpdateMessageCommand);
   }
 
   async function remove(messageIds: string[], withReplies: boolean) {
-    await removeMessageApi(new DeleteMessageCommand({
-      messageIds,
-      sellerId: ctx.sellerId,
-      sellerName: ctx.sellerName,
-    } as any));
+    await removeMessageApi({
+      ...({
+        messageIds,
+        sellerId: ctx.sellerId,
+        sellerName: ctx.sellerName,
+      } as any),
+    } as DeleteMessageCommand);
     store.removeMessageFromList(messageIds);
   }
 
   async function markAsRead(messageId: string, recipientId: string) {
-    await markMessageAsReadApi(new MarkMessageAsReadCommand({
+    await markMessageAsReadApi({
       messageId,
       recipientId,
       sellerId: ctx.sellerId,
       sellerName: ctx.sellerName,
-    }));
+    } as MarkMessageAsReadCommand);
   }
 
   return { send, sendLoading, update, remove, markAsRead };

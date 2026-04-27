@@ -32,6 +32,8 @@
 <script setup lang="ts">
 import { MaybeRefOrGetter, toRef } from "@vueuse/core";
 
+import { VcLink, VcPopup } from "@vc-shell/framework/ui";
+
 const props = defineProps<{
   src: MaybeRefOrGetter<string | undefined>;
   alt: MaybeRefOrGetter<string | undefined>;

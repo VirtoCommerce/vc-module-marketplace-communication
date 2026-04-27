@@ -9,25 +9,27 @@
 </template>
 
 <script lang="ts" setup>
-import { updateSignalRCreatorSymbol, useUser } from "@vc-shell/framework";
-import { computed, inject, onMounted, provide, ref } from "vue";
+import { useUser, useBroadcastFilter } from "@vc-shell/framework";
+import { computed, onMounted, provide, ref } from "vue";
 // eslint-disable-next-line import/no-unresolved
 import logoImage from "/assets/logo.svg";
 import { useRoute } from "vue-router";
+
+import { VcApp } from "@vc-shell/framework/ui";
 
 const isReady = ref(false);
 const version = import.meta.env.PACKAGE_VERSION;
 
 const { isAuthenticated } = useUser();
+const { setBroadcastFilter } = useBroadcastFilter();
 const route = useRoute();
 const seller = ref<{ id: string; name: string }>();
-const updateSignalRCreator = inject(updateSignalRCreatorSymbol) as (id: string) => void;
 
 onMounted(async () => {
   try {
     if (isAuthenticated.value) {
       seller.value = await getSellerById(GetSellerId());
-      updateSignalRCreator?.(seller.value?.id);
+      setBroadcastFilter((msg) => msg.creator === seller.value?.id);
       isReady.value = true;
     }
   } catch (e) {

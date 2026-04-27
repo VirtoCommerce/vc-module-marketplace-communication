@@ -2,12 +2,27 @@
   "name": "@vcmp-communication/api",
   "version": "1.0.0",
   "files": [
+    "dist",
     "package.json"
   ],
   "exports": {
     "./marketplacecommunication": {
-      "import": "./virtocommerce.marketplacecommunication.js",
-      "types": "./types/virtocommerce.marketplacecommunication.js"
+      "import": "./dist/virtocommerce.marketplacecommunication.js",
+      "types": "./dist/types/virtocommerce.marketplacecommunication.d.ts"
+    },
+    "./virtocommerce.marketplacecommunication": {
+      "import": "./dist/virtocommerce.marketplacecommunication.js",
+      "types": "./dist/types/virtocommerce.marketplacecommunication.d.ts"
+    },
+    ".": {
+      "import": "./dist/virtocommerce.marketplacecommunication.js",
+      "types": "./dist/types/virtocommerce.marketplacecommunication.d.ts"
     }
-  }
+  },
+  "apiClientGenerator": {
+    "version": "1.1.2",
+    "generatedAt": "2026-04-27T06:37:25.468Z"
+  },
+  "module": "./dist/virtocommerce.marketplacecommunication.js",
+  "types": "./dist/types/virtocommerce.marketplacecommunication.d.ts"
 }

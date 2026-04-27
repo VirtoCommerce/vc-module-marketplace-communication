@@ -15,9 +15,11 @@
 </template>
 
 <script lang="ts" setup>
-import { NotificationTemplate, VcHint, useBlade, useNotificationContext } from "@vc-shell/framework";
+import { NotificationTemplate, useBlade, useNotificationContext } from "@vc-shell/framework";
 import { MessagePushNotification } from "../typings";
 import { computed } from "vue";
+
+import { VcHint } from "@vc-shell/framework/ui";
 
 const notificationRef = useNotificationContext<MessagePushNotification>();
 const notification = computed(() => notificationRef.value);

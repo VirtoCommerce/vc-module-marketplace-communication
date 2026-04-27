@@ -5,12 +5,7 @@ import {
   SearchConversationResult,
   Conversation,
 } from "../../../../api_client/virtocommerce.marketplacecommunication";
-import {
-  useApiClient,
-  useAsync,
-  useDataTablePagination,
-  type UseDataTablePaginationReturn,
-} from "@vc-shell/framework";
+import { useApiClient, useAsync, useDataTablePagination, type UseDataTablePaginationReturn } from "@vc-shell/framework";
 
 export interface IUseConversationList {
   conversations: ComputedRef<Conversation[]>;
