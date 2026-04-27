@@ -9,10 +9,7 @@
       class="message-form__collapsed"
       @click="expandForm"
     >
-      <VcIcon
-        icon="lucide-message-square-plus"
-        size="s"
-        class="message-form__collapsed-icon"
+      <VcIcon icon="lucide-message-square-plus" size="s" class="message-form__collapsed-icon"
       />
       <span class="message-form__collapsed-text">
         {{ placeholder ?? $t("MESSENGER.ADD_PLACEHOLDER") }}
@@ -115,10 +112,7 @@
             :disabled="isUploading"
             @click="openFileSelect"
           >
-            <VcIcon
-              :icon="isUploading ? 'lucide-loader-2' : 'lucide-paperclip'"
-              size="s"
-              :class="{ 'message-form__uploading-spinner': isUploading }"
+            <VcIcon :icon="isUploading ? 'lucide-loader-2' : 'lucide-paperclip'" size="s" :class="{ 'message-form__uploading-spinner': isUploading }"
             />
           </button>
         </div>
@@ -168,16 +162,12 @@
 <script setup lang="ts">
 import { ref, computed, watch, inject, nextTick } from "vue";
 import { useI18n } from "vue-i18n";
-import {
-  Message,
-  MessageAttachment,
-} from "@vcmp-communication/api/marketplacecommunication";
-import { loading as vLoading, VcTextarea, useAssets, usePopup } from "@vc-shell/framework";
+import { Message, MessageAttachment, } from "@vcmp-communication/api/marketplacecommunication";
+import { vLoading, VcTextarea, useAssetsManager, usePopup, type AssetLike } from "@vc-shell/framework";
 
 import { getAllowedFileTypes } from "../constants";
 import { messengerContextKey, messengerStoreKey } from "../injection-keys";
 import AttachmentPreview from "./attachment-preview.vue";
-import * as _ from "lodash-es";
 
 const props = withDefaults(
   defineProps<{
@@ -198,7 +188,6 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const { edit, upload, remove, loading: assetsLoading } = useAssets();
 const { showError } = usePopup();
 
 const messengerContext = inject(messengerContextKey);
@@ -212,6 +201,44 @@ const settings = computed(() => messengerStore?.settings.value);
 const assets = ref<MessageAttachment[]>(
   props.mode === "edit" ? (props.message?.attachments ?? []) : [],
 );
+
+// Bridge between MessageAttachment[] (domain shape) and AssetLike[] (manager shape).
+// AssetLike uses `url`/`name`; MessageAttachment uses `attachmentUrl`/`fileName`.
+const assetsBridge = computed<AssetLike[]>({
+  get: () =>
+    assets.value.map((a) => ({
+      ...a,
+      url: a.attachmentUrl,
+      name: a.fileName,
+      size: a.fileSize,
+    })),
+  set: (val) => {
+    assets.value = (val ?? []).map(
+      (x) =>
+        ({
+          ...x,
+          attachmentUrl: x.url ?? (x as any).attachmentUrl,
+          fileName: x.name ?? (x as any).fileName,
+          fileType:
+            (x as any).fileType ??
+            (x.name ?? (x as any).fileName ?? "").toLowerCase().split(".").pop(),
+          fileSize: (x as any).size ?? (x as any).fileSize,
+        } as MessageAttachment),
+    );
+  },
+});
+
+const uploadPath = computed(() => {
+  const eType = entityType.value;
+  const eId = entityId.value;
+  return eType && eId ? `messenger/${eType}/${eId}` : `messenger/${conversation.value?.id}`;
+});
+
+const assetsManager = useAssetsManager(assetsBridge, {
+  uploadPath: () => uploadPath.value,
+});
+
+const assetsLoading = assetsManager.loading;
 
 const content = ref(props.mode === "edit" ? (props.message?.content ?? "") : "");
 const isExpanded = ref(props.mode !== "new");
@@ -313,57 +340,12 @@ watch(
   { immediate: true },
 );
 
-// Asset handling
-const assetsHandler = {
-  loading: computed(() => assetsLoading.value),
-  edit: (files: MessageAttachment[]) => {
-    assets.value = edit(files, assets.value).map((x) => new MessageAttachment(x));
-    return assets.value;
-  },
-  async upload(files: FileList | null) {
-    if (files) {
-      const eType = entityType.value;
-      const eId = entityId.value;
-      const path = eType && eId ? `messenger/${eType}/${eId}` : `messenger/${conversation.value?.id}`;
-      const uploaded = (await upload(files, path)).map(
-        (x) =>
-          new MessageAttachment({
-            ...x,
-            attachmentUrl: x.url,
-            fileName: x.name,
-            fileType: x.name?.toLowerCase().split(".").pop(),
-            fileSize: x.size,
-          }),
-      );
-
-      if (!assets.value) {
-        assets.value = [];
-      }
-
-      assets.value = assets.value.concat(uploaded);
-      files = null;
-      return assets.value;
-    }
-  },
-  async remove(files: MessageAttachment[]) {
-    try {
-      if (assets.value && assets.value.length && files.length > 0) {
-        assets.value = _.differenceWith(assets.value, files, (x, y) => {
-          if ("url" in x && "url" in y) {
-            return x.url === y.url;
-          }
-          return x.attachmentUrl === y.attachmentUrl;
-        });
-      }
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  },
-};
-
 const removeAsset = async (asset: MessageAttachment) => {
-  await assetsHandler.remove([asset]);
+  await assetsManager.remove({
+    ...asset,
+    url: asset.attachmentUrl,
+    name: asset.fileName,
+  });
 };
 
 const handleDragEnter = (e: DragEvent) => {
@@ -459,7 +441,7 @@ const processFiles = async (files: File[]) => {
       isUploading.value = true;
       const dataTransfer = new DataTransfer();
       validFiles.forEach((file) => dataTransfer.items.add(file));
-      await assetsHandler.upload(dataTransfer.files);
+      await assetsManager.upload(dataTransfer.files);
     } finally {
       isUploading.value = false;
     }
