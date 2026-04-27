@@ -3700,7 +3700,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vcmp-communication/api@workspace:src/api_client":
+"@vcmp-communication/api@npm:1.0.0, @vcmp-communication/api@workspace:src/api_client":
   version: 0.0.0-use.local
   resolution: "@vcmp-communication/api@workspace:src/api_client"
   languageName: unknown
@@ -5006,6 +5006,7 @@ __metadata:
     "@vc-shell/framework": "npm:^2.0.1"
     "@vc-shell/mf-module": "npm:^2.0.1"
     "@vc-shell/ts-config": "npm:^2.0.1"
+    "@vcmp-communication/api": "npm:1.0.0"
     "@vitejs/plugin-vue": "npm:^5.2.3"
     "@vue/eslint-config-prettier": "npm:^10.2.0"
     "@vue/eslint-config-typescript": "npm:^14.6.0"
