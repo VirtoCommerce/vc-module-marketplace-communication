@@ -60,7 +60,6 @@
             <VcImage
               v-if="conv.iconUrl"
               :src="conv.iconUrl"
-              rounded
               size="s"
             />
             <VcIcon
@@ -368,8 +367,8 @@ exposeToChildren({ refresh: reload });
     @apply tw-border-b tw-border-solid tw-border-[color:var(--neutrals-50)];
 
     &-avatar {
-      // Mirrors .chat-item__avatar: 10x10 circle
-      @apply tw-w-10 tw-h-10 tw-rounded-full tw-flex-shrink-0;
+      // Mirrors .chat-item__avatar: 10x10 rounded square
+      @apply tw-w-10 tw-h-10 tw-rounded-[6px] tw-flex-shrink-0;
       @apply tw-bg-[color:var(--neutrals-100)];
       animation: skeleton-pulse 1.5s ease-in-out infinite;
     }
@@ -450,7 +449,7 @@ exposeToChildren({ refresh: reload });
   &__avatar {
     @apply tw-flex tw-items-center tw-justify-center;
     @apply tw-w-10 tw-h-10 tw-flex-shrink-0;
-    @apply tw-rounded-full;
+    @apply tw-rounded-[6px];
     @apply tw-bg-[color:var(--neutrals-100)] tw-text-[color:var(--neutrals-400)];
     @apply tw-overflow-hidden;
   }
