@@ -1,3 +1,4 @@
+import { readonly, ref } from "vue";
 import { useApiClient } from "@vc-shell/framework";
 import {
   SearchMessagesQuery,
@@ -12,6 +13,10 @@ import {
   SearchMessageResult,
   MessageAttachment,
 } from "@vcmp-communication/api/marketplacecommunication";
+
+// Bumped after a message is marked read, so open widgets can refetch their unread state
+const readVersion = ref(0);
+export const messagesReadVersion = readonly(readVersion);
 
 export function useMessageApi() {
   const { getApiClient: getMessagingClient } = useApiClient(VcmpMessageClient);
@@ -73,6 +78,7 @@ export function useMessageApi() {
     await client.markMessageAsRead({
       ...args,
     } as MarkMessageAsReadCommand);
+    readVersion.value++;
   }
 
   async function getUnreadCount(query: GetUnreadCountQuery): Promise<number> {

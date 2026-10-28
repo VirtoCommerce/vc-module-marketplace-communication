@@ -1215,6 +1215,9 @@ export interface SearchMessageResult {
 export interface SearchMessagesQuery {
   entityId?: string | undefined;
   entityType?: string | undefined;
+  sellerId?: string | undefined;
+  sellerName?: string | undefined;
+  unreadOnly?: boolean;
   conversationId?: string | undefined;
   threadId?: string | undefined;
   rootsOnly?: boolean;
