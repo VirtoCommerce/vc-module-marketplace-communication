@@ -222,6 +222,7 @@ let readTimer: ReturnType<typeof setTimeout> | null = null;
 
 function delayedMarkRead() {
   if (isProgrammaticScroll.value || !isUnread.value) return;
+  if (readTimer) clearTimeout(readTimer);
   readTimer = setTimeout(() => {
     if (props.message.id && store.seller.value?.id) {
       markAsRead(props.message.id, store.seller.value.id);
@@ -229,10 +230,11 @@ function delayedMarkRead() {
   }, 2000);
 }
 
+// Re-check when the opening auto-scroll ends: messages already on screen never change visibility
 watch(
-  [isVisible, isUnread],
-  ([visible, unread]) => {
-    if (visible && unread) delayedMarkRead();
+  [isVisible, isUnread, isProgrammaticScroll],
+  ([visible, unread, scrolling]) => {
+    if (visible && unread && !scrolling) delayedMarkRead();
   },
   { immediate: true },
 );
