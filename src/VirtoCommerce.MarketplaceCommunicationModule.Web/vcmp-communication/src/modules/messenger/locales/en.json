@@ -48,6 +48,7 @@
     "SEND": "Send",
     "LOADING": "Loading conversations...",
     "NO_MESSAGES": "Start conversation with the marketplace team",
+    "NO_MESSAGES_OPERATOR": "Start conversation with the vendor",
     "NEW_MESSAGE": "Start new conversation",
     "ERROR_LOADING": "Error loading messages",
     "ERROR_SENDING": "Error sending message",

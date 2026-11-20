@@ -14,12 +14,18 @@ import { useConversationApi } from "./useConversationApi";
 import { useUserApi } from "./useUserApi";
 import { useSettingsApi } from "./useSettingsApi";
 import { type MessengerStore, messengerStoreKey } from "../injection-keys";
+import type { MessengerRole } from "../identity";
 
-export function createMessengerStore(): MessengerStore {
+export function createMessengerStore(role: MessengerRole = "seller"): MessengerStore {
   // API composables
   const { searchMessages: searchMessagesApi, getThread: getThreadApi } = useMessageApi();
   const { getConversation: getConversationApi } = useConversationApi();
-  const { getOperator: getOperatorApi, getSeller: getSellerApi, getUsers: getUsersApi } = useUserApi();
+  const {
+    getOperator: getOperatorApi,
+    getSeller: getSellerApi,
+    getUsers: getUsersApi,
+    getUser: getUserApi,
+  } = useUserApi();
   const { getSettings: getSettingsApi } = useSettingsApi();
 
   // --- Local state (scoped to this factory instance) ---
@@ -62,6 +68,9 @@ export function createMessengerStore(): MessengerStore {
   }
 
   // --- Computed ---
+  const self = computed(() => (role === "operator" ? operator.value : seller.value));
+  const counterpart = computed(() => (role === "operator" ? seller.value : operator.value));
+
   const hasNewerMessages = computed(() => {
     if (!messages.value.length || !searchResult.value) return false;
     const currentPosition = (searchQuery.value.skip || 0) + messages.value.length;
@@ -188,12 +197,15 @@ export function createMessengerStore(): MessengerStore {
       operator.value = await getOperatorApi();
     }
 
-    // 3. Load seller if entityId+entityType provided
+    // 3. Load seller: the entity's seller, or in a direct conversation the user who isn't the operator
     if (options.entityId && options.entityType) {
       seller.value = await getSellerApi({
         entityId: options.entityId,
         entityType: options.entityType,
       } as GetSellerCommunicationUserQuery);
+    } else if (conversation.value?.users?.length) {
+      const sellerUserId = conversation.value.users.find((u) => u.userId !== operator.value?.id)?.userId;
+      seller.value = sellerUserId ? await getUserApi(sellerUserId) : undefined;
     }
 
     // 4. Load settings
@@ -212,10 +224,14 @@ export function createMessengerStore(): MessengerStore {
   }
 
   return {
+    role,
+
     // State
     messages,
     operator,
     seller,
+    self,
+    counterpart,
     settings,
     conversation,
 

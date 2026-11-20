@@ -49,10 +49,33 @@ public class GetUnreadCountQueryHandler : IQueryHandler<GetUnreadCountQuery, int
             throw new ArgumentNullException(nameof(request.RecipientId));
         }
 
-        var conversation = await _conversationService.GetConversationByEntity(request.EntityId, request.EntityType);
+        var conversationId = await GetConversationIdAsync(request, recipientId);
 
-        var result = await _messageService.GetUnreadMessagesCount(recipientId, conversation?.Id);
+        var result = await _messageService.GetUnreadMessagesCount(recipientId, conversationId);
 
         return result;
+    }
+
+    protected virtual async Task<string> GetConversationIdAsync(GetUnreadCountQuery request, string recipientId)
+    {
+        if (!string.IsNullOrEmpty(request.EntityId) && !string.IsNullOrEmpty(request.EntityType))
+        {
+            return (await _conversationService.GetConversationByEntity(request.EntityId, request.EntityType))?.Id;
+        }
+
+        // No entity: the direct conversation between the recipient and the seller (the operator's vendor widget)
+        if (string.IsNullOrEmpty(request.SellerId))
+        {
+            return null;
+        }
+
+        // Look up without creating: a seller nobody has written to has no communication user and no conversation
+        var seller = await _communicationUserService.GetCommunicationUserByUserId(request.SellerId, CoreModuleConstants.CommunicationUserType.Organization);
+        if (seller == null || seller.Id == recipientId)
+        {
+            return null;
+        }
+
+        return (await _conversationService.GetConversationByUsers([recipientId, seller.Id]))?.Id;
     }
 }

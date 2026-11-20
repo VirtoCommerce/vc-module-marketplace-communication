@@ -11,6 +11,7 @@
     "build:modules-bundle": "vite build --config ./src/modules/vite.config.with-api.mts",
     "build:modules-bundle:watch": "vite build --watch --config ./src/modules/vite.config.with-api.mts",
     "watch:modules": "vite build --config ./src/modules/vite.config.with-api.mts --watch",
+    "build:admin-shell": "cross-env APP_ENV=production vite build --config ./vite.config.admin-shell.mts",
     "type-check": "vue-tsc --noEmit",
     "lint-staged": "lint-staged",
     "lint": "eslint --fix --cache '**/*.{ts,vue}'",

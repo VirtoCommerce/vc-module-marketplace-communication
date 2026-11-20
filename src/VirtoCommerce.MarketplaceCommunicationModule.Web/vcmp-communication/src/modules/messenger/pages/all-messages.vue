@@ -92,11 +92,7 @@
                 class="chat-item__preview"
               >
                 <span class="chat-item__sender">
-                  {{
-                    conv.lastMessage.sender?.userName === currentSeller.name
-                      ? $t("ALL_MESSAGES.LIST.YOU")
-                      : conv.lastMessage.sender?.userName
-                  }}:
+                  {{ isOwnSender(conv.lastMessage) ? $t("ALL_MESSAGES.LIST.YOU") : conv.lastMessage.sender?.userName }}:
                 </span>
                 {{ conv.lastMessage.content }}
               </span>
@@ -158,24 +154,29 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ComputedRef, inject, onMounted, Ref, ref, watch } from "vue";
-import { useConversationList, useMessenger } from "../composables";
-import { IBladeToolbar, notification, useBlade, useBladeNotifications } from "@vc-shell/framework";
+import { computed, onMounted, Ref, ref, watch } from "vue";
+import { useConversationList, useConversationApi, useUserApi } from "../composables";
+import { IBladeToolbar, useBlade, useBladeNotifications } from "@vc-shell/framework";
 import type {
+  CommunicationUser,
   Conversation,
+  Message,
   SearchConversationsQuery,
 } from "../../../api_client/virtocommerce.marketplacecommunication";
 import { useI18n } from "vue-i18n";
 import { useMounted, useDebounceFn } from "@vueuse/core";
-import { MessagePushNotification, ConversationListType } from "../typings";
+import { ConversationListType } from "../typings";
+import { useMessengerIdentity } from "../identity";
 import { formatDate, dateAgo } from "../utils";
 
 import { VcBlade, VcButton, VcIcon, VcImage, VcInput } from "@vc-shell/framework/ui";
 
+// legacy conversation-list
 defineBlade({
   name: "AllMessages",
   url: "/communication",
   isWorkspace: true,
+  permissions: ["seller:message:read"],
   menuItem: {
     title: "ALL_MESSAGES.MENU_TITLE",
     icon: "lucide-message-circle",
@@ -191,28 +192,36 @@ const { openBlade, exposeToChildren, options, param } = useBlade<{
   messageId?: string;
 }>();
 
+// the notification's own toast announces the message; the list only refreshes its last messages and counts
 useBladeNotifications({
   types: ["MessagePushNotification"],
-  onMessage: async (notify) => {
-    const messageNotify = notify as MessagePushNotification;
-    notification(messageNotify.title + ": " + messageNotify.content);
-    await load();
-  },
+  onMessage: load,
 });
 
 const selectedConversation = ref<Conversation | null | undefined>(null) as Ref<Conversation | null | undefined>;
 
 const { conversations, loading, getConversations, pagination, searchQuery } = useConversationList();
 
-const { createConversation, getOperator, operator } = useMessenger();
+const { createConversation } = useConversationApi();
+const { getOperator } = useUserApi();
+const operator = ref<CommunicationUser>();
 
-const currentSeller = inject<ComputedRef<{ id: string; name: string }>>("currentSeller");
+const identity = useMessengerIdentity();
+const isOperator = identity.role === "operator";
+const currentSeller = identity.seller;
 const isReady = ref(false);
 const searchValue = ref("");
 const selectedItemId = ref<string>();
 
-if (!currentSeller?.value) {
+if (!isOperator && !currentSeller.value) {
   throw new Error("Seller is not provided");
+}
+
+// The seller recognizes itself by name (as before); the operator by its communication user
+function isOwnSender(message: Message) {
+  return isOperator
+    ? !!operator.value?.id && message.senderId === operator.value.id
+    : message.sender?.userName === currentSeller.value?.name;
 }
 
 const title = computed(() => t("ALL_MESSAGES.TITLE"));
@@ -257,26 +266,31 @@ const bladeToolbar = computed<IBladeToolbar[]>(() => [
     title: t("ALL_MESSAGES.TOOLBAR.REFRESH"),
     clickHandler: reload,
   },
-  {
-    id: "operator-chat",
-    icon: "lucide-message-circle",
-    title: t("ALL_MESSAGES.TOOLBAR.OPERATOR_CHAT"),
-    clickHandler: async () => {
-      try {
-        const conversation = await createConversation({
-          sellerId: currentSeller.value?.id,
-          sellerName: currentSeller.value?.name,
-          userIds: [operator.value?.id ?? ""],
-        });
-        await openBlade({
-          name: "Messenger",
-          options: { conversation },
-        });
-      } catch (error) {
-        console.error(error);
-      }
-    },
-  },
+  // the seller's direct line to the marketplace; the operator starts conversations from a vendor's widget
+  ...(isOperator
+    ? []
+    : [
+        {
+          id: "operator-chat",
+          icon: "lucide-message-circle",
+          title: t("ALL_MESSAGES.TOOLBAR.OPERATOR_CHAT"),
+          clickHandler: async () => {
+            try {
+              const conversation = await createConversation({
+                sellerId: currentSeller.value?.id ?? "",
+                sellerName: currentSeller.value?.name ?? "",
+                userIds: [operator.value?.id ?? ""],
+              });
+              await openBlade({
+                name: "Messenger",
+                options: { conversation },
+              });
+            } catch (error) {
+              console.error(error);
+            }
+          },
+        },
+      ]),
 ]);
 
 function selectConversation(conversation: Conversation, messageId?: string) {
@@ -300,7 +314,7 @@ function selectConversation(conversation: Conversation, messageId?: string) {
 }
 
 async function load() {
-  if (currentSeller?.value) {
+  if (isOperator || currentSeller.value) {
     await reload();
     isReady.value = true;
   }
@@ -314,7 +328,13 @@ const reload = async () => {
 };
 
 async function loadConversations(query: SearchConversationsQuery) {
-  if (currentSeller?.value) {
+  if (isOperator) {
+    // legacy conversation-list: the operator's conversations, by its communication user
+    operator.value ??= await getOperator();
+    if (operator.value?.id) {
+      await getConversations({ ...query, userIds: [operator.value.id] });
+    }
+  } else if (currentSeller.value) {
     await getConversations({
       ...query,
       sellerId: currentSeller.value.id,
@@ -332,7 +352,7 @@ async function resetSearch() {
 
 onMounted(async () => {
   await load();
-  await getOperator();
+  operator.value ??= await getOperator();
 });
 
 exposeToChildren({ refresh: reload });

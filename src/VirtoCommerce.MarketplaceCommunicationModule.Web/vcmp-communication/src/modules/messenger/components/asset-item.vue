@@ -81,7 +81,8 @@ const openFileBindings = computed(() => {
   @apply tw-py-1 tw-px-2;
   @apply tw-cursor-pointer;
 
-  &--asset {
+  // .asset-item.asset-item--asset: a file is an <a>, and the Admin Shell's "[dir] a" (transparent background) outranks one class
+  &#{&}--asset {
     @apply tw-flex tw-items-center tw-gap-2;
     @apply tw-bg-[color:var(--neutrals-50)];
     @apply tw-relative;

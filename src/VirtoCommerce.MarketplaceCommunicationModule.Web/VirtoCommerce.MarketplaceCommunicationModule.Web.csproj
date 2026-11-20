@@ -12,6 +12,16 @@
     <Content Remove="vcmp-communication\**" />
     <EmbeddedResource Remove="vcmp-communication\**" />
     <None Remove="vcmp-communication\**" />
+    <Content Remove="plugins\**" />
+    <None Remove="plugins\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- NSwag emits repeated request/response plumbing; regenerate these clients instead of refactoring them.
+         They stay project items so this project-level setting reaches them. -->
+    <None Include="vcmp-communication\src\api_client\virtocommerce.*.ts" />
+    <SonarQubeSetting Include="sonar.cpd.exclusions">
+      <Value>**/vcmp-communication/src/api_client/virtocommerce.*.ts</Value>
+    </SonarQubeSetting>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\VirtoCommerce.MarketplaceCommunicationModule.Core\VirtoCommerce.MarketplaceCommunicationModule.Core.csproj" />
@@ -27,5 +37,23 @@
   <Target Name="CopyCustomContentOnPublish" AfterTargets="Publish">
     <Copy SourceFiles="@(CommunicationApp)" DestinationFiles="$(PublishDir)\..\%(Identity)" />
     <Copy SourceFiles="@(PluginRemotes)" DestinationFiles="$(PublishDir)\..\plugins\%(RecursiveDir)%(Filename)%(Extension)" />
+  </Target>
+
+  <!-- Admin Shell plugin: the operator's messenger, built from vcmp-communication/ (entry src/admin-shell/) into
+       plugins/admin-shell/ before publish, so vc-build Compress (locally and in CI) packs it.
+       SkipAdminShellPlugin=true leaves it out. -->
+  <Target Name="BuildAdminShellPlugin" BeforeTargets="Publish" Condition="'$(SkipAdminShellPlugin)' != 'true' AND Exists('$(MSBuildProjectDirectory)\vcmp-communication\package.json')">
+    <Exec Command="corepack enable" ContinueOnError="true" />
+    <Exec Command="yarn install --immutable" WorkingDirectory="$(MSBuildProjectDirectory)\vcmp-communication" />
+    <Exec Command="yarn type-check" WorkingDirectory="$(MSBuildProjectDirectory)\vcmp-communication" />
+    <Exec Command="yarn build:admin-shell" WorkingDirectory="$(MSBuildProjectDirectory)\vcmp-communication" />
+  </Target>
+  <!-- The platform probes {moduleRoot}/plugins/, but publish goes to {moduleRoot}/bin. The files are listed here, after the
+       build: PluginRemotes above is listed when the project loads, so a clean checkout (no plugins/ yet) would copy nothing. -->
+  <Target Name="CopyAdminShellPluginOnPublish" AfterTargets="Publish" DependsOnTargets="BuildAdminShellPlugin" Condition="'$(SkipAdminShellPlugin)' != 'true'">
+    <ItemGroup>
+      <AdminShellPlugin Include="$(MSBuildProjectDirectory)\plugins\admin-shell\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(AdminShellPlugin)" DestinationFiles="$(PublishDir)\..\plugins\admin-shell\%(RecursiveDir)%(Filename)%(Extension)" />
   </Target>
 </Project>

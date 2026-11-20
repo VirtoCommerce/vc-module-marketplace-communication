@@ -1099,9 +1099,12 @@ export interface GetSellerCommunicationUserQuery {
 export interface GetUnreadCountQuery {
   sellerId?: string | undefined;
   sellerName?: string | undefined;
+  isOperator?: boolean;
+  operatorId?: string | undefined;
+  operatorName?: string | undefined;
   recipientId?: string | undefined;
-  entityId: string;
-  entityType: string;
+  entityId?: string | undefined;
+  entityType?: string | undefined;
 }
 
 export interface MarkMessageAsReadCommand {

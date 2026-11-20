@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.MarketplaceVendorModule.Core.Common;
 using VirtoCommerce.MarketplaceVendorModule.Core.Domains;
 using VirtoCommerce.MarketplaceVendorModule.Core.Domains.SellerAggregate;
@@ -15,9 +14,11 @@ public class GetUnreadCountQuery : IQuery<int>, IHasSellerId, IHasOperatorId
 
     public string RecipientId { get; set; }
 
-    [Required]
+    /// <summary>
+    /// The entity whose conversation is counted. Without an entity, the direct conversation
+    /// between the recipient and the seller (SellerId) is counted.
+    /// </summary>
     public string EntityId { get; set; }
 
-    [Required]
     public string EntityType { get; set; }
 }

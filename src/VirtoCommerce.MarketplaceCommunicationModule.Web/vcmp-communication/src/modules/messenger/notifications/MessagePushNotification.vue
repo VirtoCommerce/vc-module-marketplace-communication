@@ -15,25 +15,37 @@
 </template>
 
 <script lang="ts" setup>
-import { NotificationTemplate, useBlade, useNotificationContext } from "@vc-shell/framework";
+import { BladeStackKey, NotificationTemplate, useNotificationContext } from "@vc-shell/framework";
 import { MessagePushNotification } from "../typings";
-import { computed } from "vue";
+import { computed, inject } from "vue";
+import { useConversationApi } from "../composables/useConversationApi";
 
 import { VcHint } from "@vc-shell/framework/ui";
 
 const notificationRef = useNotificationContext<MessagePushNotification>();
 const notification = computed(() => notificationRef.value);
 
-const { openBlade } = useBlade();
+const stack = inject(BladeStackKey)!;
+const { getConversationById } = useConversationApi();
 
+// A workspace takes no param, and reopening the open workspace is a no-op, so the conversation is opened
+// here: next to the Communication list, in place of any conversation open there.
 const openMessageBlade = async () => {
-  await openBlade({
-    name: "AllMessages",
-    param: notification.value.conversationId,
+  const conversationId = notification.value.conversationId;
+  if (!conversationId) return;
+  const conversation = await getConversationById(conversationId);
+  await stack.openWorkspace({ name: "AllMessages" });
+  const workspaceId = stack.workspace.value?.id;
+  if (!workspaceId) return;
+  await stack.openBlade({
+    name: "Messenger",
+    parentId: workspaceId,
+    param: notification.value.messageId,
     options: {
-      messageId: notification.value.messageId,
+      conversation,
+      entityId: conversation.entityId,
+      entityType: conversation.entityType,
     },
-    isWorkspace: true,
   });
 };
 </script>

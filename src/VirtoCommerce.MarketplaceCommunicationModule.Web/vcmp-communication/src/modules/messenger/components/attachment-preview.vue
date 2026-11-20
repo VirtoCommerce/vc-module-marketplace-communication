@@ -120,7 +120,8 @@ const extensionColor = computed(() => getExtensionColor(props.asset.fileName));
   }
 
   // --- Remove button ---
-  &__remove {
+  // nested under the block to outrank the Admin Shell's "[dir] button" reset (background)
+  .attachment-preview &__remove {
     @apply tw-absolute tw-top-1 tw-right-1;
     @apply tw-w-[18px] tw-h-[18px];
     @apply tw-rounded-full;

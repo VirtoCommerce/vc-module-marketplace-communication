@@ -1,0 +1,3 @@
+// The shared components use tw-* utility classes. Only the utilities: Tailwind's base layer would
+// reset the styles of the whole Admin Shell, which already provides them.
+@tailwind utilities;

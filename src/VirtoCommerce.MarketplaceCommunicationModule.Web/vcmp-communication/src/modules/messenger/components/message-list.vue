@@ -57,7 +57,7 @@
           icon="lucide-message-square"
           size="xl"
         />
-        <span>{{ $t("MESSENGER.NO_MESSAGES") }}</span>
+        <span>{{ $t(store.role === "operator" ? "MESSENGER.NO_MESSAGES_OPERATOR" : "MESSENGER.NO_MESSAGES") }}</span>
       </div>
 
       <!-- Next messages loader sentinel -->
@@ -87,12 +87,13 @@ import { ref, inject, provide, watch, nextTick, onMounted } from "vue";
 import { useMessengerStore, useMessageActions } from "../composables";
 import { useInfiniteScroll } from "../composables/useInfiniteScroll";
 import { messengerContextKey } from "../injection-keys";
+import type { MessagePushNotification } from "../typings";
 import MessageItem from "./message-item.vue";
 import MessageForm from "./message-form.vue";
 import MessageSkeleton from "./message-skeleton.vue";
 import { Message, MessageAttachment } from "@vcmp-communication/api/marketplacecommunication";
 
-import { useResponsive } from "@vc-shell/framework";
+import { useBladeNotifications, useResponsive } from "@vc-shell/framework";
 
 import { VcIcon } from "@vc-shell/framework/ui";
 
@@ -259,6 +260,26 @@ async function handleSend(payload: { content: string; attachments: MessageAttach
 async function refreshMessages() {
   await store.loadMessages({ ...store.searchQuery.value, conversationId: ctx.conversation.value?.id });
 }
+
+// A message from the other side arrives as a push notification (the sender's own isn't delivered to it):
+// show it in the open conversation, where it gets marked read like any other seen message.
+// An entity's conversation is created with its first message, so match by entity until it exists.
+function isForThisConversation(m: MessagePushNotification) {
+  if (ctx.conversation.value?.id) return m.conversationId === ctx.conversation.value.id;
+  return !!ctx.entityId && m.entityId === ctx.entityId && m.entityType === ctx.entityType;
+}
+
+useBladeNotifications<MessagePushNotification>({
+  types: ["MessagePushNotification"],
+  filter: isForThisConversation,
+  onMessage: async () => {
+    if (!ctx.conversation.value?.id) {
+      await store.initializeConversation({ entityId: ctx.entityId, entityType: ctx.entityType });
+    }
+    await refreshMessages();
+    scrollToBottom();
+  },
+});
 
 async function handleEditSave(args: { content: string; attachments: MessageAttachment[] }, message: Message) {
   await actions.update({

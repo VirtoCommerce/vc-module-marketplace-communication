@@ -35,7 +35,10 @@ export function useMessageActions() {
         sellerName: ctx.sellerName,
         entityId: ctx.entityId!,
         entityType: ctx.entityType!,
-        recipientId: store.operator.value?.id,
+        // the seller writes to the operator and the backend resolves the seller as sender;
+        // the operator names itself as sender, the seller is the recipient
+        senderId: store.role === "operator" ? store.operator.value?.id : undefined,
+        recipientId: store.counterpart.value?.id,
         conversationId: args.conversationId || ctx.conversation.value?.id,
       });
       // Re-fetch — API does not return full Message with sender info

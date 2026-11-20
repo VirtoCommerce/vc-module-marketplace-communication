@@ -28,8 +28,14 @@ export function useConversationApi() {
     return await client.getByEntity(entityId, entityType);
   }
 
+  async function getConversationById(conversationId: string): Promise<Conversation> {
+    const client = await getConversationClient();
+    return await client.getById(conversationId);
+  }
+
   return {
     createConversation,
     getConversation,
+    getConversationById,
   };
 }

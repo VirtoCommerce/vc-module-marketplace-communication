@@ -125,15 +125,16 @@ const isExpanded = ref(false);
 const isContentTruncated = ref(false);
 
 // --- Computed ---
-const isOwnMessage = computed(() => store.seller.value?.userId === props.message.sender?.userId);
+// "self" is the seller in the vendor portal and the operator in the Admin Shell
+const isOwnMessage = computed(() => store.self.value?.userId === props.message.sender?.userId);
 
 const canManage = computed(
-  () => store.seller.value?.userId === props.message.sender?.userId && props.message.answersCount === 0,
+  () => store.self.value?.userId === props.message.sender?.userId && props.message.answersCount === 0,
 );
 
 const isUnread = computed(() => {
-  if (!props.message.recipients || props.message.senderId === store.seller.value?.id) return false;
-  const recipient = props.message.recipients.find((r) => r.recipientId === store.seller.value?.id);
+  if (!props.message.recipients || props.message.senderId === store.self.value?.id) return false;
+  const recipient = props.message.recipients.find((r) => r.recipientId === store.self.value?.id);
   return recipient?.readStatus === "New";
 });
 
@@ -224,8 +225,8 @@ function delayedMarkRead() {
   if (isProgrammaticScroll.value || !isUnread.value) return;
   if (readTimer) clearTimeout(readTimer);
   readTimer = setTimeout(() => {
-    if (props.message.id && store.seller.value?.id) {
-      markAsRead(props.message.id, store.seller.value.id);
+    if (props.message.id && store.self.value?.id) {
+      markAsRead(props.message.id, store.self.value.id);
     }
   }, 2000);
 }
@@ -338,7 +339,8 @@ onBeforeUnmount(() => {
     }
   }
 
-  &__expand-btn {
+  // nested under the block to outrank the Admin Shell's "[dir] button" reset (margin)
+  .message-item &__expand-btn {
     font-size: 12px;
     color: var(--primary-500);
     background: none;

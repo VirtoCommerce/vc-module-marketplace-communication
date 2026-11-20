@@ -1,0 +1,10 @@
+{
+  "MARKETPLACE_COMMUNICATION": {
+    "MENU": {
+      "TITLE": "Communication"
+    },
+    "WIDGETS": {
+      "NO_SELLER": "Open a seller order to communicate"
+    }
+  }
+}

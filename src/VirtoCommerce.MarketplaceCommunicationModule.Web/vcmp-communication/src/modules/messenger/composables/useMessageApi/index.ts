@@ -31,13 +31,15 @@ export function useMessageApi() {
   async function sendMessage(message: {
     content: string;
     replyTo: string | undefined;
-    sellerId: string;
-    sellerName: string;
+    sellerId: string | undefined;
+    sellerName: string | undefined;
     entityId: string;
     entityType: string;
     conversationId?: string;
     attachments?: MessageAttachment[];
     recipientId?: string;
+    // the operator sends as itself; a seller leaves it empty and the backend resolves the seller
+    senderId?: string;
   }): Promise<void> {
     const client = await getMessagingClient();
     const command = {
@@ -48,7 +50,7 @@ export function useMessageApi() {
         replyTo: message.replyTo,
         entityId: message.entityId,
         entityType: message.entityType,
-        senderId: undefined, // this is set on the backend
+        senderId: message.senderId,
         conversationId: message.conversationId,
         recipientId: message.recipientId,
         attachments: message.attachments,

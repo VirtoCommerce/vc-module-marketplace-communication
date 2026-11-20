@@ -42,21 +42,23 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, provide, onMounted, inject, type Ref } from "vue";
+import { computed, ref, provide, onMounted } from "vue";
 import { useBlade, useResponsive } from "@vc-shell/framework";
 import { Conversation } from "@vcmp-communication/api/marketplacecommunication";
 import { useI18n } from "vue-i18n";
 import { createMessengerStore } from "../composables/useMessengerStore";
 import { messengerStoreKey, messengerContextKey } from "../injection-keys";
+import { useMessengerIdentity } from "../identity";
 import { MessageList, MessageSkeleton } from "../components";
-import { EntityToBlade } from "../typings";
 
 import { VcBlade, VcImage, VcLink } from "@vc-shell/framework/ui";
 
 const { isMobile } = useResponsive();
 
+// legacy message-list: one conversation, by entity or a direct one
 defineBlade({
   name: "Messenger",
+  permissions: ["seller:message:read"],
 });
 
 const { t } = useI18n();
@@ -64,23 +66,25 @@ const { openBlade, options } = useBlade<{
   conversation?: Conversation;
   entityId?: string;
   entityType?: string;
+  // a direct conversation has no entity to name it (legacy titled it with the seller's name)
+  title?: string;
 }>();
 
-const currentSeller = inject("currentSeller") as Ref<{ id: string; name: string }>;
+const identity = useMessengerIdentity();
 
-const bladeTitle = computed(() => t("MESSENGER.TITLE"));
+const bladeTitle = computed(() => options.value?.title || t("MESSENGER.TITLE"));
 const initLoading = ref(false);
 
 // --- Create and provide per-blade scoped store ---
-const store = createMessengerStore();
+const store = createMessengerStore(identity.role);
 provide(messengerStoreKey, store);
 
 // --- Provide context ---
 provide(messengerContextKey, {
   entityId: options.value?.entityId,
   entityType: options.value?.entityType,
-  sellerId: currentSeller.value.id,
-  sellerName: currentSeller.value.name,
+  sellerId: identity.seller.value?.id,
+  sellerName: identity.seller.value?.name,
   conversation: store.conversation,
 });
 
@@ -108,9 +112,10 @@ onMounted(async () => {
 });
 
 function goToEntity() {
-  if (options.value?.entityId && options.value?.entityType) {
+  const bladeName = options.value?.entityType ? identity.entityBlades[options.value.entityType] : undefined;
+  if (bladeName && options.value?.entityId) {
     openBlade({
-      name: EntityToBlade[options.value.entityType as keyof typeof EntityToBlade],
+      name: bladeName,
       param: options.value.entityId,
     });
   }

@@ -6,14 +6,16 @@ import type {
   Message,
   SearchMessagesQuery,
 } from "@vcmp-communication/api/marketplacecommunication";
+import type { MessengerRole } from "./identity";
 
 // --- Messenger Context (entity + seller info) ---
 
 export interface MessengerContext {
   entityId: string | undefined;
   entityType: string | undefined;
-  sellerId: string;
-  sellerName: string;
+  // the seller scope sent with commands; empty when the operator writes
+  sellerId: string | undefined;
+  sellerName: string | undefined;
   conversation: Ref<Conversation | undefined>;
 }
 
@@ -22,10 +24,15 @@ export const messengerContextKey: InjectionKey<MessengerContext> = Symbol("messe
 // --- Store interface ---
 
 export interface MessengerStore {
+  role: MessengerRole;
+
   // State
   messages: Readonly<Ref<Message[]>>;
   operator: Readonly<Ref<CommunicationUser | undefined>>;
   seller: Readonly<Ref<CommunicationUser | undefined>>;
+  // the side writing from this UI and the other side (seller/operator, swapped by role)
+  self: ComputedRef<CommunicationUser | undefined>;
+  counterpart: ComputedRef<CommunicationUser | undefined>;
   settings: Readonly<Ref<MarketplaceCommunicationSettings | undefined>>;
   conversation: Readonly<Ref<Conversation | undefined>>;
 

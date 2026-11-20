@@ -204,6 +204,8 @@ import { ref, computed, watch, inject, nextTick } from "vue";
 import { useI18n } from "vue-i18n";
 import { Message, MessageAttachment } from "@vcmp-communication/api/marketplacecommunication";
 import { vLoading, VcTextarea, useAssetsManager, usePopup, type AssetLike } from "@vc-shell/framework";
+// imported, not global: the Admin Shell doesn't register the framework's components globally
+import { VcIcon } from "@vc-shell/framework/ui";
 
 import { getAllowedFileTypes } from "../constants";
 import { messengerContextKey, messengerStoreKey } from "../injection-keys";
@@ -594,7 +596,8 @@ const openFileSelect = () => {
     text-overflow: ellipsis;
   }
 
-  &__reply-preview-close {
+  // nested under the block to outrank the Admin Shell's "[dir] button" reset
+  .message-form &__reply-preview-close {
     flex-shrink: 0;
     background: none;
     border: none;
@@ -646,7 +649,8 @@ const openFileSelect = () => {
     @apply tw-flex tw-items-center tw-gap-1;
   }
 
-  &__tool-btn {
+  // Buttons are nested under the block: the Admin Shell's reset "[dir] button" (padding, background) outranks one class
+  .message-form &__tool-btn {
     @apply tw-flex tw-items-center tw-justify-center tw-gap-1;
     @apply tw-h-7 tw-min-w-[28px] tw-px-1.5;
     @apply tw-rounded;
@@ -669,7 +673,7 @@ const openFileSelect = () => {
     }
   }
 
-  &__send-btn {
+  .message-form &__send-btn {
     @apply tw-inline-flex tw-items-center tw-gap-1;
     @apply tw-h-7 tw-px-2.5;
     @apply tw-rounded;

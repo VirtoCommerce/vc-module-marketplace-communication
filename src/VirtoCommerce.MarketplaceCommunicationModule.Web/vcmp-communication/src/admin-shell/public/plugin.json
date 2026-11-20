@@ -1,0 +1,17 @@
+{
+  "remote": { "name": "marketplace_communication_admin", "exposed": "./Module" },
+  "contributions": {
+    "menu": [
+      {
+        "id": "marketplace-communication",
+        "sectionId": "marketplace",
+        "title": "Communication",
+        "titleKey": "MARKETPLACE_COMMUNICATION.MENU.TITLE",
+        "icon": "lucide-message-circle",
+        "route": "/communication",
+        "permission": "seller:message:read",
+        "priority": 900
+      }
+    ]
+  }
+}
